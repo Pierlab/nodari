@@ -8,6 +8,14 @@ An example configuration file `example_farm.json` demonstrates a minimal world s
 
 The engine includes a `LoggingSystem` that prints selected events, offering a basic way to observe simulations from the console.
 
+## Running the simulation
+
+After installing the dependencies, launch the Pygame-powered example farm:
+
+```
+python run_farm.py
+```
+
 ## Development
 
 * Python 3.9+
@@ -17,3 +25,7 @@ The engine includes a `LoggingSystem` that prints selected events, offering a ba
 ## License
 
 MIT
+
+## TODO
+
+- Implement seed-based reproducibility for deterministic simulations.

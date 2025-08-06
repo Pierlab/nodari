@@ -12,7 +12,7 @@ class NeedNode(SimNode):
 
     def __init__(
         self,
-        name: str,
+        need_name: str,
         threshold: float,
         increase_rate: float,
         decrease_rate: float = 0.0,
@@ -20,7 +20,7 @@ class NeedNode(SimNode):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        self.need_name = name
+        self.need_name = need_name
         self.threshold = threshold
         self.increase_rate = increase_rate
         self.decrease_rate = decrease_rate

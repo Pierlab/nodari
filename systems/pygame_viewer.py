@@ -69,7 +69,7 @@ class PygameViewerSystem(SystemNode):
             if isinstance(node, InventoryNode):
                 lines.append(f"{node.name} inv: {node.items}")
             if isinstance(node, NeedNode):
-                lines.append(f"{node.name}: {node.value:.1f}/{node.threshold}")
+                lines.append(f"{node.need_name}: {node.value:.1f}/{node.threshold}")
             if isinstance(node, TransformNode):
                 x, y = node.position
                 pygame.draw.circle(
