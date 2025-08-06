@@ -1,7 +1,8 @@
 """Simple AI behaviour reacting to needs."""
 from __future__ import annotations
 
-from typing import Optional
+from typing import List, Optional
+import math
 import random
 
 from core.simnode import SimNode
@@ -9,6 +10,7 @@ from core.plugins import register_node_type
 from .inventory import InventoryNode
 from .need import NeedNode
 from .transform import TransformNode
+from systems.time import TimeSystem
 
 
 class AIBehaviorNode(SimNode):
@@ -18,15 +20,42 @@ class AIBehaviorNode(SimNode):
     inventory and satisfies the hunger need.
     """
 
-    def __init__(self, target_inventory: Optional[InventoryNode] = None, speed: float = 10.0, **kwargs) -> None:
+    def __init__(
+        self,
+        target_inventory: Optional[InventoryNode] = None,
+        speed: float = 10.0,
+        home: Optional[str | SimNode] = None,
+        work: Optional[str | SimNode] = None,
+        home_inventory: Optional[str | InventoryNode] = None,
+        lunch_position: Optional[List[float]] = None,
+        wage: float = 1.0,
+        idle_chance: float = 0.1,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self.target_inventory = target_inventory
         self.speed = speed
+        self.home = home
+        self.work = work
+        self.home_inventory = home_inventory
+        self.lunch_position = lunch_position or [0.0, 0.0]
+        self.wage = wage
+        self.idle_chance = idle_chance
+        self._money_acc = 0.0
+        self._idle = False
+        self._resolved = False
         self.on_event("need_threshold_reached", self._on_need)
 
     def update(self, dt: float) -> None:
         transform = self._find_transform()
-        if transform is not None:
+        if transform is not None and (self.home or self.work):
+            self._resolve_references()
+            target = self._determine_target()
+            if target is not None:
+                self._move_towards(transform, target, dt)
+                self._handle_work(transform, target, dt)
+        elif transform is not None:
+            # fallback random walk
             transform.position[0] += random.uniform(-1, 1) * self.speed * dt
             transform.position[1] += random.uniform(-1, 1) * self.speed * dt
         super().update(dt)
@@ -59,6 +88,126 @@ class AIBehaviorNode(SimNode):
             if isinstance(child, TransformNode):
                 return child
         return None
+
+    # ------------------------------------------------------------------
+    # Scheduling helpers
+    # ------------------------------------------------------------------
+    def _root(self) -> SimNode:
+        node: SimNode = self
+        while node.parent is not None:
+            node = node.parent
+        return node
+
+    def _resolve_references(self) -> None:
+        if self._resolved:
+            return
+        root = self._root()
+        if isinstance(self.home, str):
+            self.home = self._find_by_name(root, self.home)
+        if isinstance(self.work, str):
+            self.work = self._find_by_name(root, self.work)
+        if isinstance(self.home_inventory, str):
+            node = self._find_by_name(root, self.home_inventory)
+            if isinstance(node, InventoryNode):
+                self.home_inventory = node
+        self._resolved = True
+
+    def _find_by_name(self, node: SimNode, name: str) -> Optional[SimNode]:
+        if node.name == name:
+            return node
+        for child in node.children:
+            found = self._find_by_name(child, name)
+            if found is not None:
+                return found
+        return None
+
+    def _time_system(self) -> Optional[TimeSystem]:
+        root = self._root()
+        for child in self._walk(root):
+            if isinstance(child, TimeSystem):
+                return child
+        return None
+
+    def _walk(self, node: SimNode):  # type: ignore[override]
+        yield node
+        for child in node.children:
+            yield from self._walk(child)
+
+    def _get_position(self, node: SimNode | None) -> Optional[List[float]]:
+        if node is None:
+            return None
+        for child in node.children:
+            if isinstance(child, TransformNode):
+                return child.position
+        return None
+
+    def _determine_target(self) -> Optional[List[float]]:
+        time_sys = self._time_system()
+        if time_sys is None:
+            return None
+        t = time_sys.current_time % 86400
+        morning = 8 * 3600
+        lunch = 12 * 3600
+        lunch_end = 13 * 3600
+        evening = 18 * 3600
+
+        if t < morning:
+            self._idle = False
+            return self._get_position(self.home)
+        if morning <= t < lunch:
+            self._idle = False
+            return self._get_position(self.work)
+        if lunch <= t < lunch_end:
+            # decide idleness for afternoon
+            if not self._idle and random.random() < self.idle_chance:
+                self._idle = True
+            return self.lunch_position
+        if lunch_end <= t < evening:
+            if self._idle:
+                return self.lunch_position
+            return self._get_position(self.work)
+        return self._get_position(self.home)
+
+    def _move_towards(self, transform: TransformNode, target: List[float], dt: float) -> None:
+        dx = target[0] - transform.position[0]
+        dy = target[1] - transform.position[1]
+        dist = math.hypot(dx, dy)
+        if dist < 1e-6:
+            return
+        step = self.speed * dt
+        if step >= dist:
+            transform.position[0], transform.position[1] = target[0], target[1]
+        else:
+            transform.position[0] += dx / dist * step
+            transform.position[1] += dy / dist * step
+
+    def _handle_work(self, transform: TransformNode, target: List[float], dt: float) -> None:
+        time_sys = self._time_system()
+        if time_sys is None:
+            return
+        t = time_sys.current_time % 86400
+        morning = 8 * 3600
+        lunch = 12 * 3600
+        lunch_end = 13 * 3600
+        evening = 18 * 3600
+        if morning <= t < lunch or (lunch_end <= t < evening and not self._idle):
+            work_pos = self._get_position(self.work)
+            if work_pos is not None:
+                dx = transform.position[0] - work_pos[0]
+                dy = transform.position[1] - work_pos[1]
+                if math.hypot(dx, dy) < 1.0:
+                    self._money_acc += self.wage * dt
+                    inv = self._find_inventory()
+                    if inv is not None and self._money_acc >= 1.0:
+                        amount = int(self._money_acc)
+                        self._money_acc -= amount
+                        inv.add_item("money", amount)
+        if t >= evening or t < morning:
+            inv = self._find_inventory()
+            if inv and self.home_inventory and isinstance(self.home_inventory, InventoryNode):
+                amt = inv.items.get("money", 0)
+                if amt > 0:
+                    inv.transfer_to(self.home_inventory, "money", amt)
 
 
 register_node_type("AIBehaviorNode", AIBehaviorNode)

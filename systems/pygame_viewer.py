@@ -11,6 +11,9 @@ from core.plugins import register_node_type
 from nodes.inventory import InventoryNode
 from nodes.need import NeedNode
 from nodes.transform import TransformNode
+from nodes.character import CharacterNode
+from nodes.farm import FarmNode
+from nodes.house import HouseNode
 from systems.time import TimeSystem
 
 
@@ -71,13 +74,17 @@ class PygameViewerSystem(SystemNode):
             if isinstance(node, NeedNode):
                 lines.append(f"{node.need_name}: {node.value:.1f}/{node.threshold}")
             if isinstance(node, TransformNode):
+                parent = node.parent
                 x, y = node.position
-                pygame.draw.circle(
-                    self.screen,
-                    (0, 200, 0),
-                    (int(x * self.scale), int(y * self.scale)),
-                    5,
-                )
+                pos = (int(x * self.scale), int(y * self.scale))
+                if isinstance(parent, CharacterNode):
+                    pygame.draw.circle(self.screen, (0, 200, 0), pos, 5)
+                elif isinstance(parent, FarmNode):
+                    pygame.draw.rect(self.screen, (150, 100, 50), (*pos, 20, 20))
+                elif isinstance(parent, HouseNode):
+                    pygame.draw.rect(self.screen, (50, 100, 200), (*pos, 20, 20))
+                else:
+                    pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):
                 time_sys = node
 

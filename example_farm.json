@@ -4,28 +4,78 @@
     "config": {"width": 100, "height": 100},
     "children": [
       {
-        "type": "FarmNode",
-        "id": "farm",
+        "type": "HouseNode",
+        "id": "house1",
         "children": [
-          {"type": "TransformNode", "config": {"position": [50, 50]}},
-          {"type": "InventoryNode", "id": "farm_inventory", "config": {"items": {}}},
-          {"type": "ResourceProducerNode", "config": {"resource": "wheat", "rate_per_tick": 1}, "id": "producer"}
+          {"type": "TransformNode", "config": {"position": [10, 10]}},
+          {"type": "InventoryNode", "id": "house1_inventory", "config": {"items": {}}}
+        ]
+      },
+      {
+        "type": "HouseNode",
+        "id": "house2",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 80]}},
+          {"type": "InventoryNode", "id": "house2_inventory", "config": {"items": {}}}
+        ]
+      },
+      {
+        "type": "HouseNode",
+        "id": "house3",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [80, 20]}},
+          {"type": "InventoryNode", "id": "house3_inventory", "config": {"items": {}}}
+        ]
+      },
+      {
+        "type": "FarmNode",
+        "id": "farm1",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [60, 60]}},
+          {"type": "InventoryNode", "id": "farm1_inventory", "config": {"items": {}}},
+          {"type": "ResourceProducerNode", "id": "producer1", "config": {"resource": "wheat", "rate_per_tick": 1}}
+        ]
+      },
+      {
+        "type": "FarmNode",
+        "id": "farm2",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [80, 80]}},
+          {"type": "InventoryNode", "id": "farm2_inventory", "config": {"items": {}}},
+          {"type": "ResourceProducerNode", "id": "producer2", "config": {"resource": "wheat", "rate_per_tick": 1}}
         ]
       },
       {
         "type": "CharacterNode",
-        "id": "farmer",
+        "id": "worker1",
         "children": [
-          {"type": "TransformNode", "config": {"position": [20, 20]}},
-          {"type": "NeedNode", "config": {"need_name": "hunger", "threshold": 1000, "increase_rate": 0.035}},
-          {"type": "InventoryNode", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {}}
+          {"type": "TransformNode", "config": {"position": [10, 10]}},
+          {"type": "InventoryNode", "id": "worker1_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house1", "work": "farm1", "home_inventory": "house1_inventory", "lunch_position": [50, 50], "speed": 20.0, "idle_chance": 0.2}}
         ]
       },
-      {"type": "TimeSystem", "id": "time"},
+      {
+        "type": "CharacterNode",
+        "id": "worker2",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 80]}},
+          {"type": "InventoryNode", "id": "worker2_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house2", "work": "farm2", "home_inventory": "house2_inventory", "lunch_position": [50, 50], "speed": 20.0, "idle_chance": 0.2}}
+        ]
+      },
+      {
+        "type": "CharacterNode",
+        "id": "worker3",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [80, 20]}},
+          {"type": "InventoryNode", "id": "worker3_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house3", "work": "farm1", "home_inventory": "house3_inventory", "lunch_position": [50, 50], "speed": 20.0, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60}},
       {"type": "EconomySystem", "id": "economy"},
       {"type": "LoggingSystem", "id": "logger"},
-      {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 400, "height": 300}}
+      {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 800, "height": 600, "scale": 5}}
     ]
   }
 }
