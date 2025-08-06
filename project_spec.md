@@ -173,6 +173,7 @@ Steps must be completed in order, each with accompanying unit tests.
 - [x] Create minimal farm simulation configuration file.
 - [x] Write integration tests for farmer working, eating and sleeping.
 - [x] Provide minimal rendering/logging to observe the simulation (LoggingSystem outputs events to console).
+- [x] Add Pygame-based visualization interface.
 - [x] Document architecture and nodes, update README.
 - [ ] Implement seed-based reproducibility (optional).
 - [x] Prepare foundations for future plugins and scenarios.
