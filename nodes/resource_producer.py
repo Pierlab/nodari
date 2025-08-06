@@ -17,6 +17,7 @@ class ResourceProducerNode(SimNode):
         rate_per_tick: int,
         inputs: Optional[Dict[str, int]] = None,
         output_inventory: Optional[InventoryNode] = None,
+        active: bool = True,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -24,10 +25,15 @@ class ResourceProducerNode(SimNode):
         self.rate_per_tick = rate_per_tick
         self.inputs = inputs or {}
         self.output_inventory = output_inventory
+        self.active = active
 
     def update(self, dt: float) -> None:
+        if not self.active:
+            super().update(dt)
+            return
         inv = self.output_inventory or self._find_inventory()
         if inv is None:
+            super().update(dt)
             return
         if all(inv.items.get(name, 0) >= qty for name, qty in self.inputs.items()):
             for name, qty in self.inputs.items():

@@ -7,23 +7,84 @@
         "type": "FarmNode",
         "id": "farm",
         "children": [
-          {"type": "InventoryNode", "id": "farm_inventory", "config": {"items": {}}},
-          {"type": "ResourceProducerNode", "config": {"resource": "wheat", "rate_per_tick": 1}, "id": "producer"}
+          {"type": "InventoryNode", "id": "farm_inventory", "config": {"items": {}}}
         ]
       },
       {
         "type": "CharacterNode",
-        "id": "farmer",
+        "id": "farmer1",
         "children": [
-          {"type": "NeedNode", "config": {"name": "hunger", "threshold": 3, "increase_rate": 2}},
+          {"type": "TransformNode", "config": {"position": [20, 20]}},
           {"type": "InventoryNode", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {}}
+          {"type": "ResourceProducerNode", "config": {"resource": "wheat", "rate_per_tick": 1, "active": false}},
+          {
+            "type": "AIBehaviorNode",
+            "config": {
+              "home": [20, 20],
+              "work_position": [40, 40],
+              "wander_range": 1.5,
+              "routine": [
+                {"start": 6, "end": 8, "action": "wander"},
+                {"start": 8, "end": 16, "action": "work"},
+                {"start": 16, "end": 20, "action": "wander"},
+                {"start": 20, "end": 24, "action": "sleep"},
+                {"start": 0, "end": 6, "action": "sleep"}
+              ]
+            }
+          }
         ]
       },
-      {"type": "TimeSystem", "id": "time"},
+      {
+        "type": "CharacterNode",
+        "id": "farmer2",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [50, 20]}},
+          {"type": "InventoryNode", "config": {"items": {}}},
+          {"type": "ResourceProducerNode", "config": {"resource": "wheat", "rate_per_tick": 1, "active": false}},
+          {
+            "type": "AIBehaviorNode",
+            "config": {
+              "home": [50, 20],
+              "work_position": [60, 60],
+              "wander_range": 1.5,
+              "routine": [
+                {"start": 6, "end": 8, "action": "wander"},
+                {"start": 8, "end": 16, "action": "work"},
+                {"start": 16, "end": 20, "action": "wander"},
+                {"start": 20, "end": 24, "action": "sleep"},
+                {"start": 0, "end": 6, "action": "sleep"}
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "CharacterNode",
+        "id": "farmer3",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [80, 20]}},
+          {"type": "InventoryNode", "config": {"items": {}}},
+          {"type": "ResourceProducerNode", "config": {"resource": "wheat", "rate_per_tick": 1, "active": false}},
+          {
+            "type": "AIBehaviorNode",
+            "config": {
+              "home": [80, 20],
+              "work_position": [20, 60],
+              "wander_range": 1.5,
+              "routine": [
+                {"start": 6, "end": 8, "action": "wander"},
+                {"start": 8, "end": 16, "action": "work"},
+                {"start": 16, "end": 20, "action": "wander"},
+                {"start": 20, "end": 24, "action": "sleep"},
+                {"start": 0, "end": 6, "action": "sleep"}
+              ]
+            }
+          }
+        ]
+      },
+      {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 1.0, "phase_length": 12}},
       {"type": "EconomySystem", "id": "economy"},
-      {"type": "LoggingSystem", "id": "logger"},
-      {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 400, "height": 300}}
+      {"type": "LoggingSystem", "id": "logger"}
     ]
   }
 }
