@@ -24,3 +24,5 @@ Tu travailles sur le projet Nodari. Aujourd’hui, ta mission est d’ajouter **
    - Le **README.md** si cette fonctionnalité est visible ou importante
 
 5. Commets les changements avec un message clair, du type :
+   - `git commit -m "feat: add nouvelle fonctionnalité"`
+

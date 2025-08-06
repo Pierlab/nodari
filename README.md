@@ -26,6 +26,4 @@ python run_farm.py
 
 MIT
 
-## TODO
-
-- Implement seed-based reproducibility for deterministic simulations.
+See [TODO.md](TODO.md) for the full roadmap and upcoming enhancements.
