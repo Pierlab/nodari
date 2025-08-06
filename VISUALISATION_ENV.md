@@ -13,8 +13,8 @@ Ce guide explique comment préparer un environnement Python pour exécuter la si
 Executez les commandes suivantes à la racine du projet pour créer un environnement virtuel et installer les dépendances.
 
 ```bash
-python3 -m venv .venv && \
-  source .venv/bin/activate && \
+python -m venv .venv && \
+  source .venv/Scripts/activate && \
   pip install --upgrade pip && \
   pip install -r requirements.txt
 ```
