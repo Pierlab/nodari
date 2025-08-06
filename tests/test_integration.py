@@ -15,7 +15,7 @@ def test_farm_simulation_cycle():
     producer = ResourceProducerNode(resource="wheat", rate_per_tick=1, output_inventory=farm_inv, parent=farm)
 
     char = CharacterNode(name="farmer", parent=world)
-    hunger = NeedNode(name="hunger", threshold=3, increase_rate=2, parent=char)
+    hunger = NeedNode(need_name="hunger", threshold=3, increase_rate=2, parent=char)
     personal_inv = InventoryNode(name="personal", items={}, parent=char)
     ai = AIBehaviorNode(parent=char, target_inventory=farm_inv)
 
