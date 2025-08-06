@@ -22,7 +22,8 @@
       },
       {"type": "TimeSystem", "id": "time"},
       {"type": "EconomySystem", "id": "economy"},
-      {"type": "LoggingSystem", "id": "logger"}
+      {"type": "LoggingSystem", "id": "logger"},
+      {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 400, "height": 300}}
     ]
   }
 }
