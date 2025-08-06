@@ -172,7 +172,7 @@ Steps must be completed in order, each with accompanying unit tests.
 - [x] Implement `CharacterNode` composed of generic nodes and simple farmer logic.
 - [x] Create minimal farm simulation configuration file.
 - [x] Write integration tests for farmer working, eating and sleeping.
-- [ ] Provide minimal rendering/logging to observe the simulation.
+- [x] Provide minimal rendering/logging to observe the simulation (LoggingSystem outputs events to console).
 - [x] Document architecture and nodes, update README.
 - [ ] Implement seed-based reproducibility (optional).
 - [x] Prepare foundations for future plugins and scenarios.
