@@ -7,6 +7,7 @@
         "type": "FarmNode",
         "id": "farm",
         "children": [
+          {"type": "TransformNode", "config": {"position": [50, 50]}},
           {"type": "InventoryNode", "id": "farm_inventory", "config": {"items": {}}},
           {"type": "ResourceProducerNode", "config": {"resource": "wheat", "rate_per_tick": 1}, "id": "producer"}
         ]
@@ -15,7 +16,8 @@
         "type": "CharacterNode",
         "id": "farmer",
         "children": [
-          {"type": "NeedNode", "config": {"name": "hunger", "threshold": 3, "increase_rate": 2}},
+          {"type": "TransformNode", "config": {"position": [20, 20]}},
+          {"type": "NeedNode", "config": {"name": "hunger", "threshold": 1000, "increase_rate": 0.035}},
           {"type": "InventoryNode", "config": {"items": {}}},
           {"type": "AIBehaviorNode", "config": {}}
         ]

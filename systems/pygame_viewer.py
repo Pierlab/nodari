@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterator, List
+from typing import Iterator, List, Optional
 
 import pygame
 
@@ -11,6 +11,7 @@ from core.plugins import register_node_type
 from nodes.inventory import InventoryNode
 from nodes.need import NeedNode
 from nodes.transform import TransformNode
+from systems.time import TimeSystem
 
 
 class PygameViewerSystem(SystemNode):
@@ -26,8 +27,9 @@ class PygameViewerSystem(SystemNode):
 
     def __init__(self, width: int = 640, height: int = 480, scale: float = 5.0, **kwargs) -> None:
         super().__init__(**kwargs)
-        # Allow running in headless environments for tests
-        os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+        # Use dummy driver only when no display is available
+        if "DISPLAY" not in os.environ and os.environ.get("SDL_VIDEODRIVER") is None:
+            os.environ["SDL_VIDEODRIVER"] = "dummy"
         pygame.init()
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption(self.name)
@@ -62,6 +64,7 @@ class PygameViewerSystem(SystemNode):
         self.screen.fill((30, 30, 30))
 
         lines: List[str] = []
+        time_sys: Optional[TimeSystem] = None
         for node in self._walk(self._root()):
             if isinstance(node, InventoryNode):
                 lines.append(f"{node.name} inv: {node.items}")
@@ -75,10 +78,19 @@ class PygameViewerSystem(SystemNode):
                     (int(x * self.scale), int(y * self.scale)),
                     5,
                 )
+            if isinstance(node, TimeSystem):
+                time_sys = node
 
         for i, text in enumerate(lines):
             surf = self.font.render(text, True, (220, 220, 220))
-            self.screen.blit(surf, (10, 10 + i * 20))
+            self.screen.blit(surf, (10, 30 + i * 20))
+
+        if time_sys is not None:
+            hours = int(time_sys.current_time // 3600) % 24
+            minutes = int((time_sys.current_time % 3600) // 60)
+            time_text = f"{hours:02d}:{minutes:02d}"
+            surf = self.font.render(time_text, True, (220, 220, 220))
+            self.screen.blit(surf, (10, 10))
 
         pygame.display.flip()
         super().update(dt)
