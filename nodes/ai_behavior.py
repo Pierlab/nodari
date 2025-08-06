@@ -43,6 +43,7 @@ class AIBehaviorNode(SimNode):
         self.idle_chance = idle_chance
         self._money_acc = 0.0
         self._idle = False
+        self._sleeping = False
         self._resolved = False
         self.on_event("need_threshold_reached", self._on_need)
 
@@ -53,6 +54,8 @@ class AIBehaviorNode(SimNode):
             target = self._determine_target()
             if target is not None:
                 self._move_towards(transform, target, dt)
+                if self._is_at_position(transform.position, target):
+                    self._apply_idle_jitter(transform, target)
                 self._handle_work(transform, target, dt)
         elif transform is not None:
             # fallback random walk
@@ -146,23 +149,29 @@ class AIBehaviorNode(SimNode):
         if time_sys is None:
             return None
         t = time_sys.current_time % 86400
-        morning = 8 * 3600
+        wake = 6 * 3600
+        work_start = 8 * 3600
         lunch = 12 * 3600
-        lunch_end = 13 * 3600
-        evening = 18 * 3600
+        lunch_end = 14 * 3600
+        work_end = 18 * 3600
+        sleep = 22 * 3600
 
-        if t < morning:
+        if t < wake or t >= sleep:
+            self._sleeping = True
             self._idle = False
             return self._get_position(self.home)
-        if morning <= t < lunch:
+        self._sleeping = False
+        if wake <= t < work_start:
+            self._idle = False
+            return self._get_position(self.home)
+        if work_start <= t < lunch:
             self._idle = False
             return self._get_position(self.work)
         if lunch <= t < lunch_end:
-            # decide idleness for afternoon
             if not self._idle and random.random() < self.idle_chance:
                 self._idle = True
             return self.lunch_position
-        if lunch_end <= t < evening:
+        if lunch_end <= t < work_end:
             if self._idle:
                 return self.lunch_position
             return self._get_position(self.work)
@@ -186,11 +195,12 @@ class AIBehaviorNode(SimNode):
         if time_sys is None:
             return
         t = time_sys.current_time % 86400
-        morning = 8 * 3600
+        work_start = 8 * 3600
         lunch = 12 * 3600
-        lunch_end = 13 * 3600
-        evening = 18 * 3600
-        if morning <= t < lunch or (lunch_end <= t < evening and not self._idle):
+        lunch_end = 14 * 3600
+        work_end = 18 * 3600
+        sleep = 22 * 3600
+        if work_start <= t < lunch or (lunch_end <= t < work_end and not self._idle):
             work_pos = self._get_position(self.work)
             if work_pos is not None:
                 dx = transform.position[0] - work_pos[0]
@@ -202,12 +212,25 @@ class AIBehaviorNode(SimNode):
                         amount = int(self._money_acc)
                         self._money_acc -= amount
                         inv.add_item("money", amount)
-        if t >= evening or t < morning:
+        if t >= work_end or t < work_start:
             inv = self._find_inventory()
             if inv and self.home_inventory and isinstance(self.home_inventory, InventoryNode):
                 amt = inv.items.get("money", 0)
                 if amt > 0:
                     inv.transfer_to(self.home_inventory, "money", amt)
+
+    def _is_at_position(self, pos: List[float], target: List[float], threshold: float = 0.5) -> bool:
+        dx = pos[0] - target[0]
+        dy = pos[1] - target[1]
+        return math.hypot(dx, dy) <= threshold
+
+    def _apply_idle_jitter(self, transform: TransformNode, target: List[float]) -> None:
+        if self._sleeping:
+            transform.position[0], transform.position[1] = target[0], target[1]
+            return
+        jitter = 0.5
+        transform.position[0] = target[0] + random.uniform(-jitter, jitter)
+        transform.position[1] = target[1] + random.uniform(-jitter, jitter)
 
 
 register_node_type("AIBehaviorNode", AIBehaviorNode)

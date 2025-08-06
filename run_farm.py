@@ -64,7 +64,7 @@ if not any(isinstance(c, PygameViewerSystem) for c in world.children):
 
 
 FPS = 24
-TIME_SCALE = 86400 / (3 * 60)  # 1 journée simulée = 3 minutes réelles
+TIME_SCALE = 86400 / 60  # 1 journée simulée = 1 minute réelle
 
 clock = pygame.time.Clock()
 

@@ -51,7 +51,7 @@
         "children": [
           {"type": "TransformNode", "config": {"position": [10, 10]}},
           {"type": "InventoryNode", "id": "worker1_inventory", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {"home": "house1", "work": "farm1", "home_inventory": "house1_inventory", "lunch_position": [50, 50], "speed": 20.0, "idle_chance": 0.2}}
+          {"type": "AIBehaviorNode", "config": {"home": "house1", "work": "farm1", "home_inventory": "house1_inventory", "lunch_position": [50, 50], "speed": 0.05, "idle_chance": 0.2}}
         ]
       },
       {
@@ -60,7 +60,7 @@
         "children": [
           {"type": "TransformNode", "config": {"position": [20, 80]}},
           {"type": "InventoryNode", "id": "worker2_inventory", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {"home": "house2", "work": "farm2", "home_inventory": "house2_inventory", "lunch_position": [50, 50], "speed": 20.0, "idle_chance": 0.2}}
+          {"type": "AIBehaviorNode", "config": {"home": "house2", "work": "farm2", "home_inventory": "house2_inventory", "lunch_position": [50, 50], "speed": 0.05, "idle_chance": 0.2}}
         ]
       },
       {
@@ -69,7 +69,7 @@
         "children": [
           {"type": "TransformNode", "config": {"position": [80, 20]}},
           {"type": "InventoryNode", "id": "worker3_inventory", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {"home": "house3", "work": "farm1", "home_inventory": "house3_inventory", "lunch_position": [50, 50], "speed": 20.0, "idle_chance": 0.2}}
+          {"type": "AIBehaviorNode", "config": {"home": "house3", "work": "farm1", "home_inventory": "house3_inventory", "lunch_position": [50, 50], "speed": 0.05, "idle_chance": 0.2}}
         ]
       },
       {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60}},
