@@ -60,3 +60,40 @@ def test_idle_jitter():
     time.current_time = 23 * 3600
     ai.update(1.0)
     assert trans.position == [0.0, 0.0]
+
+
+def test_return_to_work_after_lunch():
+    ai, time, _ = _create_ai()
+    # Force idle during lunch
+    ai.idle_chance = 1.0
+    time.current_time = 13 * 3600
+    target = ai._determine_target()
+    assert target == ai.lunch_position
+    assert ai._idle is True
+
+    # After lunch ends, worker should go back to work
+    time.current_time = 14 * 3600
+    target = ai._determine_target()
+    assert ai._idle is False
+    assert target == [10.0, 0.0]
+
+
+def test_drop_inventory_after_work():
+    world = WorldNode(name="world")
+    home = SimNode(name="home", parent=world)
+    TransformNode(position=[0.0, 0.0], parent=home)
+    home_inv = InventoryNode(name="home_inv", items={}, parent=home)
+    work = SimNode(name="work", parent=world)
+    TransformNode(position=[10.0, 0.0], parent=work)
+    char = CharacterNode(name="char", parent=world)
+    TransformNode(position=[10.0, 0.0], parent=char)
+    personal_inv = InventoryNode(name="inv", items={"water": 2, "wheat": 3, "money": 5}, parent=char)
+    ai = AIBehaviorNode(parent=char, home="home", work="work", home_inventory="home_inv")
+    time = TimeSystem(parent=world)
+    ai._resolve_references()
+
+    time.current_time = 19 * 3600
+    ai.update(1.0)
+
+    assert all(qty == 0 for qty in personal_inv.items.values())
+    assert home_inv.items == {"water": 2, "wheat": 3, "money": 5}

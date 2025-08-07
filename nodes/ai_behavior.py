@@ -215,8 +215,9 @@ class AIBehaviorNode(SimNode):
                 self._idle = True
             return self.lunch_position
         if lunch_end <= t < work_end:
-            if self._idle:
-                return self.lunch_position
+            # After lunch workers should resume their duties. Any idle state
+            # picked up during lunch is cleared so characters walk back to work.
+            self._idle = False
             if self._task == "fetch_water" and isinstance(self.well_inventory, InventoryNode):
                 return self._get_position(self.well_inventory.parent)
             if self._task == "deliver_water":
@@ -255,9 +256,11 @@ class AIBehaviorNode(SimNode):
             if t >= work_end or t < work_start:
                 inv = self._find_inventory()
                 if inv and self.home_inventory and isinstance(self.home_inventory, InventoryNode):
-                    amt = inv.items.get("money", 0)
-                    if amt > 0:
-                        inv.transfer_to(self.home_inventory, "money", amt)
+                    # Drop any remaining items (money or resources) at home so
+                    # characters don't keep them overnight.
+                    for item, qty in list(inv.items.items()):
+                        if qty > 0:
+                            inv.transfer_to(self.home_inventory, item, qty)
             return
 
         inv = self._find_inventory()
@@ -270,6 +273,10 @@ class AIBehaviorNode(SimNode):
         warehouse_pos = self._get_position(warehouse_inv.parent) if warehouse_inv else None
 
         if self._task == "fetch_water" and well_inv and well_pos and self._is_at_position(transform.position, well_pos):
+            # When a worker arrives at the well, water is produced on demand.
+            well_producer = self._find_producer(well_inv.parent)
+            if well_producer is not None:
+                well_producer.work()
             qty = min(self.water_per_fetch, well_inv.items.get("water", 0))
             if inv and qty > 0:
                 well_inv.transfer_to(inv, "water", qty)
