@@ -44,7 +44,7 @@
         "children": [
           {"type": "TransformNode", "config": {"position": [40, 70]}},
           {"type": "InventoryNode", "id": "well_inventory", "config": {"items": {"water": 0}}},
-          {"type": "ResourceProducerNode", "id": "well_producer", "config": {"resource": "water", "rate_per_tick": 1}}
+          {"type": "ResourceProducerNode", "id": "well_producer", "config": {"resource": "water", "rate_per_tick": 1, "auto": false}}
         ]
       },
       {"type": "WarehouseNode", "id": "warehouse",
