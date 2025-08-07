@@ -29,6 +29,7 @@ load_plugins(
         "systems.time",
         "systems.economy",
         "systems.logger",
+        "systems.distance",
         "systems.pygame_viewer",
     ]
 )
