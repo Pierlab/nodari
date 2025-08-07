@@ -2,7 +2,7 @@
 
 This project aims to build a modular simulation engine for farm scenarios and beyond. It is designed around reusable nodes, a plugin system and declarative configuration.
 
-Project objectives, current progress and the complete roadmap live in [project_spec.md](project_spec.md). The document centralises goals, completed work and upcoming tasks.
+Project objectives, current progress and the complete roadmap live in [project_spec.md](docs/project_spec.md). The document centralises goals, completed work and upcoming tasks.
 
 An example configuration file `example_farm.json` demonstrates a minimal world setup loaded via the declarative loader.
 
@@ -35,7 +35,7 @@ python run_farm.py
 
 ## Roadmap and Tasks
 
-Project objectives, completed milestones and remaining tasks are tracked in [project_spec.md](project_spec.md). A high-level view of upcoming features also appears in [TODO.md](TODO.md).
+Project objectives, completed milestones and remaining tasks are tracked in [project_spec.md](docs/project_spec.md). A high-level view of upcoming features also appears in [TODO.md](docs/TODO.md).
 
 ## Future Possibilities
 
