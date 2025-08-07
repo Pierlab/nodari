@@ -1,7 +1,9 @@
 """Core simulation node with event bus and hierarchy management."""
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional
+import asyncio
+import inspect
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
 EventHandler = Callable[["SimNode", str, Dict[str, Any]], None]
@@ -22,7 +24,8 @@ class SimNode:
         self.name = name or self.__class__.__name__
         self.parent = parent
         self.children: List[SimNode] = []
-        self._listeners: Dict[str, List[EventHandler]] = {}
+        # Mapping of event name to list of (priority, handler)
+        self._listeners: Dict[str, List[Tuple[int, EventHandler]]] = {}
         if parent is not None:
             parent.add_child(self)
 
@@ -42,15 +45,26 @@ class SimNode:
     # ------------------------------------------------------------------
     # Event bus
     # ------------------------------------------------------------------
-    def on_event(self, event_name: str, handler: EventHandler) -> None:
-        """Register *handler* for *event_name*."""
-        self._listeners.setdefault(event_name, []).append(handler)
+    def on_event(self, event_name: str, handler: EventHandler, priority: int = 0) -> None:
+        """Register *handler* for *event_name* with optional *priority*.
+
+        Handlers with higher priority are invoked before those with lower
+        priority. Handlers with the same priority keep their registration
+        order thanks to the stability of list sorting.
+        """
+
+        listeners = self._listeners.setdefault(event_name, [])
+        listeners.append((priority, handler))
+        listeners.sort(key=lambda item: item[0], reverse=True)
 
     def off_event(self, event_name: str, handler: EventHandler) -> None:
         """Unregister *handler* from *event_name*."""
         handlers = self._listeners.get(event_name)
-        if handlers and handler in handlers:
-            handlers.remove(handler)
+        if handlers:
+            for i, (_prio, hnd) in enumerate(handlers):
+                if hnd is handler:
+                    del handlers[i]
+                    break
 
     def emit(
         self,
@@ -76,7 +90,7 @@ class SimNode:
         """
 
         payload = payload or {}
-        for handler in list(self._listeners.get(event_name, [])):
+        for _prio, handler in list(self._listeners.get(event_name, [])):
             handler(origin or self, event_name, payload)
 
         if direction == "up":
@@ -89,6 +103,49 @@ class SimNode:
             for child in list(self.children):
                 if child is not origin:
                     child.emit(event_name, payload, direction="down", origin=origin or self)
+
+    async def emit_async(
+        self,
+        event_name: str,
+        payload: Optional[Dict[str, Any]] = None,
+        direction: str = "up",
+        origin: Optional["SimNode"] = None,
+    ) -> None:
+        """Asynchronously emit an event.
+
+        This variant awaits any coroutine handlers and propagates events using
+        ``asyncio``. Local handlers are awaited before propagation to ensure
+        deterministic ordering similar to the synchronous ``emit``.
+        """
+
+        payload = payload or {}
+        tasks: List[asyncio.Future] = []
+        for _prio, handler in list(self._listeners.get(event_name, [])):
+            result = handler(origin or self, event_name, payload)
+            if inspect.isawaitable(result):
+                tasks.append(asyncio.ensure_future(result))
+        if tasks:
+            await asyncio.gather(*tasks)
+
+        prop_tasks: List[asyncio.Future] = []
+        if direction == "up":
+            for child in list(self.children):
+                if child is not origin:
+                    prop_tasks.append(
+                        child.emit_async(event_name, payload, direction="down", origin=origin or self)
+                    )
+            if self.parent is not None:
+                prop_tasks.append(
+                    self.parent.emit_async(event_name, payload, direction="up", origin=origin or self)
+                )
+        elif direction == "down":
+            for child in list(self.children):
+                if child is not origin:
+                    prop_tasks.append(
+                        child.emit_async(event_name, payload, direction="down", origin=origin or self)
+                    )
+        if prop_tasks:
+            await asyncio.gather(*prop_tasks)
 
     # ------------------------------------------------------------------
     # Simulation API
