@@ -6,9 +6,9 @@ Historique des améliorations techniques. Les tâches encore ouvertes sont aussi
 - [x] Utiliser `SchedulerSystem` pour planifier les mises à jour des nœuds lents (`NeedNode`, IA...).
 - [x] Implémenter un `WeatherSystem` impactant la production et les comportements.
 - [ ] Refactorer `AIBehaviorNode` :
-  - [ ] Séparer planification, navigation et interactions économiques.
-  - [ ] Utiliser une machine à états ou un arbre de comportement configurable.
-  - [ ] Résoudre les références lors du chargement.
+  - [x] Séparer planification, navigation et interactions économiques.
+  - [x] Utiliser une machine à états ou un arbre de comportement configurable.
+  - [x] Résoudre les références lors du chargement.
   - [ ] Paramétrer durées, vitesses et seuils via la configuration.
   - [x] Confier la cadence de mise à jour au `SchedulerSystem`.
 - [x] Mettre en cache les distances ou introduire un index spatial.

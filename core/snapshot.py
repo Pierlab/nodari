@@ -42,5 +42,23 @@ def _deserialize_node(data: Dict[str, Any], parent: Optional[SimNode] = None) ->
 
 
 def deserialize_world(data: Dict[str, Any]) -> SimNode:
-    """Rebuild a simulation tree from previously serialised *data*."""
-    return _deserialize_node(data, None)
+    """Rebuild a simulation tree from previously serialised *data*.
+
+    After constructing the full tree, nodes exposing a ``resolve_references``
+    method will have it invoked once so that expensive lookups are avoided
+    during the first update.
+    """
+
+    root = _deserialize_node(data, None)
+
+    def _walk(node: SimNode):
+        yield node
+        for child in node.children:
+            yield from _walk(child)
+
+    for node in _walk(root):
+        resolver = getattr(node, "resolve_references", None)
+        if callable(resolver):
+            resolver()
+
+    return root

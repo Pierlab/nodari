@@ -1,7 +1,7 @@
 """Simple AI behaviour reacting to needs."""
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Callable, Dict, List, Optional
 import math
 import random
 
@@ -78,6 +78,13 @@ class AIBehaviorNode(SimNode):
         self._sleeping = False
         self._resolved = False
         self._task: Optional[str] = None
+        # simple configurable state machine
+        self.state: str = "idle"
+        self.state_handlers: Dict[str, Callable[[float, TransformNode], None]] = {
+            "idle": self._state_idle,
+            "moving": self._state_moving,
+            "working": self._state_working,
+        }
         self.on_event("need_threshold_reached", self._on_need)
         self.update_interval = update_interval
         if update_interval:
@@ -87,19 +94,64 @@ class AIBehaviorNode(SimNode):
 
     def update(self, dt: float) -> None:
         transform = self._find_transform()
-        if transform is not None and (self.home or self.work):
-            self._resolve_references()
-            target = self._determine_target()
-            if target is not None:
-                self._move_towards(transform, target, dt)
-                if self._is_at_position(transform.position, target):
-                    self._apply_idle_jitter(transform, target)
-                self._handle_work(transform, target, dt)
-        elif transform is not None:
+        if transform is None:
+            super().update(dt)
+            return
+        if self.home or self.work:
+            self.resolve_references()
+            target = self.plan(transform)
+            self.navigate(transform, target, dt)
+            self.interact(transform, target, dt)
+        else:
             # fallback random walk
             transform.position[0] += random.uniform(-1, 1) * self.random_speed * dt
             transform.position[1] += random.uniform(-1, 1) * self.random_speed * dt
         super().update(dt)
+
+    # ------------------------------------------------------------------
+    # Public helpers for state machine
+    # ------------------------------------------------------------------
+    def change_state(self, new_state: str) -> None:
+        self.state = new_state
+
+    def resolve_references(self) -> None:
+        self._resolve_references()
+
+    # Planning / Navigation / Economic interactions --------------------
+    def plan(self, transform: TransformNode) -> Optional[List[float]]:
+        target = self._determine_target()
+        if target is None:
+            self.change_state("idle")
+        else:
+            self.change_state("moving")
+        return target
+
+    def navigate(self, transform: TransformNode, target: Optional[List[float]], dt: float) -> None:
+        if target is None:
+            return
+        self._move_towards(transform, target, dt)
+        if self._is_at_position(transform.position, target):
+            self._apply_idle_jitter(transform, target)
+            self.change_state("working")
+
+    def interact(self, transform: TransformNode, target: Optional[List[float]], dt: float) -> None:
+        if target is None:
+            return
+        handler = self.state_handlers.get(self.state)
+        if handler:
+            handler(dt, transform)
+
+    # State handlers ----------------------------------------------------
+    def _state_idle(self, dt: float, transform: TransformNode) -> None:  # pragma: no cover - trivial
+        pass
+
+    def _state_moving(self, dt: float, transform: TransformNode) -> None:  # pragma: no cover - handled in navigate
+        pass
+
+    def _state_working(self, dt: float, transform: TransformNode) -> None:
+        target = self._determine_target()
+        if target is not None:
+            self._handle_work(transform, target, dt)
 
     def _on_need(self, emitter: SimNode, event_name: str, payload) -> None:
         if payload.get("need") != "hunger":

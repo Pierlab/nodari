@@ -3,9 +3,9 @@
 This checklist gathers outstanding tasks from the project specification and maintenance notes. Items are grouped by theme and ordered by priority.
 
 ## Refactoring & Maintenance
-- [ ] **High** Refactor `AIBehaviorNode` by separating planning, navigation and economic interactions.
-- [ ] **High** Introduce a configurable state machine or behaviour tree for `AIBehaviorNode`.
-- [ ] **High** Resolve `AIBehaviorNode` references during loading to avoid repeated lookups.
+- [x] **High** Refactor `AIBehaviorNode` by separating planning, navigation and economic interactions.
+- [x] **High** Introduce a configurable state machine or behaviour tree for `AIBehaviorNode`.
+- [x] **High** Resolve `AIBehaviorNode` references during loading to avoid repeated lookups.
 - [ ] **Medium** Parameterise durations, speeds and thresholds via configuration files.
 
 ## Core Engine Enhancements
@@ -13,7 +13,7 @@ This checklist gathers outstanding tasks from the project specification and main
 - [ ] **Medium** State diffing and time-travel debugging for deterministic replay.
 
 ## Tools for Creation
-- [ ] **High** Command-line tool to scaffold new node or system plugins from templates.
+- [x] **High** Command-line tool to scaffold new node or system plugins from templates.
 - [ ] **Medium** Schema validation utility for configuration files (YAML/JSON).
 - [ ] **Low** Graphical node editor allowing drag-and-drop composition and export to declarative configs.
     - [ ] **Low** Basic UI to add/remove nodes and edit properties.
@@ -49,7 +49,7 @@ This checklist gathers outstanding tasks from the project specification and main
 - [ ] **Low** Social relationship system tracking friendships and rivalries.
 
 ## Infrastructure & Performance
-- [ ] **High** Continuous integration pipeline running tests, linting and type checks.
+- [x] **High** Continuous integration pipeline running tests, linting and type checks.
 - [ ] **Medium** Benchmark suite with automated performance regression alerts.
 - [ ] **Medium** Plugin versioning and compatibility management.
 - [ ] **Medium** Packaging and distribution on PyPI with semantic versioning.
@@ -57,8 +57,8 @@ This checklist gathers outstanding tasks from the project specification and main
 - [ ] **Low** Plugin sandboxing and permission system.
 
 ## Documentation & Community
-- [ ] **High** Expand [project_spec.md](../specs/project_spec.md) with concrete examples for every node and system type.
-- [ ] **High** Write step-by-step tutorials and how-to guides.
+- [x] **High** Expand [project_spec.md](../specs/project_spec.md) with concrete examples for every node and system type.
+- [x] **High** Write step-by-step tutorials and how-to guides.
 - [ ] **Medium** Publish contribution guidelines and a code of conduct.
 - [ ] **Medium** Launch a documentation website with interactive examples and API reference.
 - [ ] **Low** Organise community challenges to create and share new scenarios.
