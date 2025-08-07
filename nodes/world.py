@@ -13,9 +13,9 @@ class WorldNode(SimNode):
     Parameters
     ----------
     width:
-        Width of the world map.
+        Width of the world map in meters.
     height:
-        Height of the world map.
+        Height of the world map in meters.
     seed:
         Optional seed for global random number generation to make
         simulations deterministic.

@@ -7,12 +7,15 @@ import random
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
+from core.units import kmh_to_mps
 from .inventory import InventoryNode
 from .need import NeedNode
 from .transform import TransformNode
 from systems.time import TimeSystem
 
-BASE_SPEED = 0.01
+# Reference random speed used to scale idle jitter (2 km/h)
+_REF_RANDOM_SPEED = kmh_to_mps(2.0)
+_IDLE_JITTER_DISTANCE = 0.5  # meters when random_speed is 2 km/h
 
 
 class AIBehaviorNode(SimNode):
@@ -40,10 +43,24 @@ class AIBehaviorNode(SimNode):
         wheat_threshold: int = 20,
         **kwargs,
     ) -> None:
+        """Create the AI behaviour.
+
+        Parameters
+        ----------
+        target_inventory:
+            Inventory from which wheat is taken when hungry.
+        speed:
+            Movement speed in kilometres per hour.
+        random_speed:
+            Maximum random walk speed in kilometres per hour.
+        home, work, ...:
+            References to important nodes within the simulation tree.
+        """
         super().__init__(**kwargs)
         self.target_inventory = target_inventory
-        self.speed = BASE_SPEED * speed
-        self.random_speed = BASE_SPEED * random_speed
+        # Speeds are provided in km/h and converted to m/s for simulation
+        self.speed = kmh_to_mps(speed)
+        self.random_speed = kmh_to_mps(random_speed)
         self.home = home
         self.work = work
         self.home_inventory = home_inventory
@@ -333,7 +350,7 @@ class AIBehaviorNode(SimNode):
         if self._sleeping:
             transform.position[0], transform.position[1] = target[0], target[1]
             return
-        jitter = self.random_speed * 25
+        jitter = (self.random_speed / _REF_RANDOM_SPEED) * _IDLE_JITTER_DISTANCE
         transform.position[0] = target[0] + random.uniform(-jitter, jitter)
         transform.position[1] = target[1] + random.uniform(-jitter, jitter)
 

@@ -34,7 +34,7 @@ Global behaviours live in `SystemNode` subclasses which traverse the tree or lis
 - **TimeSystem** – manages time flow (ticks, day/night cycles, seasons) and emits `tick` and `phase_changed` events.
 - **EconomySystem** – listens to buy/sell events, transfers money and updates prices if necessary.
 - **WeatherSystem** – determines current weather, emits events like `rain_started` or `drought` and exposes state.
-- **DistanceSystem** – computes distances between nodes with positions and answers distance queries.
+- **DistanceSystem** – computes distances between nodes with positions and answers distance queries in meters.
 
 ### 3.3 Generic Nodes
 For modelling the farm and inhabitants:
@@ -42,7 +42,7 @@ For modelling the farm and inhabitants:
 - **NeedNode** – represents a need (hunger, fatigue). Holds current value, thresholds and change rates. Emits `need_threshold_reached` and `need_satisfied`.
 - **ResourceProducerNode** – produces a resource every tick consuming optional inputs. Emits `resource_produced`.
 - **AIBehaviorNode** – decides actions based on internal state and events (`need_threshold_reached`, `phase_changed`, etc.).
-- **TransformNode** (optional) – stores position and velocity.
+- **TransformNode** (optional) – stores position in meters and velocity in meters per second.
 
 ### 3.4 Composed Nodes
 - **CharacterNode** – combines TransformNode, multiple NeedNodes, an InventoryNode and an AIBehaviorNode.
@@ -145,7 +145,7 @@ Steps must be completed in order, each with accompanying unit tests.
 - Tests for transitions.
 
 ### Step 6: Farm Simulation Composition
-- Implement `WorldNode` as root container with map size, systems, buildings and characters.
+- Implement `WorldNode` as root container with map size (meters), systems, buildings and characters.
 - Implement `FarmNode` with position, an `InventoryNode` and `ResourceProducerNode` producing wheat.
 - Implement `CharacterNode` combining a `TransformNode`, `NeedNode`s, an `InventoryNode` and an `AIBehaviorNode` with simple farmer logic.
 - Provide minimal configuration file for loader initialisation.

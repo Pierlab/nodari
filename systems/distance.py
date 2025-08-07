@@ -1,4 +1,4 @@
-"""System providing distance calculations between nodes."""
+"""System providing distance calculations between nodes in meters."""
 from __future__ import annotations
 
 import math
