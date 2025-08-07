@@ -215,8 +215,7 @@ class AIBehaviorNode(SimNode):
                 self._idle = True
             return self.lunch_position
         if lunch_end <= t < work_end:
-            if self._idle:
-                return self.lunch_position
+            self._idle = False
             if self._task == "fetch_water" and isinstance(self.well_inventory, InventoryNode):
                 return self._get_position(self.well_inventory.parent)
             if self._task == "deliver_water":
@@ -251,25 +250,34 @@ class AIBehaviorNode(SimNode):
         lunch = 12 * 3600
         lunch_end = 14 * 3600
         work_end = 18 * 3600
-        if not (work_start <= t < lunch or (lunch_end <= t < work_end and not self._idle)):
-            if t >= work_end or t < work_start:
-                inv = self._find_inventory()
-                if inv and self.home_inventory and isinstance(self.home_inventory, InventoryNode):
-                    amt = inv.items.get("money", 0)
-                    if amt > 0:
-                        inv.transfer_to(self.home_inventory, "money", amt)
-            return
-
         inv = self._find_inventory()
         farm_inv = self.work_inventory if isinstance(self.work_inventory, InventoryNode) else None
         well_inv = self.well_inventory if isinstance(self.well_inventory, InventoryNode) else None
         warehouse_inv = self.warehouse_inventory if isinstance(self.warehouse_inventory, InventoryNode) else None
         producer = self._find_producer(self.work)
+        if not (work_start <= t < lunch or (lunch_end <= t < work_end and not self._idle)):
+            if inv:
+                if farm_inv:
+                    amt = inv.items.get("water", 0)
+                    if amt > 0:
+                        inv.transfer_to(farm_inv, "water", amt)
+                if warehouse_inv:
+                    amt = inv.items.get("wheat", 0)
+                    if amt > 0:
+                        inv.transfer_to(warehouse_inv, "wheat", amt)
+                if (t >= work_end or t < work_start) and self.home_inventory and isinstance(self.home_inventory, InventoryNode):
+                    amt = inv.items.get("money", 0)
+                    if amt > 0:
+                        inv.transfer_to(self.home_inventory, "money", amt)
+            return
         work_pos = self._get_position(self.work)
         well_pos = self._get_position(well_inv.parent) if well_inv else None
         warehouse_pos = self._get_position(warehouse_inv.parent) if warehouse_inv else None
 
         if self._task == "fetch_water" and well_inv and well_pos and self._is_at_position(transform.position, well_pos):
+            well_producer = self._find_producer(well_inv.parent)
+            if well_producer:
+                well_producer.work(self.water_per_fetch)
             qty = min(self.water_per_fetch, well_inv.items.get("water", 0))
             if inv and qty > 0:
                 well_inv.transfer_to(inv, "water", qty)
@@ -300,7 +308,7 @@ class AIBehaviorNode(SimNode):
                     farm_inv.transfer_to(inv, "wheat", qty)
                     self._task = "deliver_wheat"
                     return
-                if farm_inv.items.get("water", 0) < 1 and well_inv and well_inv.items.get("water", 0) > 0 and inv.items.get("water", 0) == 0:
+                if farm_inv.items.get("water", 0) < 1 and well_inv and inv.items.get("water", 0) == 0:
                     self._task = "fetch_water"
                     return
             if producer is not None and farm_inv:
