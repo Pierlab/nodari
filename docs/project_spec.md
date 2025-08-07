@@ -182,6 +182,9 @@ Steps must be completed in order, each with accompanying unit tests.
 - [x] Document architecture and nodes, update README.
 - [x] Implement seed-based reproducibility. The `WorldNode` accepts a `seed` to initialise the global RNG for deterministic runs.
 - [x] Prepare foundations for future plugins and scenarios.
+- [x] Integrate `SchedulerSystem` to allow nodes like `NeedNode` and `AIBehaviorNode` to update at custom intervals.
+- [x] Implement a basic `WeatherSystem` emitting `weather_changed` events.
+- [x] Enhance `EconomySystem` with simple dynamic pricing reacting to stock levels.
 
 ### 5.2 Upcoming
 #### Core Engine Enhancements
@@ -213,9 +216,9 @@ Steps must be completed in order, each with accompanying unit tests.
 - [ ] VR/AR viewer for immersive observation.
 
 #### Advanced Simulation Mechanics
-- [ ] Weather and seasonal systems influencing production rates and character behaviour.
+- [ ] Extend `WeatherSystem` to influence production rates and character behaviour.
 - [ ] Animal nodes with needs, reproduction and resource generation.
-- [ ] Dynamic economy with fluctuating prices and market events.
+- [ ] Advanced dynamic economy with market events and complex price fluctuations.
 - [ ] Quest or objective system using dedicated `QuestNode` types.
 - [ ] Combat mechanics including equipment, damage and defence systems.
 - [ ] Behaviour tree library for complex AI decision making.

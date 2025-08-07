@@ -41,6 +41,7 @@ class AIBehaviorNode(SimNode):
         idle_chance: float = 0.1,
         water_per_fetch: int = 5,
         wheat_threshold: int = 20,
+        update_interval: float | None = None,
         **kwargs,
     ) -> None:
         """Create the AI behaviour.
@@ -78,6 +79,11 @@ class AIBehaviorNode(SimNode):
         self._resolved = False
         self._task: Optional[str] = None
         self.on_event("need_threshold_reached", self._on_need)
+        self.update_interval = update_interval
+        if update_interval:
+            scheduler = self._scheduler_system()
+            if scheduler:
+                scheduler.schedule(self, update_interval)
 
     def update(self, dt: float) -> None:
         transform = self._find_transform()
@@ -182,6 +188,15 @@ class AIBehaviorNode(SimNode):
         root = self._root()
         for child in self._walk(root):
             if isinstance(child, TimeSystem):
+                return child
+        return None
+
+    def _scheduler_system(self):
+        from systems.scheduler import SchedulerSystem
+
+        root = self._root()
+        for child in self._walk(root):
+            if isinstance(child, SchedulerSystem):
                 return child
         return None
 
