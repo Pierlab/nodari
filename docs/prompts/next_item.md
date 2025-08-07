@@ -1,0 +1,3 @@
+Ouvre tous les fichiers de checklist situés dans le dossier `docs/checklists` du projet. Pour chaque checklist, identifie en premier lieu les tâches marquées comme prioritaires (par exemple en priorité 1 ou « High priority ») et traite-les dans l’ordre. Réalise concrètement les actions mentionnées, modifie les fichiers du projet si nécessaire pour répondre à ces tâches, puis coche la case correspondante dans la checklist.
+
+À la fin de ton intervention, ecris dans la reponse une description claire et synthétique des actions effectuées et des modifications apportées. Assure-toi que toutes les modifications de code ou de documentation nécessaires ont été effectuées et sauvegardées.
