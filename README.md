@@ -11,6 +11,10 @@ deterministic simulations.
 
 The engine includes a `LoggingSystem` that prints selected events, offering a basic way to observe simulations from the console. A `DistanceSystem` computes distances between positioned nodes to support spatial reasoning.
 
+All map coordinates, distances and speeds in the simulation use meters as the
+base unit. Velocities are expressed in meters per second. Utility conversion
+helpers (kilometres, km/h, square kilometres…) live in `core/units.py`.
+
 ## Running the simulation
 
 After installing the dependencies, launch the Pygame-powered example farm:
