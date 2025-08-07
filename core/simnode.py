@@ -24,6 +24,11 @@ class SimNode:
         self.name = name or self.__class__.__name__
         self.parent = parent
         self.children: List[SimNode] = []
+        # Cached immutable view of ``children`` used for iteration without
+        # repeated list copying. Marked dirty whenever the children list
+        # changes.
+        self._iter_children: Tuple[SimNode, ...] = ()
+        self._children_dirty = False
         # Mapping of event name to list of (priority, handler)
         self._listeners: Dict[str, List[Tuple[int, EventHandler]]] = {}
         # When ``True`` the node is excluded from automatic updates and must
@@ -39,11 +44,13 @@ class SimNode:
         """Attach *node* as a child of this node."""
         node.parent = self
         self.children.append(node)
+        self._children_dirty = True
 
     def remove_child(self, node: "SimNode") -> None:
         """Remove *node* from children."""
         self.children.remove(node)
         node.parent = None
+        self._children_dirty = True
 
     # ------------------------------------------------------------------
     # Event bus
@@ -97,13 +104,13 @@ class SimNode:
             handler(origin or self, event_name, payload)
 
         if direction == "up":
-            for child in list(self.children):
+            for child in self._get_iter_children():
                 if child is not origin:
                     child.emit(event_name, payload, direction="down", origin=origin or self)
             if self.parent is not None:
                 self.parent.emit(event_name, payload, direction="up", origin=origin or self)
         elif direction == "down":
-            for child in list(self.children):
+            for child in self._get_iter_children():
                 if child is not origin:
                     child.emit(event_name, payload, direction="down", origin=origin or self)
 
@@ -132,7 +139,7 @@ class SimNode:
 
         prop_tasks: List[asyncio.Future] = []
         if direction == "up":
-            for child in list(self.children):
+            for child in self._get_iter_children():
                 if child is not origin:
                     prop_tasks.append(
                         child.emit_async(event_name, payload, direction="down", origin=origin or self)
@@ -142,7 +149,7 @@ class SimNode:
                     self.parent.emit_async(event_name, payload, direction="up", origin=origin or self)
                 )
         elif direction == "down":
-            for child in list(self.children):
+            for child in self._get_iter_children():
                 if child is not origin:
                     prop_tasks.append(
                         child.emit_async(event_name, payload, direction="down", origin=origin or self)
@@ -155,11 +162,26 @@ class SimNode:
     # ------------------------------------------------------------------
     def update(self, dt: float) -> None:
         """Update the node for a simulation tick."""
-        for child in list(self.children):
+        for child in self._get_iter_children():
             if getattr(child, "_manual_update", False):
                 # Scheduled nodes are updated externally and skipped here.
                 continue
             child.update(dt)
+
+    # Internal helpers -------------------------------------------------
+    def _get_iter_children(self) -> Tuple["SimNode", ...]:
+        """Return an up-to-date immutable view of ``children``.
+
+        The tuple is rebuilt only when the children list has changed, which
+        avoids repeatedly copying large lists during tight update or event
+        loops. Newly added or removed children therefore take effect on the
+        next iteration.
+        """
+
+        if self._children_dirty:
+            self._iter_children = tuple(self.children)
+            self._children_dirty = False
+        return self._iter_children
 
     def _serialize_value(self, value: Any) -> Any:
         """Serialise *value* supporting nested structures and node refs."""
@@ -176,7 +198,15 @@ class SimNode:
         state = {
             k: self._serialize_value(v)
             for k, v in self.__dict__.items()
-            if k not in {"name", "parent", "children", "_listeners"}
+            if k
+            not in {
+                "name",
+                "parent",
+                "children",
+                "_listeners",
+                "_iter_children",
+                "_children_dirty",
+            }
         }
         return {
             "name": self.name,
