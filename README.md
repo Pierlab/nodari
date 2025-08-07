@@ -15,6 +15,10 @@ All map coordinates, distances and speeds in the simulation use meters as the
 base unit. Velocities are expressed in meters per second. Utility conversion
 helpers (kilometres, km/h, square kilometres…) live in `core/units.py`.
 
+The example runner scales simulation time by a factor of 12 (one simulated day
+equals two real hours) so characters cover the roughly 100 m between houses at
+a walking pace.
+
 ## Running the simulation
 
 After installing the dependencies, launch the Pygame-powered example farm:
