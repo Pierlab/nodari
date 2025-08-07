@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
-EventHandler = Callable[["SimNode", str, Dict[str, Any]], None]
+EventHandler = Callable[["SimNode", str, Dict[str, Any]], Any]
 
 
 class SimNode:
@@ -100,19 +101,28 @@ class SimNode:
         """
 
         payload = payload or {}
+        payload.setdefault("timestamp", time.time())
         for _prio, handler in list(self._listeners.get(event_name, [])):
-            handler(origin or self, event_name, payload)
+            result = handler(origin or self, event_name, payload)
+            if result is False or payload.get("stop_propagation"):
+                return
 
+        if payload.get("stop_propagation"):
+            return
         if direction == "up":
             for child in self._get_iter_children():
                 if child is not origin:
                     child.emit(event_name, payload, direction="down", origin=origin or self)
+                    if payload.get("stop_propagation"):
+                        return
             if self.parent is not None:
                 self.parent.emit(event_name, payload, direction="up", origin=origin or self)
         elif direction == "down":
             for child in self._get_iter_children():
                 if child is not origin:
                     child.emit(event_name, payload, direction="down", origin=origin or self)
+                    if payload.get("stop_propagation"):
+                        return
 
     async def emit_async(
         self,
@@ -129,33 +139,31 @@ class SimNode:
         """
 
         payload = payload or {}
-        tasks: List[asyncio.Future] = []
+        payload.setdefault("timestamp", time.time())
         for _prio, handler in list(self._listeners.get(event_name, [])):
             result = handler(origin or self, event_name, payload)
             if inspect.isawaitable(result):
-                tasks.append(asyncio.ensure_future(result))
-        if tasks:
-            await asyncio.gather(*tasks)
+                result = await result
+            if result is False or payload.get("stop_propagation"):
+                return
 
-        prop_tasks: List[asyncio.Future] = []
+        if payload.get("stop_propagation"):
+            return
+
         if direction == "up":
             for child in self._get_iter_children():
                 if child is not origin:
-                    prop_tasks.append(
-                        child.emit_async(event_name, payload, direction="down", origin=origin or self)
-                    )
+                    await child.emit_async(event_name, payload, direction="down", origin=origin or self)
+                    if payload.get("stop_propagation"):
+                        return
             if self.parent is not None:
-                prop_tasks.append(
-                    self.parent.emit_async(event_name, payload, direction="up", origin=origin or self)
-                )
+                await self.parent.emit_async(event_name, payload, direction="up", origin=origin or self)
         elif direction == "down":
             for child in self._get_iter_children():
                 if child is not origin:
-                    prop_tasks.append(
-                        child.emit_async(event_name, payload, direction="down", origin=origin or self)
-                    )
-        if prop_tasks:
-            await asyncio.gather(*prop_tasks)
+                    await child.emit_async(event_name, payload, direction="down", origin=origin or self)
+                    if payload.get("stop_propagation"):
+                        return
 
     # ------------------------------------------------------------------
     # Simulation API

@@ -1,6 +1,6 @@
 # Checklist de nettoyage
 
-- [ ] Permettre d'arrêter la propagation d'un évènement et ajouter des horodatages.
+- [x] Permettre d'arrêter la propagation d'un évènement et ajouter des horodatages.
 - [ ] Utiliser `SchedulerSystem` pour planifier les mises à jour des nœuds lents (`NeedNode`, IA...).
 - [ ] Implémenter un `WeatherSystem` impactant la production et les comportements.
 - [ ] Refactorer `AIBehaviorNode` :
@@ -9,8 +9,8 @@
   - [ ] Résoudre les références lors du chargement.
   - [ ] Paramétrer durées, vitesses et seuils via la configuration.
   - [ ] Confier la cadence de mise à jour au `SchedulerSystem`.
-- [ ] Mettre en cache les distances ou introduire un index spatial.
-- [ ] Étendre `SimNode.serialize` pour inclure positions, inventaires et besoins.
+- [x] Mettre en cache les distances ou introduire un index spatial.
+- [x] Étendre `SimNode.serialize` pour inclure positions, inventaires et besoins.
 - [ ] Enrichir `EconomySystem` avec une économie dynamique.
 - [ ] Permettre la sérialisation complète et le rechargement de l'état du monde.
 - [ ] Créer des outils de création (templates, validation de schéma, éditeur graphique).
