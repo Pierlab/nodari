@@ -2,6 +2,16 @@
 
 Ce document décrit le déroulement de la simulation lorsque l'on exécute `run_farm.py`. Il met l'accent sur la structure des nœuds, les interactions et les flux de données qui permettent de faire évoluer le monde.
 
+## Lancement
+
+Après avoir préparé l'environnement (voir [Setup visualization environment](setup_visualization.md)) lancez la simulation :
+
+```bash
+python run_farm.py
+```
+
+Fermez la fenêtre ou utilisez `Ctrl+C` pour arrêter le programme.
+
 ## 1. Déroulement général
 
 1. **Chargement des plugins** : `run_farm.py` importe les modules nécessaires pour enregistrer toutes les classes de nœuds et de systèmes.
@@ -23,8 +33,7 @@ flowchart LR
 ## 2. Structure initiale du monde
 
 `example_farm.json` instancie une petite ferme composée de cinq maisons,
-de dix personnages, d'un puits, d'une ferme et d'un entrepôt. Les maisons sont espacées d'environ 100 m les unes des autres. Le schéma
-ci-dessous résume les nœuds principaux :
+de dix personnages, d'un puits, d'une ferme et d'un entrepôt. Les maisons sont espacées d'environ 100 m les unes des autres. Le schéma ci-dessous résume les nœuds principaux :
 
 ```
 WorldNode

@@ -1,5 +1,7 @@
 # Checklist de nettoyage
 
+Historique des améliorations techniques. Les tâches encore ouvertes sont aussi listées dans [todo.md](todo.md).
+
 - [x] Permettre d'arrêter la propagation d'un évènement et ajouter des horodatages.
 - [x] Utiliser `SchedulerSystem` pour planifier les mises à jour des nœuds lents (`NeedNode`, IA...).
 - [x] Implémenter un `WeatherSystem` impactant la production et les comportements.

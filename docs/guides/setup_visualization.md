@@ -10,13 +10,16 @@ Ce guide explique comment préparer un environnement Python pour exécuter la si
 
 ## 2. Installation automatique
 
-Executez les commandes suivantes à la racine du projet pour créer un environnement virtuel et installer les dépendances.
+Exécutez les commandes suivantes à la racine du projet pour créer un environnement virtuel et installer les dépendances.
 
 ```bash
-python -m venv .venv && \
-  source .venv/Scripts/activate && \
-  pip install --upgrade pip && \
-  pip install -r requirements.txt
+python -m venv .venv
+# Sous Linux/macOS
+source .venv/bin/activate
+# Sous Windows
+# .venv\Scripts\activate
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 Ces commandes peuvent être copiées/collées telles quelles : tout s'enchaîne automatiquement.
@@ -47,15 +50,14 @@ for _ in range(1000):
 PY
 ```
 
-Une fenêtre Pygame apparaît avec un affichage minimal des entités simulées.
+Une fenêtre Pygame apparaît avec un affichage minimal des entités simulées. Fermez la fenêtre ou utilisez `Ctrl+C` dans le terminal pour arrêter la simulation.
 
 ## 5. Pour aller plus loin
 
-Vous pouvez regrouper les commandes d'installation dans un script shell (`setup_env.sh`) et l'exécuter d'un seul coup :
+Vous pouvez regrouper les commandes d'installation dans un script shell (`setup_env.sh`) et l'exécuter d'un seul coup :
 
 ```bash
 bash setup_env.sh
 ```
 
 (adaptez le script à vos besoins pour automatiser la configuration sur vos machines).
-

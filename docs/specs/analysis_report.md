@@ -63,7 +63,7 @@ La plupart des fichiers Python sont concis. `AIBehaviorNode` constitue l'excepti
 - Étendre `WeatherSystem` pour impacter la production et les comportements.
 
 ## 5. Roadmap et tâches en attente
-Le fichier `project_spec.md` recense les jalons atteints et les étapes futures. Les tâches identifiées incluent :
+Le fichier [project_spec.md](project_spec.md) recense les jalons atteints et les étapes futures. Les tâches identifiées incluent :
 - Optimiser le scheduler pour les grandes simulations.
 - Créer des outils de création (templates, validation de schéma, éditeur de nœuds).
 - Enrichir la visualisation (zoom, caméra, mode web, 3D).

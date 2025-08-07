@@ -1,6 +1,6 @@
 Tu travailles sur le projet Nodari. Aujourd’hui, ta mission est d’ajouter **une nouvelle fonctionnalité** dans le moteur de simulation.
 
-1. Commence par **lire ou relire `project_spec.md`**, en particulier les sections suivantes :
+1. Commence par **lire ou relire [project_spec.md](../specs/project_spec.md)**, en particulier les sections suivantes :
    - L’architecture générale (SimNode, bus d’événements, plugins)
    - Les conventions de développement
    - La structure des fichiers
@@ -20,7 +20,7 @@ Tu travailles sur le projet Nodari. Aujourd’hui, ta mission est d’ajouter **
    - **Documentée** (docstring + exemple d’usage si besoin)
 
 4. Mets à jour :
-   - La **checklist de `project_spec.md`** pour y inscrire cette nouvelle fonctionnalité
+   - La **checklist de [project_spec.md](../specs/project_spec.md)** pour y inscrire cette nouvelle fonctionnalité
    - Le **README.md** si cette fonctionnalité est visible ou importante
 
 5. Commets les changements avec un message clair, du type :
