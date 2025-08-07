@@ -26,6 +26,9 @@ class SimNode:
         self.children: List[SimNode] = []
         # Mapping of event name to list of (priority, handler)
         self._listeners: Dict[str, List[Tuple[int, EventHandler]]] = {}
+        # When ``True`` the node is excluded from automatic updates and must
+        # be advanced manually (e.g. by a scheduler system).
+        self._manual_update = False
         if parent is not None:
             parent.add_child(self)
 
@@ -153,6 +156,9 @@ class SimNode:
     def update(self, dt: float) -> None:
         """Update the node for a simulation tick."""
         for child in list(self.children):
+            if getattr(child, "_manual_update", False):
+                # Scheduled nodes are updated externally and skipped here.
+                continue
             child.update(dt)
 
     def _serialize_value(self, value: Any) -> Any:
