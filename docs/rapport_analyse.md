@@ -21,13 +21,13 @@ Plusieurs systèmes héritent de `SystemNode` et appliquent des comportements gl
 | Système | Rôle | Notes |
 |--------|------|-------|
 | `TimeSystem` | Gère l'écoulement du temps et émet `tick`/`phase_changed`. | Durées paramétrables. |
-| `EconomySystem` | Traite les demandes d'achat entre nœuds. | Pas de fluctuation de prix. |
+| `EconomySystem` | Traite les demandes d'achat entre nœuds. | Prix dynamiques selon le stock. |
 | `DistanceSystem` | Calcule la distance euclidienne entre deux nœuds. | Met en cache les distances à chaque tick. |
 | `SchedulerSystem` | Planifie la mise à jour de nœuds à des cadences différentes. | Base d'un scheduler complet. |
 | `LoggingSystem` | Journalise les évènements. | Simple mais efficace. |
 | `PygameViewerSystem` | Affiche une vue 2D et des panneaux d'inventaire. | Zoom et outils possibles. |
+| `WeatherSystem` | Détermine la météo courante et émet `weather_changed`. | État aléatoire simple. |
 
-Le `WeatherSystem` mentionné dans la spécification n'est pas encore implémenté.
 
 ### 2.3 Nœuds génériques et composés
 La spécification définit plusieurs nœuds de base que le projet implémente :
@@ -48,7 +48,7 @@ La plupart des fichiers Python sont concis. `AIBehaviorNode` constitue l'excepti
 
 ### 4.1 Bus d'évènements et boucle de mise à jour
 - Le bus d'évènements gère l'arrêt de la propagation et ajoute un horodatage à chaque émission.
-- Utiliser `SchedulerSystem` pour réduire la fréquence de mise à jour des nœuds lents (`NeedNode`, IA...).
+- `SchedulerSystem` réduit la fréquence de mise à jour des nœuds lents (`NeedNode`, IA...).
 - Généraliser les caches immuables (ex. `_iter_children`) aux gestionnaires d'évènements.
 
 ### 4.2 Nœud `AIBehaviorNode`
@@ -56,19 +56,18 @@ La plupart des fichiers Python sont concis. `AIBehaviorNode` constitue l'excepti
 - Remplacer les horaires codés en dur par une machine à états ou un arbre de comportement.
 - Résoudre les références (`home`, `work`, etc.) lors du chargement pour éviter les recherches répétées.
 - Paramétrer les valeurs clés (durée de journée, vitesse de marche, seuils) via la configuration.
-- Confier la cadence de mise à jour au `SchedulerSystem`.
+- La cadence de mise à jour est désormais confiée au `SchedulerSystem`.
 
 ### 4.3 Autres pistes
-- Enrichir `EconomySystem` avec une économie dynamique.
-- Implémenter un `WeatherSystem` impactant la production et les comportements.
+- Approfondir `EconomySystem` avec marchés et évènements.
+- Étendre `WeatherSystem` pour impacter la production et les comportements.
 
 ## 5. Roadmap et tâches en attente
 Le fichier `project_spec.md` recense les jalons atteints et les étapes futures. Les tâches identifiées incluent :
 - Optimiser le scheduler pour les grandes simulations.
-- Permettre la sérialisation complète et le rechargement de l'état du monde.
 - Créer des outils de création (templates, validation de schéma, éditeur de nœuds).
 - Enrichir la visualisation (zoom, caméra, mode web, 3D).
-- Ajouter des mécaniques avancées (météo, animaux, quêtes, combat, économie dynamique, arbres de comportement).
+- Ajouter des mécaniques avancées (météo étendue, animaux, quêtes, combat, arbres de comportement).
 - Mettre en place un CI/benchmark avec alertes de régression et versionnage des plugins.
 - Développer la documentation, des tutoriels et une marketplace communautaire.
 
