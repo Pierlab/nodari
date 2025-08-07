@@ -6,6 +6,9 @@ See [project_spec.md](project_spec.md) for the full specification, architecture 
 
 An example configuration file `example_farm.json` demonstrates a minimal world setup loaded via the declarative loader.
 
+Configurations may include a `seed` in the `WorldNode` configuration to ensure
+deterministic simulations.
+
 The engine includes a `LoggingSystem` that prints selected events, offering a basic way to observe simulations from the console.
 
 ## Running the simulation
