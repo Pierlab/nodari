@@ -8,6 +8,7 @@ Ce document décrit le déroulement de la simulation lorsque l'on exécute `run_
 2. **Construction du monde** : `load_simulation_from_file("example_farm.json")` lit la configuration déclarative et instancie l'arbre de nœuds.
 3. **Liaison des producteurs** : chaque `ResourceProducerNode` est relié à l'inventaire présent au même niveau hiérarchique.
 4. **Boucle principale** : une boucle Pygame calcule `dt` et appelle `world.update(dt * TIME_SCALE)`.
+5. **Temps initial** : le `TimeSystem` démarre à 04:00 pour simuler le lever à 6h.
 
 ```mermaid
 flowchart LR
@@ -21,30 +22,29 @@ flowchart LR
 
 ## 2. Structure initiale du monde
 
-L'exemple `example_farm.json` décrit un monde minimal. Le schéma suivant résume les principaux nœuds :
+`example_farm.json` instancie une petite ferme composée de cinq maisons,
+de dix personnages, d'un puits, d'une ferme et d'un entrepôt. Le schéma
+ci-dessous résume les nœuds principaux :
 
 ```
 WorldNode
-├─ HouseNode house1
+├─ HouseNode house1..house5
 │  ├─ TransformNode
-│  └─ InventoryNode house1_inventory
-├─ HouseNode house2
+│  └─ InventoryNode house*_inventory
+├─ FarmNode farm
 │  ├─ TransformNode
-│  └─ InventoryNode house2_inventory
-├─ HouseNode house3
+│  ├─ InventoryNode farm_inventory
+│  └─ ResourceProducerNode farm_producer
+├─ WellNode well
 │  ├─ TransformNode
-│  └─ InventoryNode house3_inventory
-├─ FarmNode farm1
+│  ├─ InventoryNode well_inventory
+│  └─ ResourceProducerNode well_producer
+├─ WarehouseNode warehouse
 │  ├─ TransformNode
-│  ├─ InventoryNode farm1_inventory
-│  └─ ResourceProducerNode producer1
-├─ FarmNode farm2
+│  └─ InventoryNode warehouse_inventory
+├─ CharacterNode jean, marie, ... (10 au total)
 │  ├─ TransformNode
-│  ├─ InventoryNode farm2_inventory
-│  └─ ResourceProducerNode producer2
-├─ CharacterNode worker1/2/3
-│  ├─ TransformNode
-│  ├─ InventoryNode worker*_inventory
+│  ├─ InventoryNode *_inventory
 │  └─ AIBehaviorNode
 ├─ TimeSystem
 ├─ EconomySystem
@@ -93,7 +93,7 @@ Lorsqu'un nœud veut acheter un objet, il émet `buy_request` vers `EconomySyste
 
 ## 4. Visualisation et observabilité
 
-- `PygameViewerSystem` dessine chaque image en parcourant l'arbre de nœuds et en représentant les positions, inventaires et besoins.
+- `PygameViewerSystem` ouvre une fenêtre de 1200x720 pixels et dessine chaque image en parcourant l'arbre de nœuds en représentant les positions, inventaires et besoins.
 - `LoggingSystem` écrit les événements clés (`tick`, `resource_produced`, `inventory_changed`, `need_threshold_reached`, ...).
 
 ## 5. Évolution du monde

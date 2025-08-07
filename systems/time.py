@@ -8,13 +8,19 @@ from core.plugins import register_node_type
 class TimeSystem(SystemNode):
     """Emit a `tick` event based on elapsed time and track the day cycle."""
 
-    def __init__(self, tick_duration: float = 1.0, phase_length: int = 10, **kwargs) -> None:
+    def __init__(
+        self,
+        tick_duration: float = 1.0,
+        phase_length: int = 10,
+        start_time: float = 0.0,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self.tick_duration = tick_duration
         self.phase_length = phase_length
         self.current_tick = 0
         self.phase = 0
-        self.current_time = 0.0  # seconds since start of day
+        self.current_time = start_time  # seconds since start of day
         self._accumulator = 0.0
         self.day_length = 24 * 3600.0
 

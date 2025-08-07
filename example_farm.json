@@ -1,81 +1,132 @@
 {
   "world": {
     "type": "WorldNode",
-    "config": {"width": 100, "height": 100, "seed": 42},
+    "config": {"width": 240, "height": 144, "seed": 42},
     "children": [
-      {
-        "type": "HouseNode",
-        "id": "house1",
+      {"type": "HouseNode", "id": "house1",
         "children": [
-          {"type": "TransformNode", "config": {"position": [10, 10]}},
+          {"type": "TransformNode", "config": {"position": [20, 20]}},
           {"type": "InventoryNode", "id": "house1_inventory", "config": {"items": {}}}
         ]
       },
-      {
-        "type": "HouseNode",
-        "id": "house2",
+      {"type": "HouseNode", "id": "house2",
         "children": [
-          {"type": "TransformNode", "config": {"position": [20, 80]}},
+          {"type": "TransformNode", "config": {"position": [20, 120]}},
           {"type": "InventoryNode", "id": "house2_inventory", "config": {"items": {}}}
         ]
       },
-      {
-        "type": "HouseNode",
-        "id": "house3",
+      {"type": "HouseNode", "id": "house3",
         "children": [
-          {"type": "TransformNode", "config": {"position": [80, 20]}},
+          {"type": "TransformNode", "config": {"position": [120, 20]}},
           {"type": "InventoryNode", "id": "house3_inventory", "config": {"items": {}}}
         ]
       },
-      {
-        "type": "FarmNode",
-        "id": "farm1",
+      {"type": "HouseNode", "id": "house4",
         "children": [
-          {"type": "TransformNode", "config": {"position": [60, 60]}},
-          {"type": "InventoryNode", "id": "farm1_inventory", "config": {"items": {}}},
-          {"type": "ResourceProducerNode", "id": "producer1", "config": {"resource": "wheat", "rate_per_tick": 1}}
+          {"type": "TransformNode", "config": {"position": [220, 40]}},
+          {"type": "InventoryNode", "id": "house4_inventory", "config": {"items": {}}}
         ]
       },
-      {
-        "type": "FarmNode",
-        "id": "farm2",
+      {"type": "HouseNode", "id": "house5",
         "children": [
-          {"type": "TransformNode", "config": {"position": [80, 80]}},
-          {"type": "InventoryNode", "id": "farm2_inventory", "config": {"items": {}}},
-          {"type": "ResourceProducerNode", "id": "producer2", "config": {"resource": "wheat", "rate_per_tick": 1}}
+          {"type": "TransformNode", "config": {"position": [200, 120]}},
+          {"type": "InventoryNode", "id": "house5_inventory", "config": {"items": {}}}
         ]
       },
-      {
-        "type": "CharacterNode",
-        "id": "worker1",
+      {"type": "FarmNode", "id": "farm",
         "children": [
-          {"type": "TransformNode", "config": {"position": [10, 10]}},
-          {"type": "InventoryNode", "id": "worker1_inventory", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {"home": "house1", "work": "farm1", "home_inventory": "house1_inventory", "lunch_position": [50, 50], "speed": 0.05, "idle_chance": 0.2}}
+          {"type": "TransformNode", "config": {"position": [120, 80]}},
+          {"type": "InventoryNode", "id": "farm_inventory", "config": {"items": {}}},
+          {"type": "ResourceProducerNode", "id": "farm_producer", "config": {"resource": "wheat", "rate_per_tick": 1, "inputs": {"water": 1}, "auto": false}}
         ]
       },
-      {
-        "type": "CharacterNode",
-        "id": "worker2",
+      {"type": "WellNode", "id": "well",
         "children": [
-          {"type": "TransformNode", "config": {"position": [20, 80]}},
-          {"type": "InventoryNode", "id": "worker2_inventory", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {"home": "house2", "work": "farm2", "home_inventory": "house2_inventory", "lunch_position": [50, 50], "speed": 0.05, "idle_chance": 0.2}}
+          {"type": "TransformNode", "config": {"position": [40, 70]}},
+          {"type": "InventoryNode", "id": "well_inventory", "config": {"items": {"water": 0}}},
+          {"type": "ResourceProducerNode", "id": "well_producer", "config": {"resource": "water", "rate_per_tick": 1}}
         ]
       },
-      {
-        "type": "CharacterNode",
-        "id": "worker3",
+      {"type": "WarehouseNode", "id": "warehouse",
         "children": [
-          {"type": "TransformNode", "config": {"position": [80, 20]}},
-          {"type": "InventoryNode", "id": "worker3_inventory", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {"home": "house3", "work": "farm1", "home_inventory": "house3_inventory", "lunch_position": [50, 50], "speed": 0.05, "idle_chance": 0.2}}
+          {"type": "TransformNode", "config": {"position": [200, 70]}},
+          {"type": "InventoryNode", "id": "warehouse_inventory", "config": {"items": {}}}
         ]
       },
-      {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60}},
+      {"type": "CharacterNode", "id": "jean",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 20]}},
+          {"type": "InventoryNode", "id": "jean_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house1", "work": "farm", "home_inventory": "house1_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "marie",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 20]}},
+          {"type": "InventoryNode", "id": "marie_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house1", "work": "farm", "home_inventory": "house1_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "pierre",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 120]}},
+          {"type": "InventoryNode", "id": "pierre_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house2", "work": "farm", "home_inventory": "house2_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "julie",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 120]}},
+          {"type": "InventoryNode", "id": "julie_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house2", "work": "farm", "home_inventory": "house2_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "paul",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [120, 20]}},
+          {"type": "InventoryNode", "id": "paul_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house3", "work": "farm", "home_inventory": "house3_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "claire",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [120, 20]}},
+          {"type": "InventoryNode", "id": "claire_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house3", "work": "farm", "home_inventory": "house3_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "jacques",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [220, 40]}},
+          {"type": "InventoryNode", "id": "jacques_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house4", "work": "farm", "home_inventory": "house4_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "sophie",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [220, 40]}},
+          {"type": "InventoryNode", "id": "sophie_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house4", "work": "farm", "home_inventory": "house4_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "louis",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [200, 120]}},
+          {"type": "InventoryNode", "id": "louis_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house5", "work": "farm", "home_inventory": "house5_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "anne",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [200, 120]}},
+          {"type": "InventoryNode", "id": "anne_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"home": "house5", "work": "farm", "home_inventory": "house5_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 0.05, "idle_chance": 0.2}}
+        ]
+      },
+      {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60, "start_time": 14400}},
       {"type": "EconomySystem", "id": "economy"},
       {"type": "LoggingSystem", "id": "logger"},
-      {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 800, "height": 600, "scale": 5}}
+      {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 1200, "height": 720, "scale": 5}}
     ]
   }
 }
