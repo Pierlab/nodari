@@ -186,7 +186,7 @@ Steps must be completed in order, each with accompanying unit tests.
 #### Core Engine Enhancements
 - [x] Expand the event bus with priority levels and asynchronous dispatching. Handlers now accept a priority and asynchronous handlers are supported via ``emit_async``.
 - [x] Support serialising and reloading full world state for snapshots and debugging.
-- [ ] Provide a scheduling system to update nodes at different rates.
+- [x] Provide a scheduling system to update nodes at different rates (``SchedulerSystem`` allows manual update intervals).
 - [ ] Optimise the update loop for large simulations (profiling, micro-benchmarks).
 - [ ] Hot-reload node logic without restarting simulations.
 - [ ] State diffing and time-travel debugging for deterministic replay.
