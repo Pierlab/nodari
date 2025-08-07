@@ -59,7 +59,7 @@ This checklist gathers outstanding tasks from the project specification and main
 ## Documentation & Community
 - [x] **High** Expand [project_spec.md](../specs/project_spec.md) with concrete examples for every node and system type.
 - [x] **High** Write step-by-step tutorials and how-to guides.
-- [ ] **Medium** Publish contribution guidelines and a code of conduct.
+- [x] **Medium** Publish contribution guidelines and a code of conduct.
 - [ ] **Medium** Launch a documentation website with interactive examples and API reference.
 - [ ] **Low** Organise community challenges to create and share new scenarios.
 - [ ] **Low** Auto-generated API reference using Sphinx.

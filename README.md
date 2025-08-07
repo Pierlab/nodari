@@ -29,9 +29,10 @@ python run_farm.py
 
 ## Development
 
-* Python 3.9+
+* Python 3.11+
 * Install dependencies listed in `requirements.txt`
-* Run tests with `pytest`
+* Run checks with `flake8`, `mypy` and `pytest`
+* See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines and the [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## Roadmap and Tasks
 
