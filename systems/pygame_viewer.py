@@ -14,6 +14,8 @@ from nodes.transform import TransformNode
 from nodes.character import CharacterNode
 from nodes.farm import FarmNode
 from nodes.house import HouseNode
+from nodes.well import WellNode
+from nodes.warehouse import WarehouseNode
 from systems.time import TimeSystem
 
 
@@ -83,6 +85,10 @@ class PygameViewerSystem(SystemNode):
                     pygame.draw.rect(self.screen, (150, 100, 50), (*pos, 20, 20))
                 elif isinstance(parent, HouseNode):
                     pygame.draw.rect(self.screen, (50, 100, 200), (*pos, 20, 20))
+                elif isinstance(parent, WellNode):
+                    pygame.draw.circle(self.screen, (0, 100, 200), pos, 7)
+                elif isinstance(parent, WarehouseNode):
+                    pygame.draw.rect(self.screen, (150, 150, 150), (*pos, 20, 20))
                 else:
                     pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):

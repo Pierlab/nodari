@@ -24,6 +24,8 @@ load_plugins(
         "nodes.ai_behavior",
         "nodes.transform",
         "nodes.house",
+        "nodes.well",
+        "nodes.warehouse",
         "systems.time",
         "systems.economy",
         "systems.logger",
