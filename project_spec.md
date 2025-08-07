@@ -34,6 +34,7 @@ Global behaviours live in `SystemNode` subclasses which traverse the tree or lis
 - **TimeSystem** – manages time flow (ticks, day/night cycles, seasons) and emits `tick` and `phase_changed` events.
 - **EconomySystem** – listens to buy/sell events, transfers money and updates prices if necessary.
 - **WeatherSystem** – determines current weather, emits events like `rain_started` or `drought` and exposes state.
+- **DistanceSystem** – computes distances between nodes with positions and answers distance queries.
 
 ### 3.3 Generic Nodes
 For modelling the farm and inhabitants:
@@ -176,6 +177,7 @@ Steps must be completed in order, each with accompanying unit tests.
 - [x] Write integration tests for farmer working, eating and sleeping.
 - [x] Provide minimal rendering/logging to observe the simulation (LoggingSystem outputs events to console).
 - [x] Add Pygame-based visualization interface.
+- [x] Introduce `DistanceSystem` for distance calculations between nodes.
 - [x] Document architecture and nodes, update README.
 - [x] Implement seed-based reproducibility. The `WorldNode` accepts a `seed` to initialise the global RNG for deterministic runs.
 - [x] Prepare foundations for future plugins and scenarios.

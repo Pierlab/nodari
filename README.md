@@ -9,7 +9,7 @@ An example configuration file `example_farm.json` demonstrates a minimal world s
 Configurations may include a `seed` in the `WorldNode` configuration to ensure
 deterministic simulations.
 
-The engine includes a `LoggingSystem` that prints selected events, offering a basic way to observe simulations from the console.
+The engine includes a `LoggingSystem` that prints selected events, offering a basic way to observe simulations from the console. A `DistanceSystem` computes distances between positioned nodes to support spatial reasoning.
 
 ## Running the simulation
 

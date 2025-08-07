@@ -126,6 +126,7 @@
       {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60, "start_time": 14400}},
       {"type": "EconomySystem", "id": "economy"},
       {"type": "LoggingSystem", "id": "logger"},
+      {"type": "DistanceSystem", "id": "distance"},
       {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 1200, "height": 720, "scale": 5}}
     ]
   }
