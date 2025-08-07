@@ -155,11 +155,27 @@ class SimNode:
         for child in list(self.children):
             child.update(dt)
 
+    def _serialize_value(self, value: Any) -> Any:
+        """Serialise *value* supporting nested structures and node refs."""
+        if isinstance(value, SimNode):
+            return value.name
+        if isinstance(value, list):
+            return [self._serialize_value(v) for v in value]
+        if isinstance(value, dict):
+            return {k: self._serialize_value(v) for k, v in value.items()}
+        return value
+
     def serialize(self) -> Dict[str, Any]:
-        """Return a serialisable representation of this node."""
+        """Return a serialisable representation of this node with state."""
+        state = {
+            k: self._serialize_value(v)
+            for k, v in self.__dict__.items()
+            if k not in {"name", "parent", "children", "_listeners"}
+        }
         return {
             "name": self.name,
             "type": self.__class__.__name__,
+            "state": state,
             "children": [child.serialize() for child in self.children],
         }
 
