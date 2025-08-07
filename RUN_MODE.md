@@ -7,7 +7,7 @@ Ce document décrit le déroulement de la simulation lorsque l'on exécute `run_
 1. **Chargement des plugins** : `run_farm.py` importe les modules nécessaires pour enregistrer toutes les classes de nœuds et de systèmes.
 2. **Construction du monde** : `load_simulation_from_file("example_farm.json")` lit la configuration déclarative et instancie l'arbre de nœuds.
 3. **Liaison des producteurs** : chaque `ResourceProducerNode` est relié à l'inventaire présent au même niveau hiérarchique.
-4. **Boucle principale** : une boucle Pygame calcule `dt` et appelle `world.update(dt * TIME_SCALE)`.
+4. **Boucle principale** : une boucle Pygame calcule `dt` et appelle `world.update(dt * TIME_SCALE)` avec `TIME_SCALE = 12` (1 journée simulée = 2 heures réelles) afin que les personnages parcourent les ~100 m séparant les maisons à une allure de marche.
 5. **Temps initial** : le `TimeSystem` démarre à 04:00 pour simuler le lever à 6h.
 
 ```mermaid
@@ -23,7 +23,7 @@ flowchart LR
 ## 2. Structure initiale du monde
 
 `example_farm.json` instancie une petite ferme composée de cinq maisons,
-de dix personnages, d'un puits, d'une ferme et d'un entrepôt. Le schéma
+de dix personnages, d'un puits, d'une ferme et d'un entrepôt. Les maisons sont espacées d'environ 100 m les unes des autres. Le schéma
 ci-dessous résume les nœuds principaux :
 
 ```
@@ -100,7 +100,7 @@ Lorsqu'un nœud veut acheter un objet, il émet `buy_request` vers `EconomySyste
 
 À chaque itération de la boucle :
 
-1. Calcul de `dt` réel et mise à l'échelle (`TIME_SCALE`) pour accélérer le temps simulé.
+1. Calcul de `dt` réel et mise à l'échelle (`TIME_SCALE = 12`) pour accélérer le temps simulé tout en conservant une vitesse de marche pour des trajets d'environ 100 m.
 2. Appel à `world.update` qui propage l'`update` à tous les nœuds enfants.
 3. Les systèmes et nœuds réagissent selon leurs règles (production de ressources, satisfaction des besoins, transactions économiques, etc.).
 4. L'état est observé via la fenêtre Pygame et les logs.
