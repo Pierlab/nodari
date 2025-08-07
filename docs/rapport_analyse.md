@@ -13,9 +13,7 @@ Le fichier `README.md` rappelle l'usage du mètre et du mètre par seconde comme
 ## 2. Structure et conformité au cahier des charges
 
 ### 2.1 Arbre de nœuds et bus d'évènements
-La classe `SimNode` (`core/simnode.py`) forme le cœur de l'engine. Chaque nœud possède un parent et une liste d'enfants, et gère l'enregistrement de gestionnaires d'évènements via `on_event`/`off_event`. La méthode `emit` propage un évènement vers tous les enfants ainsi que vers le parent.
-
-Cette implémentation respecte la spécification mais ne permet pas encore d'arrêter la propagation ni d'associer un horodatage à chaque évènement pour le débogage.
+La classe `SimNode` (`core/simnode.py`) forme le cœur de l'engine. Chaque nœud possède un parent et une liste d'enfants, et gère l'enregistrement de gestionnaires d'évènements via `on_event`/`off_event`. La méthode `emit` propage un évènement vers tous les enfants ainsi que vers le parent et ajoute désormais un horodatage. Les gestionnaires peuvent retourner `False` ou renseigner `stop_propagation` dans le payload pour interrompre la diffusion.
 
 ### 2.2 Systèmes globaux
 Plusieurs systèmes héritent de `SystemNode` et appliquent des comportements globaux :
@@ -24,7 +22,7 @@ Plusieurs systèmes héritent de `SystemNode` et appliquent des comportements gl
 |--------|------|-------|
 | `TimeSystem` | Gère l'écoulement du temps et émet `tick`/`phase_changed`. | Durées paramétrables. |
 | `EconomySystem` | Traite les demandes d'achat entre nœuds. | Pas de fluctuation de prix. |
-| `DistanceSystem` | Calcule la distance euclidienne entre deux nœuds. | Conforme à la spécification. |
+| `DistanceSystem` | Calcule la distance euclidienne entre deux nœuds. | Met en cache les distances à chaque tick. |
 | `SchedulerSystem` | Planifie la mise à jour de nœuds à des cadences différentes. | Base d'un scheduler complet. |
 | `LoggingSystem` | Journalise les évènements. | Simple mais efficace. |
 | `PygameViewerSystem` | Affiche une vue 2D et des panneaux d'inventaire. | Zoom et outils possibles. |
@@ -41,6 +39,7 @@ La spécification définit plusieurs nœuds de base que le projet implémente :
 - `CharacterNode`, `FarmNode`, `WorldNode`, `HouseNode`, `WellNode`, `WarehouseNode` : nœuds composés servant de conteneurs.
 
 Le chargement déclaratif est assuré par `core/loader.py` via un registre global de classes (`register_node_type`, `get_node_type`).
+La méthode `serialize` de `SimNode` inclut désormais positions, inventaires et besoins dans l'état exporté.
 
 ## 3. Observations sur les fichiers
 La plupart des fichiers Python sont concis. `AIBehaviorNode` constitue l'exception principale et pourrait devenir une source de dette technique sans refactorisation.
@@ -48,7 +47,7 @@ La plupart des fichiers Python sont concis. `AIBehaviorNode` constitue l'excepti
 ## 4. Pistes d'optimisation et d'amélioration
 
 ### 4.1 Bus d'évènements et boucle de mise à jour
-- Autoriser l'arrêt de la propagation d'un évènement et ajouter des horodatages.
+- Le bus d'évènements gère l'arrêt de la propagation et ajoute un horodatage à chaque émission.
 - Utiliser `SchedulerSystem` pour réduire la fréquence de mise à jour des nœuds lents (`NeedNode`, IA...).
 - Généraliser les caches immuables (ex. `_iter_children`) aux gestionnaires d'évènements.
 
@@ -60,14 +59,12 @@ La plupart des fichiers Python sont concis. `AIBehaviorNode` constitue l'excepti
 - Confier la cadence de mise à jour au `SchedulerSystem`.
 
 ### 4.3 Autres pistes
-- Mettre en cache les distances ou utiliser un index spatial pour les requêtes massives.
-- Étendre `SimNode.serialize` pour inclure positions, inventaires et besoins.
 - Enrichir `EconomySystem` avec une économie dynamique.
 - Implémenter un `WeatherSystem` impactant la production et les comportements.
 
 ## 5. Roadmap et tâches en attente
 Le fichier `project_spec.md` recense les jalons atteints et les étapes futures. Les tâches identifiées incluent :
-- Améliorer le bus d'évènements et le scheduler pour les grandes simulations.
+- Optimiser le scheduler pour les grandes simulations.
 - Permettre la sérialisation complète et le rechargement de l'état du monde.
 - Créer des outils de création (templates, validation de schéma, éditeur de nœuds).
 - Enrichir la visualisation (zoom, caméra, mode web, 3D).

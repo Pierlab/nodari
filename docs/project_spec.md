@@ -34,7 +34,7 @@ Global behaviours live in `SystemNode` subclasses which traverse the tree or lis
 - **TimeSystem** – manages time flow (ticks, day/night cycles, seasons) and emits `tick` and `phase_changed` events.
 - **EconomySystem** – listens to buy/sell events, transfers money and updates prices if necessary.
 - **WeatherSystem** – determines current weather, emits events like `rain_started` or `drought` and exposes state.
-- **DistanceSystem** – computes distances between nodes with positions and answers distance queries in meters.
+- **DistanceSystem** – computes distances between nodes with positions, caches results each tick and answers distance queries in meters.
 
 ### 3.3 Generic Nodes
 For modelling the farm and inhabitants:
@@ -178,13 +178,14 @@ Steps must be completed in order, each with accompanying unit tests.
 - [x] Provide minimal rendering/logging to observe the simulation (LoggingSystem outputs events to console).
 - [x] Add Pygame-based visualization interface.
 - [x] Introduce `DistanceSystem` for distance calculations between nodes.
+- [x] Cache distance measurements for faster repeated queries.
 - [x] Document architecture and nodes, update README.
 - [x] Implement seed-based reproducibility. The `WorldNode` accepts a `seed` to initialise the global RNG for deterministic runs.
 - [x] Prepare foundations for future plugins and scenarios.
 
 ### 5.2 Upcoming
 #### Core Engine Enhancements
-- [x] Expand the event bus with priority levels and asynchronous dispatching. Handlers now accept a priority and asynchronous handlers are supported via ``emit_async``.
+- [x] Expand the event bus with priority levels, asynchronous dispatching, stoppable propagation and automatic event timestamps. Handlers now accept a priority and asynchronous handlers are supported via ``emit_async``.
 - [x] Support serialising and reloading full world state for snapshots and debugging.
 - [x] Provide a scheduling system to update nodes at different rates (``SchedulerSystem`` allows manual update intervals).
 - [x] Optimise the update loop for large simulations (profiling, micro-benchmarks).
