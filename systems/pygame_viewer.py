@@ -18,6 +18,14 @@ from nodes.well import WellNode
 from nodes.warehouse import WarehouseNode
 from systems.time import TimeSystem
 
+BUILDING_SIZES = {
+    FarmNode: (60, 40),
+    HouseNode: (40, 40),
+    WarehouseNode: (50, 30),
+}
+WELL_RADIUS = 10
+CHAR_RADIUS = 5
+
 
 class PygameViewerSystem(SystemNode):
     """Render simulation state using a simple Pygame window.
@@ -38,8 +46,9 @@ class PygameViewerSystem(SystemNode):
         pygame.init()
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption(self.name)
-        self.font = pygame.font.Font(None, 24)
+        self.font = pygame.font.Font(None, 16)
         self.scale = scale
+        self.panel_width = 200
 
     # ------------------------------------------------------------------
     # Helpers
@@ -80,30 +89,43 @@ class PygameViewerSystem(SystemNode):
                 x, y = node.position
                 pos = (int(x * self.scale), int(y * self.scale))
                 if isinstance(parent, CharacterNode):
-                    pygame.draw.circle(self.screen, (0, 200, 0), pos, 5)
+                    pygame.draw.circle(self.screen, (0, 200, 0), pos, CHAR_RADIUS)
                 elif isinstance(parent, FarmNode):
-                    pygame.draw.rect(self.screen, (150, 100, 50), (*pos, 20, 20))
+                    w, h = BUILDING_SIZES[FarmNode]
+                    rect = pygame.Rect(0, 0, w, h)
+                    rect.center = pos
+                    pygame.draw.rect(self.screen, (150, 100, 50), rect)
                 elif isinstance(parent, HouseNode):
-                    pygame.draw.rect(self.screen, (50, 100, 200), (*pos, 20, 20))
+                    w, h = BUILDING_SIZES[HouseNode]
+                    rect = pygame.Rect(0, 0, w, h)
+                    rect.center = pos
+                    pygame.draw.rect(self.screen, (50, 100, 200), rect)
                 elif isinstance(parent, WellNode):
-                    pygame.draw.circle(self.screen, (0, 100, 200), pos, 7)
+                    pygame.draw.circle(self.screen, (0, 100, 200), pos, WELL_RADIUS)
                 elif isinstance(parent, WarehouseNode):
-                    pygame.draw.rect(self.screen, (150, 150, 150), (*pos, 20, 20))
+                    w, h = BUILDING_SIZES[WarehouseNode]
+                    rect = pygame.Rect(0, 0, w, h)
+                    rect.center = pos
+                    pygame.draw.rect(self.screen, (150, 150, 150), rect)
                 else:
                     pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):
                 time_sys = node
+        panel_rect = pygame.Rect(
+            self.screen.get_width() - self.panel_width, 0, self.panel_width, self.screen.get_height()
+        )
+        pygame.draw.rect(self.screen, (20, 20, 20), panel_rect)
 
         for i, text in enumerate(lines):
             surf = self.font.render(text, True, (220, 220, 220))
-            self.screen.blit(surf, (10, 30 + i * 20))
+            self.screen.blit(surf, (panel_rect.x + 10, 30 + i * 18))
 
         if time_sys is not None:
             hours = int(time_sys.current_time // 3600) % 24
             minutes = int((time_sys.current_time % 3600) // 60)
             time_text = f"{hours:02d}:{minutes:02d}"
             surf = self.font.render(time_text, True, (220, 220, 220))
-            self.screen.blit(surf, (10, 10))
+            self.screen.blit(surf, (panel_rect.x + 10, 10))
 
         pygame.display.flip()
         super().update(dt)

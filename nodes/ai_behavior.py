@@ -12,6 +12,8 @@ from .need import NeedNode
 from .transform import TransformNode
 from systems.time import TimeSystem
 
+BASE_SPEED = 0.01
+
 
 class AIBehaviorNode(SimNode):
     """Very small behaviour for a farmer.
@@ -23,7 +25,8 @@ class AIBehaviorNode(SimNode):
     def __init__(
         self,
         target_inventory: Optional[InventoryNode] = None,
-        speed: float = 10.0,
+        speed: float = 5.0,
+        random_speed: float = 2.0,
         home: Optional[str | SimNode] = None,
         work: Optional[str | SimNode] = None,
         home_inventory: Optional[str | InventoryNode] = None,
@@ -39,7 +42,8 @@ class AIBehaviorNode(SimNode):
     ) -> None:
         super().__init__(**kwargs)
         self.target_inventory = target_inventory
-        self.speed = speed
+        self.speed = BASE_SPEED * speed
+        self.random_speed = BASE_SPEED * random_speed
         self.home = home
         self.work = work
         self.home_inventory = home_inventory
@@ -70,8 +74,8 @@ class AIBehaviorNode(SimNode):
                 self._handle_work(transform, target, dt)
         elif transform is not None:
             # fallback random walk
-            transform.position[0] += random.uniform(-1, 1) * self.speed * dt
-            transform.position[1] += random.uniform(-1, 1) * self.speed * dt
+            transform.position[0] += random.uniform(-1, 1) * self.random_speed * dt
+            transform.position[1] += random.uniform(-1, 1) * self.random_speed * dt
         super().update(dt)
 
     def _on_need(self, emitter: SimNode, event_name: str, payload) -> None:
@@ -329,7 +333,7 @@ class AIBehaviorNode(SimNode):
         if self._sleeping:
             transform.position[0], transform.position[1] = target[0], target[1]
             return
-        jitter = 0.5
+        jitter = self.random_speed * 25
         transform.position[0] = target[0] + random.uniform(-jitter, jitter)
         transform.position[1] = target[1] + random.uniform(-jitter, jitter)
 
