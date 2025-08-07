@@ -36,6 +36,18 @@ Global behaviours live in `SystemNode` subclasses which traverse the tree or lis
 - **WeatherSystem** – determines current weather, emits events like `rain_started` or `drought` and exposes state.
 - **DistanceSystem** – computes distances between nodes with positions, caches results each tick and answers distance queries in meters.
 
+Example usage:
+
+```python
+from core.simnode import SimNode
+from systems.time import TimeSystem
+from systems.weather import WeatherSystem
+
+root = SimNode("world")
+time = TimeSystem(parent=root)
+weather = WeatherSystem(parent=root)
+```
+
 ### 3.3 Generic Nodes
 For modelling the farm and inhabitants:
 - **InventoryNode** – manages a stock of resources. Allows add/remove/transfer and emits `inventory_changed`.
@@ -44,9 +56,35 @@ For modelling the farm and inhabitants:
 - **AIBehaviorNode** – decides actions based on internal state and events (`need_threshold_reached`, `phase_changed`, etc.).
 - **TransformNode** (optional) – stores position in meters and velocity in meters per second.
 
+Example usage:
+
+```python
+from nodes.inventory import InventoryNode
+from nodes.need import NeedNode
+from nodes.resource_producer import ResourceProducerNode
+from nodes.ai_behavior import AIBehaviorNode
+from nodes.transform import TransformNode
+
+inv = InventoryNode(items={"wheat": 10})
+hunger = NeedNode(need_name="hunger", threshold=50, increase_rate=1)
+producer = ResourceProducerNode(resource="wheat")
+ai = AIBehaviorNode()
+transform = TransformNode(position=[0, 0])
+```
+
 ### 3.4 Composed Nodes
 - **CharacterNode** – combines TransformNode, multiple NeedNodes, an InventoryNode and an AIBehaviorNode.
 - **FarmNode** – inventory of wheat, resource producer for wheat, fixed properties like position/size.
+
+Example:
+
+```python
+from nodes.character import CharacterNode
+from nodes.farm import FarmNode
+
+char = CharacterNode(name="farmer")
+farm = FarmNode(name="farm")
+```
 
 ### 3.5 Plugin Registry and Declarative Loader
 Node classes live in Python modules and are registered in a plugin registry so that nodes can be instantiated by name. A loader reads YAML/JSON files describing the tree (`type`, `config`, `children`). Example YAML:
