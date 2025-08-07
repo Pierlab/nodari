@@ -175,7 +175,8 @@ Steps must be completed in order, each with accompanying unit tests.
 - [x] Provide minimal rendering/logging to observe the simulation (LoggingSystem outputs events to console).
 - [x] Add Pygame-based visualization interface.
 - [x] Document architecture and nodes, update README.
-- [ ] Implement seed-based reproducibility (optional).
+- [x] Implement seed-based reproducibility (optional). The ``WorldNode``
+  accepts a ``seed`` to initialise the global RNG for deterministic runs.
 - [x] Prepare foundations for future plugins and scenarios.
 
 ## 6. Contribution Guidelines
