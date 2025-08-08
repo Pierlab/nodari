@@ -6,6 +6,8 @@ from typing import Iterator, List, Optional
 
 import pygame
 
+import config
+
 from core.simnode import SystemNode
 from core.plugins import register_node_type
 from nodes.inventory import InventoryNode
@@ -33,22 +35,36 @@ class PygameViewerSystem(SystemNode):
     Parameters
     ----------
     width, height:
-        Size of the Pygame window in pixels.
+        Size of the simulation area in pixels.
     scale:
         Scale applied to positions stored in :class:`TransformNode`s.
+    panel_width:
+        Width of the information panel appended to the right of the view.
+    font_size:
+        Font size used to render the panel text.
     """
 
-    def __init__(self, width: int = 640, height: int = 480, scale: float = 5.0, **kwargs) -> None:
+    def __init__(
+        self,
+        width: int = config.VIEW_WIDTH,
+        height: int = config.VIEW_HEIGHT,
+        scale: float = 5.0,
+        panel_width: int = config.PANEL_WIDTH,
+        font_size: int = config.FONT_SIZE,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         # Use dummy driver only when no display is available
         if "DISPLAY" not in os.environ and os.environ.get("SDL_VIDEODRIVER") is None:
             os.environ["SDL_VIDEODRIVER"] = "dummy"
         pygame.init()
-        self.screen = pygame.display.set_mode((width, height))
+        self.view_width = width
+        self.view_height = height
+        self.panel_width = panel_width
+        self.screen = pygame.display.set_mode((width + self.panel_width, height))
         pygame.display.set_caption(self.name)
-        self.font = pygame.font.Font(None, 16)
+        self.font = pygame.font.Font(None, font_size)
         self.scale = scale
-        self.panel_width = 200
 
     # ------------------------------------------------------------------
     # Helpers
@@ -79,11 +95,14 @@ class PygameViewerSystem(SystemNode):
 
         lines: List[str] = []
         time_sys: Optional[TimeSystem] = None
+        character_count = 0
         for node in self._walk(self._root()):
             if isinstance(node, InventoryNode):
                 lines.append(f"{node.name} inv: {node.items}")
             if isinstance(node, NeedNode):
                 lines.append(f"{node.need_name}: {node.value:.1f}/{node.threshold}")
+            if isinstance(node, CharacterNode):
+                character_count += 1
             if isinstance(node, TransformNode):
                 parent = node.parent
                 x, y = node.position
@@ -111,21 +130,22 @@ class PygameViewerSystem(SystemNode):
                     pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):
                 time_sys = node
-        panel_rect = pygame.Rect(
-            self.screen.get_width() - self.panel_width, 0, self.panel_width, self.screen.get_height()
-        )
-        pygame.draw.rect(self.screen, (20, 20, 20), panel_rect)
-
-        for i, text in enumerate(lines):
-            surf = self.font.render(text, True, (220, 220, 220))
-            self.screen.blit(surf, (panel_rect.x + 10, 30 + i * 18))
+        panel_rect = pygame.Rect(self.view_width, 0, self.panel_width, self.view_height)
+        pygame.draw.rect(self.screen, (50, 50, 50), panel_rect)
 
         if time_sys is not None:
             hours = int(time_sys.current_time // 3600) % 24
             minutes = int((time_sys.current_time % 3600) // 60)
             time_text = f"{hours:02d}:{minutes:02d}"
-            surf = self.font.render(time_text, True, (220, 220, 220))
-            self.screen.blit(surf, (panel_rect.x + 10, 10))
+            lines.insert(0, f"Phase: {time_sys.phase}")
+            lines.insert(0, f"Tick: {time_sys.current_tick}")
+            lines.insert(0, time_text)
+        lines.insert(0, f"Characters: {character_count}")
+
+        line_height = self.font.get_linesize()
+        for i, text in enumerate(lines):
+            surf = self.font.render(text, True, (255, 255, 255))
+            self.screen.blit(surf, (panel_rect.x + 10, 10 + i * line_height))
 
         pygame.display.flip()
         super().update(dt)

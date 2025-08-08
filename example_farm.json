@@ -123,11 +123,11 @@
           {"type": "AIBehaviorNode", "config": {"home": "house5", "work": "farm", "home_inventory": "house5_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "lunch_position": [120, 80], "speed": 5, "random_speed": 2, "idle_chance": 0.2}}
         ]
       },
-      {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60, "start_time": 14400}},
+      {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60}},
       {"type": "EconomySystem", "id": "economy"},
       {"type": "LoggingSystem", "id": "logger"},
       {"type": "DistanceSystem", "id": "distance"},
-      {"type": "PygameViewerSystem", "id": "viewer", "config": {"width": 1200, "height": 720, "scale": 5}}
+      {"type": "PygameViewerSystem", "id": "viewer", "config": {"scale": 5}}
     ]
   }
 }

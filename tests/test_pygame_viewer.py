@@ -13,7 +13,7 @@ def test_pygame_viewer_runs():
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     world = WorldNode(name="world")
     InventoryNode(name="inv", items={"wheat": 1}, parent=world)
-    viewer = PygameViewerSystem(parent=world, width=120, height=80)
+    viewer = PygameViewerSystem(parent=world, width=120, height=80, panel_width=30)
     world.update(0)
-    assert viewer.screen.get_size() == (120, 80)
+    assert viewer.screen.get_size() == (150, 80)
     pygame.quit()
