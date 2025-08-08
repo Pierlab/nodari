@@ -10,8 +10,6 @@ import config
 
 from core.simnode import SimNode, SystemNode
 from core.plugins import register_node_type
-from nodes.inventory import InventoryNode
-from nodes.need import NeedNode
 from nodes.transform import TransformNode
 from nodes.character import CharacterNode
 from nodes.farm import FarmNode
@@ -91,8 +89,8 @@ class PygameViewerSystem(SystemNode):
                 self.selected = self._node_at_pixel(event.pos)
 
     def _node_at_pixel(self, pos) -> Optional[SimNode]:
-        x = pos[0] / self.scale
-        y = pos[1] / self.scale
+        """Return the topmost node at the given pixel position."""
+        selected: Optional[SimNode] = None
         for node in self._walk(self._root()):
             for child in node.children:
                 if isinstance(child, TransformNode):
@@ -101,37 +99,43 @@ class PygameViewerSystem(SystemNode):
                     sx, sy = px * self.scale, py * self.scale
                     if isinstance(parent, CharacterNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= CHAR_RADIUS ** 2:
-                            return parent
+                            selected = parent
                     elif isinstance(parent, FarmNode):
                         w, h = BUILDING_SIZES[FarmNode]
                         rect = pygame.Rect(0, 0, w, h)
                         rect.center = (int(sx), int(sy))
                         if rect.collidepoint(pos):
-                            return parent
+                            selected = parent
                     elif isinstance(parent, HouseNode):
                         w, h = BUILDING_SIZES[HouseNode]
                         rect = pygame.Rect(0, 0, w, h)
                         rect.center = (int(sx), int(sy))
                         if rect.collidepoint(pos):
-                            return parent
+                            selected = parent
                     elif isinstance(parent, WellNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= WELL_RADIUS ** 2:
-                            return parent
+                            selected = parent
                     elif isinstance(parent, WarehouseNode):
                         w, h = BUILDING_SIZES[WarehouseNode]
                         rect = pygame.Rect(0, 0, w, h)
                         rect.center = (int(sx), int(sy))
                         if rect.collidepoint(pos):
-                            return parent
-        return None
+                            selected = parent
+        return selected
 
     def _info_lines(self, node: SimNode) -> List[str]:
+        """Return a list of human-readable attributes for ``node``."""
         lines: List[str] = [node.name]
+        for attr, value in vars(node).items():
+            if attr.startswith("_") or attr in {"parent", "children"}:
+                continue
+            lines.append(f"{attr}: {value}")
         for child in node.children:
-            if isinstance(child, InventoryNode):
-                lines.append(f"Inventory: {child.items}")
-            if isinstance(child, NeedNode):
-                lines.append(f"{child.need_name}: {child.value:.1f}/{child.threshold}")
+            lines.append(child.__class__.__name__ + ":")
+            for attr, value in vars(child).items():
+                if attr.startswith("_") or attr in {"parent", "children"}:
+                    continue
+                lines.append(f"  {attr}: {value}")
         return lines
 
     def update(self, dt: float) -> None:  # noqa: D401 - inherit docstring
@@ -156,22 +160,47 @@ class PygameViewerSystem(SystemNode):
                     rect = pygame.Rect(0, 0, w, h)
                     rect.center = pos
                     pygame.draw.rect(self.screen, (150, 100, 50), rect)
+                    name = self.font.render(parent.name, True, (255, 255, 255))
+                    name_rect = name.get_rect()
+                    name_rect.center = (pos[0], pos[1] + h // 2 + name_rect.height // 2 + 2)
+                    self.screen.blit(name, name_rect)
                 elif isinstance(parent, HouseNode):
                     w, h = BUILDING_SIZES[HouseNode]
                     rect = pygame.Rect(0, 0, w, h)
                     rect.center = pos
                     pygame.draw.rect(self.screen, (50, 100, 200), rect)
+                    name = self.font.render(parent.name, True, (255, 255, 255))
+                    name_rect = name.get_rect()
+                    name_rect.center = (pos[0], pos[1] + h // 2 + name_rect.height // 2 + 2)
+                    self.screen.blit(name, name_rect)
                 elif isinstance(parent, WellNode):
                     pygame.draw.circle(self.screen, (0, 100, 200), pos, WELL_RADIUS)
+                    name = self.font.render(parent.name, True, (255, 255, 255))
+                    name_rect = name.get_rect()
+                    name_rect.center = (pos[0], pos[1] + WELL_RADIUS + name_rect.height // 2 + 2)
+                    self.screen.blit(name, name_rect)
                 elif isinstance(parent, WarehouseNode):
                     w, h = BUILDING_SIZES[WarehouseNode]
                     rect = pygame.Rect(0, 0, w, h)
                     rect.center = pos
                     pygame.draw.rect(self.screen, (150, 150, 150), rect)
+                    name = self.font.render(parent.name, True, (255, 255, 255))
+                    name_rect = name.get_rect()
+                    name_rect.center = (pos[0], pos[1] + h // 2 + name_rect.height // 2 + 2)
+                    self.screen.blit(name, name_rect)
                 else:
                     pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):
                 time_sys = node
+
+        # draw a scale bar representing 100 meters
+        scale_length = int(100 * self.scale)
+        bar_y = self.view_height - 20
+        pygame.draw.line(self.screen, (255, 255, 255), (10, bar_y), (10 + scale_length, bar_y), 2)
+        label = self.font.render("100 m", True, (255, 255, 255))
+        label_rect = label.get_rect()
+        label_rect.center = (10 + scale_length / 2, bar_y + label_rect.height / 2 + 2)
+        self.screen.blit(label, label_rect)
 
         panel_rect = pygame.Rect(self.view_width, 0, self.panel_width, self.view_height)
         pygame.draw.rect(self.screen, (50, 50, 50), panel_rect)
