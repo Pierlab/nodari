@@ -7,6 +7,7 @@ import random
 from core.simnode import SimNode
 from core.plugins import register_node_type
 from core.units import kmh_to_mps
+import config
 from .inventory import InventoryNode
 from .transform import TransformNode
 from . import ai_utils
@@ -24,14 +25,16 @@ class AIBehaviorNode(SimNode):
     def __init__(
         self,
         target_inventory: Optional[InventoryNode] = None,
-        speed: float = 5.0,
-        random_speed: float = 2.0,
+        speed: float = config.CHARACTER_SPEED,
+        random_speed: float = config.CHARACTER_RANDOM_SPEED,
         home: Optional[str | SimNode] = None,
         work: Optional[str | SimNode] = None,
         home_inventory: Optional[str | InventoryNode] = None,
         work_inventory: Optional[str | InventoryNode] = None,
         well_inventory: Optional[str | InventoryNode] = None,
         warehouse_inventory: Optional[str | InventoryNode] = None,
+        field: Optional[str | SimNode] = None,
+        field_inventory: Optional[str | InventoryNode] = None,
         lunch_position: Optional[List[float]] = None,
         wage: float = 1.0,
         idle_chance: float = 0.1,
@@ -73,6 +76,8 @@ class AIBehaviorNode(SimNode):
         self.work_inventory = work_inventory
         self.well_inventory = well_inventory
         self.warehouse_inventory = warehouse_inventory
+        self.field = field
+        self.field_inventory = field_inventory
         self.lunch_position = lunch_position or [0.0, 0.0]
         self.wage = wage
         self.idle_chance = idle_chance
@@ -217,6 +222,12 @@ class AIBehaviorNode(SimNode):
             node = ai_utils.find_by_name(root, self.warehouse_inventory)
             if isinstance(node, InventoryNode):
                 self.warehouse_inventory = node
+        if isinstance(self.field, str):
+            self.field = ai_utils.find_by_name(root, self.field)
+        if isinstance(self.field_inventory, str):
+            node = ai_utils.find_by_name(root, self.field_inventory)
+            if isinstance(node, InventoryNode):
+                self.field_inventory = node
         self._resolved = True
 
 

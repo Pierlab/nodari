@@ -178,6 +178,10 @@ def determine_target(ai: "AIBehaviorNode") -> Optional[List[float]]:
             return get_position(ai.well_inventory.parent)
         if ai._task == "deliver_water":
             return get_position(ai.work if isinstance(ai.work, SimNode) else None)
+        if ai._task == "deliver_water_to_field" and isinstance(ai.field, SimNode):
+            return get_position(ai.field)
+        if ai._task == "deliver_wheat_to_farm":
+            return get_position(ai.work if isinstance(ai.work, SimNode) else None)
         if ai._task == "deliver_wheat" and isinstance(ai.warehouse_inventory, InventoryNode):
             return get_position(ai.warehouse_inventory.parent)
         return get_position(ai.work if isinstance(ai.work, SimNode) else None)
@@ -190,6 +194,10 @@ def determine_target(ai: "AIBehaviorNode") -> Optional[List[float]]:
         if ai._task == "fetch_water" and isinstance(ai.well_inventory, InventoryNode):
             return get_position(ai.well_inventory.parent)
         if ai._task == "deliver_water":
+            return get_position(ai.work if isinstance(ai.work, SimNode) else None)
+        if ai._task == "deliver_water_to_field" and isinstance(ai.field, SimNode):
+            return get_position(ai.field)
+        if ai._task == "deliver_wheat_to_farm":
             return get_position(ai.work if isinstance(ai.work, SimNode) else None)
         if ai._task == "deliver_wheat" and isinstance(ai.warehouse_inventory, InventoryNode):
             return get_position(ai.warehouse_inventory.parent)
@@ -211,6 +219,7 @@ def handle_work(ai: "AIBehaviorNode", transform: TransformNode, target: List[flo
     farm_inv = ai.work_inventory if isinstance(ai.work_inventory, InventoryNode) else None
     well_inv = ai.well_inventory if isinstance(ai.well_inventory, InventoryNode) else None
     warehouse_inv = ai.warehouse_inventory if isinstance(ai.warehouse_inventory, InventoryNode) else None
+    field_inv = ai.field_inventory if isinstance(ai.field_inventory, InventoryNode) else None
     producer = find_producer(ai.work if isinstance(ai.work, SimNode) else None)
     if not (work_start <= t < lunch or (lunch_end <= t < work_end and not ai._idle)):
         if inv:
@@ -230,6 +239,7 @@ def handle_work(ai: "AIBehaviorNode", transform: TransformNode, target: List[flo
     work_pos = get_position(ai.work if isinstance(ai.work, SimNode) else None)
     well_pos = get_position(well_inv.parent) if well_inv else None
     warehouse_pos = get_position(warehouse_inv.parent) if warehouse_inv else None
+    field_pos = get_position(ai.field if isinstance(ai.field, SimNode) else None)
 
     if ai._task == "fetch_water" and well_inv and well_pos and is_at_position(transform.position, well_pos):
         well_producer = find_producer(well_inv.parent)
@@ -248,6 +258,13 @@ def handle_work(ai: "AIBehaviorNode", transform: TransformNode, target: List[flo
                 inv.transfer_to(farm_inv, "water", amt)
         ai._task = None
 
+    if ai._task == "deliver_water_to_field" and field_pos and is_at_position(transform.position, field_pos):
+        if inv and field_inv:
+            amt = inv.items.get("water", 0)
+            if amt > 0:
+                inv.transfer_to(field_inv, "water", amt)
+        ai._task = None
+
     if ai._task == "deliver_wheat" and warehouse_pos and is_at_position(transform.position, warehouse_pos):
         if inv and warehouse_inv:
             amt = inv.items.get("wheat", 0)
@@ -255,11 +272,31 @@ def handle_work(ai: "AIBehaviorNode", transform: TransformNode, target: List[flo
                 inv.transfer_to(warehouse_inv, "wheat", amt)
         ai._task = None
 
+    if ai._task == "deliver_wheat_to_farm" and work_pos and is_at_position(transform.position, work_pos):
+        if inv and farm_inv:
+            amt = inv.items.get("wheat", 0)
+            if amt > 0:
+                inv.transfer_to(farm_inv, "wheat", amt)
+        ai._task = None
+
     if work_pos and is_at_position(transform.position, work_pos):
         if inv and farm_inv:
             if inv.items.get("water", 0) > 0:
                 amt = inv.items.get("water", 0)
                 inv.transfer_to(farm_inv, "water", amt)
+            if inv.items.get("wheat", 0) > 0:
+                amt = inv.items.get("wheat", 0)
+                inv.transfer_to(farm_inv, "wheat", amt)
+            if farm_inv.items.get("water", 0) > 0 and field_inv and field_inv.items.get("water", 0) < 1 and inv.items.get("water", 0) == 0:
+                qty = farm_inv.items.get("water", 0)
+                farm_inv.transfer_to(inv, "water", qty)
+                ai._task = "deliver_water_to_field"
+                return
+            if field_inv and field_inv.items.get("wheat", 0) > 0 and inv.items.get("wheat", 0) == 0:
+                qty = field_inv.items.get("wheat", 0)
+                field_inv.transfer_to(inv, "wheat", qty)
+                ai._task = "deliver_wheat_to_farm"
+                return
             if farm_inv.items.get("wheat", 0) >= ai.wheat_threshold and inv.items.get("wheat", 0) == 0 and warehouse_inv:
                 qty = farm_inv.items.get("wheat", 0)
                 farm_inv.transfer_to(inv, "wheat", qty)
@@ -276,5 +313,18 @@ def handle_work(ai: "AIBehaviorNode", transform: TransformNode, target: List[flo
             amount = int(ai._money_acc)
             ai._money_acc -= amount
             inv.add_item("money", amount)
+
+    if field_pos and is_at_position(transform.position, field_pos):
+        if ai._task == "deliver_water_to_field" and inv and field_inv:
+            amt = inv.items.get("water", 0)
+            if amt > 0:
+                inv.transfer_to(field_inv, "water", amt)
+            ai._task = None
+            return
+        if inv and field_inv and field_inv.items.get("wheat", 0) > 0 and inv.items.get("wheat", 0) == 0:
+            qty = field_inv.items.get("wheat", 0)
+            field_inv.transfer_to(inv, "wheat", qty)
+            ai._task = "deliver_wheat_to_farm"
+            return
 
 

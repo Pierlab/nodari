@@ -10,3 +10,7 @@ FONT_SIZE = 18
 FPS = 24
 TIME_SCALE = 60  # one simulated minute per real second
 START_TIME = 7 * 3600 + 30 * 60  # 07:30 in seconds
+
+# Character movement speeds in kilometres per hour
+CHARACTER_SPEED = 5.0
+CHARACTER_RANDOM_SPEED = 2.0
