@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import pygame
 
+import config
+
 from core.loader import load_simulation_from_file
 from core.plugins import load_plugins
 from nodes.ai_behavior import AIBehaviorNode
 from nodes.inventory import InventoryNode
 from nodes.resource_producer import ResourceProducerNode
 from systems.pygame_viewer import PygameViewerSystem
+from systems.time import TimeSystem
 
 
 # Charge tous les plugins nécessaires pour la simulation
@@ -65,9 +68,13 @@ _link_producers(world)
 if not any(isinstance(c, PygameViewerSystem) for c in world.children):
     PygameViewerSystem(parent=world)
 
+time_system = next((c for c in world.children if isinstance(c, TimeSystem)), None)
+if time_system is not None:
+    time_system.current_time = config.START_TIME
 
-FPS = 24
-TIME_SCALE = 86400 / 50  # 1 journée simulée = 2 heures réelles
+
+FPS = config.FPS
+TIME_SCALE = config.TIME_SCALE
 
 clock = pygame.time.Clock()
 

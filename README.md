@@ -15,9 +15,9 @@ All map coordinates, distances and speeds in the simulation use meters as the
 base unit. Velocities are expressed in meters per second. Utility conversion
 helpers (kilometres, km/h, square kilometres…) live in `core/units.py`.
 
-The example runner scales simulation time by a factor of 12 (one simulated day
-equals two real hours) so characters cover the roughly 100 m between houses at
-a walking pace.
+Runtime parameters such as time scaling, initial time and display sizes are
+centralised in `config.py`. By default the simulation advances one simulated
+minute per real second and starts at 07:30.
 
 ## Running the simulation
 
