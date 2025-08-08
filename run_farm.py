@@ -77,9 +77,19 @@ FPS = config.FPS
 TIME_SCALE = config.TIME_SCALE
 
 clock = pygame.time.Clock()
-
-while pygame.get_init():
+viewer = next((c for c in world.children if isinstance(c, PygameViewerSystem)), None)
+paused = False
+running = True
+while running and pygame.get_init():
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            paused = not paused
+    if viewer:
+        viewer.process_events(events)
     dt = clock.tick(FPS) / 1000.0
-    world.update(dt * TIME_SCALE)
+    world.update(0 if paused else dt * TIME_SCALE)
 
 pygame.quit()
