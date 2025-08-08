@@ -163,6 +163,7 @@ Steps must be completed in order, each with accompanying unit tests.
 
 #### 4.4 AIBehaviorNode
 - Attributes: behaviour parameters (e.g., need priorities).
+- Configurable daily schedule (wake, work, lunch and sleep hours).
 - `on_event` reacts to needs, time and production events.
 - `update` may emit regular commands.
 - Tests for reacting to a need threshold by eating, etc.

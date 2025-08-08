@@ -15,7 +15,7 @@ from systems.time import TimeSystem
 
 # Reference random speed used to scale idle jitter (2 km/h)
 _REF_RANDOM_SPEED = kmh_to_mps(2.0)
-_IDLE_JITTER_DISTANCE = 0.5  # meters when random_speed is 2 km/h
+_DEFAULT_IDLE_JITTER_DISTANCE = 0.5  # meters when random_speed is 2 km/h
 
 
 class AIBehaviorNode(SimNode):
@@ -39,6 +39,13 @@ class AIBehaviorNode(SimNode):
         lunch_position: Optional[List[float]] = None,
         wage: float = 1.0,
         idle_chance: float = 0.1,
+        wake_hour: float = 6.0,
+        work_start_hour: float = 8.0,
+        lunch_hour: float = 12.0,
+        lunch_end_hour: float = 14.0,
+        work_end_hour: float = 18.0,
+        sleep_hour: float = 22.0,
+        idle_jitter_distance: float = _DEFAULT_IDLE_JITTER_DISTANCE,
         water_per_fetch: int = 5,
         wheat_threshold: int = 20,
         update_interval: float | None = None,
@@ -56,6 +63,8 @@ class AIBehaviorNode(SimNode):
             Maximum random walk speed in kilometres per hour.
         home, work, ...:
             References to important nodes within the simulation tree.
+        wake_hour, work_start_hour, ...:
+            Daily schedule in hours since midnight controlling movement and work.
         """
         super().__init__(**kwargs)
         self.target_inventory = target_inventory
@@ -71,6 +80,14 @@ class AIBehaviorNode(SimNode):
         self.lunch_position = lunch_position or [0.0, 0.0]
         self.wage = wage
         self.idle_chance = idle_chance
+        # Convert daily schedule (hours) to seconds
+        self.wake_time = wake_hour * 3600
+        self.work_start_time = work_start_hour * 3600
+        self.lunch_time = lunch_hour * 3600
+        self.lunch_end_time = lunch_end_hour * 3600
+        self.work_end_time = work_end_hour * 3600
+        self.sleep_time = sleep_hour * 3600
+        self.idle_jitter_distance = idle_jitter_distance
         self.water_per_fetch = water_per_fetch
         self.wheat_threshold = wheat_threshold
         self._money_acc = 0.0
@@ -270,12 +287,12 @@ class AIBehaviorNode(SimNode):
         if time_sys is None:
             return None
         t = time_sys.current_time % 86400
-        wake = 6 * 3600
-        work_start = 8 * 3600
-        lunch = 12 * 3600
-        lunch_end = 14 * 3600
-        work_end = 18 * 3600
-        sleep = 22 * 3600
+        wake = self.wake_time
+        work_start = self.work_start_time
+        lunch = self.lunch_time
+        lunch_end = self.lunch_end_time
+        work_end = self.work_end_time
+        sleep = self.sleep_time
 
         if t < wake or t >= sleep:
             self._sleeping = True
@@ -334,10 +351,10 @@ class AIBehaviorNode(SimNode):
         if time_sys is None:
             return
         t = time_sys.current_time % 86400
-        work_start = 8 * 3600
-        lunch = 12 * 3600
-        lunch_end = 14 * 3600
-        work_end = 18 * 3600
+        work_start = self.work_start_time
+        lunch = self.lunch_time
+        lunch_end = self.lunch_end_time
+        work_end = self.work_end_time
         inv = self._find_inventory()
         farm_inv = self.work_inventory if isinstance(self.work_inventory, InventoryNode) else None
         well_inv = self.well_inventory if isinstance(self.well_inventory, InventoryNode) else None
@@ -417,7 +434,7 @@ class AIBehaviorNode(SimNode):
         if self._sleeping:
             transform.position[0], transform.position[1] = target[0], target[1]
             return
-        jitter = (self.random_speed / _REF_RANDOM_SPEED) * _IDLE_JITTER_DISTANCE
+        jitter = (self.random_speed / _REF_RANDOM_SPEED) * self.idle_jitter_distance
         transform.position[0] = target[0] + random.uniform(-jitter, jitter)
         transform.position[1] = target[1] + random.uniform(-jitter, jitter)
 
