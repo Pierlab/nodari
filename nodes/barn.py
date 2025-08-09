@@ -1,15 +1,15 @@
-"""Farm node composed of inventory and producer."""
+"""Barn node for housing animals."""
 from __future__ import annotations
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
 
 
-class FarmNode(SimNode):
-    """Represents the central farm with inventories and production."""
+class BarnNode(SimNode):
+    """Simple barn used to shelter animals and equipment."""
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
 
-register_node_type("FarmNode", FarmNode)
+register_node_type("BarnNode", BarnNode)
