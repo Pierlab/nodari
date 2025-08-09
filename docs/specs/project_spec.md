@@ -55,6 +55,7 @@ For modelling the farm and inhabitants:
 - **ResourceProducerNode** – produces a resource every tick consuming optional inputs. Emits `resource_produced`.
 - **AIBehaviorNode** – decides actions based on internal state and events (`need_threshold_reached`, `phase_changed`, etc.).
 - **TransformNode** (optional) – stores position in meters and velocity in meters per second.
+- **AnimalNode** – represents livestock or wildlife with needs and optional resource production. Emits events such as `animal_fed`.
 
 Example usage:
 
@@ -64,10 +65,12 @@ from nodes.need import NeedNode
 from nodes.resource_producer import ResourceProducerNode
 from nodes.ai_behavior import AIBehaviorNode
 from nodes.transform import TransformNode
+from nodes.animal import AnimalNode
 
 inv = InventoryNode(items={"wheat": 10})
 hunger = NeedNode(need_name="hunger", threshold=50, increase_rate=1)
 producer = ResourceProducerNode(resource="wheat")
+animal = AnimalNode(species="cow", hunger=hunger, producer=producer)
 ai = AIBehaviorNode()
 transform = TransformNode(position=[0, 0])
 ```
