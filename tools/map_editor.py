@@ -1,36 +1,20 @@
 import json
 import os
-
 import sys
-from dataclasses import dataclass
 from pathlib import Path
-
-from typing import List, Tuple
 
 import pygame
 
-
-# Allow running from the tools directory by ensuring the repository root is on
-# ``sys.path``.  This lets us import the shared configuration module even when
-# the editor is executed directly via ``python tools/map_editor.py``.
+# Ensure repository root on path so ``config`` can be imported when
+# executing the script from the ``tools`` directory.
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-try:  # pragma: no cover - import guard
-    import config  # type: ignore
-except Exception:  # pragma: no cover - config module is optional
-    # The `config` module is optional. Defaults below are used if it is missing.
-    pass
+import config
 
-
-# Use a dummy video driver only when running on a headless Linux system.
-# Windows and macOS typically do not define a ``DISPLAY`` environment
-# variable even though a graphical display is available. Previously the
-# editor would therefore force the SDL ``dummy`` driver on those platforms,
-# resulting in a non-interactive window where buildings could not be drawn.
-# Restricting the check to Linux prevents this unintended behaviour while
-# still allowing headless execution in continuous integration environments.
+# Allow headless execution (e.g. in CI) by falling back to the SDL
+# ``dummy`` video driver when a display is not available.
 if (
     sys.platform.startswith("linux")
     and "DISPLAY" not in os.environ
@@ -40,63 +24,17 @@ if (
 
 pygame.init()
 
-if "config" in locals():
-    SCALE = config.SCALE
-    WORLD_WIDTH = config.WORLD_WIDTH
-    WORLD_HEIGHT = config.WORLD_HEIGHT
-    PANEL_WIDTH = config.PANEL_WIDTH
-    FONT_SIZE = config.FONT_SIZE
-else:
-    SCALE = 5
-    WORLD_WIDTH = 240
-    WORLD_HEIGHT = 144
-    PANEL_WIDTH = 320
-    FONT_SIZE = 14
+SCALE = config.SCALE
+WORLD_WIDTH = config.WORLD_WIDTH
+WORLD_HEIGHT = config.WORLD_HEIGHT
+BUILDING_SIZE = 10  # in world units
 
-VIEW_WIDTH = WORLD_WIDTH * SCALE
-VIEW_HEIGHT = WORLD_HEIGHT * SCALE
-
-FONT = pygame.font.Font(None, FONT_SIZE)
-
-MIN_BUILDING_SIZE = 10
-HELP_MESSAGE = f"Click without dragging places a {MIN_BUILDING_SIZE}x{MIN_BUILDING_SIZE} building"
+COLOR_BG = (30, 30, 30)
+COLOR_BUILDING = (200, 180, 80)
 
 
-BUILDING_KEYS = {
-    pygame.K_1: ("HouseNode", (50, 100, 200)),
-    pygame.K_2: ("BarnNode", (139, 69, 19)),
-    pygame.K_3: ("FarmNode", (150, 100, 50)),
-    pygame.K_4: ("PastureNode", (34, 139, 34)),
-    pygame.K_5: ("SiloNode", (200, 200, 50)),
-    pygame.K_6: ("WarehouseNode", (150, 150, 150)),
-}
-
-
-BUILDING_COLORS = {v[0]: v[1] for v in BUILDING_KEYS.values()}
-
-
-default_type = "HouseNode"
-
-@dataclass
-class Building:
-    type: str
-    rect: pygame.Rect
-
-
-def draw_panel(screen, buildings, current_type):
-    panel_rect = pygame.Rect(VIEW_WIDTH, 0, PANEL_WIDTH, VIEW_HEIGHT)
-    pygame.draw.rect(screen, (50, 50, 50), panel_rect)
-    lines = [f"Current: {current_type}", HELP_MESSAGE, "Buildings:"]
-    for b in buildings:
-        w = b.rect.width / SCALE
-        h = b.rect.height / SCALE
-        lines.append(f"{b.type}: {w:.1f}x{h:.1f}")
-    for i, text in enumerate(lines):
-        surf = FONT.render(text, True, (255, 255, 255))
-        screen.blit(surf, (panel_rect.x + 10, 10 + i * FONT.get_linesize()))
-
-
-def export(buildings, path="custom_map.json"):
+def export(buildings, path="custom_map.json") -> None:
+    """Export buildings to ``path`` in the required JSON format."""
     data = {
         "world": {
             "type": "WorldNode",
@@ -104,18 +42,17 @@ def export(buildings, path="custom_map.json"):
             "children": [],
         }
     }
-    for i, b in enumerate(buildings, 1):
-        x = (b.rect.x + b.rect.width / 2) / SCALE
-        y = (b.rect.y + b.rect.height / 2) / SCALE
-        w = b.rect.width / SCALE
-        h = b.rect.height / SCALE
+    for i, rect in enumerate(buildings, 1):
+        cell_x = rect.x // SCALE
+        cell_y = rect.y // SCALE
         node = {
-            "type": b.type,
-            "id": f"{b.type.lower()}{i}",
-            "config": {"width": w, "height": h},
-            "children": [
-                {"type": "TransformNode", "config": {"position": [x, y]}}
-            ],
+            "type": "Building",
+            "id": f"building{i}",
+            "config": {
+                "position": [cell_x, cell_y],
+                "width": BUILDING_SIZE,
+                "height": BUILDING_SIZE,
+            },
         }
         data["world"]["children"].append(node)
     with open(path, "w", encoding="utf8") as fh:
@@ -123,68 +60,31 @@ def export(buildings, path="custom_map.json"):
     print(f"Exported {len(buildings)} buildings to {path}")
 
 
-def main(output_path: str = "custom_map.json"):
-    screen = pygame.display.set_mode((VIEW_WIDTH + PANEL_WIDTH, VIEW_HEIGHT))
+def main(output_path: str = "custom_map.json") -> None:
+    screen = pygame.display.set_mode((WORLD_WIDTH * SCALE, WORLD_HEIGHT * SCALE))
     pygame.display.set_caption("Map Editor")
+    clock = pygame.time.Clock()
+    buildings: list[pygame.Rect] = []
     running = True
-    buildings: List[Building] = []
-    current_type = default_type
-    start_pos: Tuple[int, int] | None = None
-    current_rect: pygame.Rect | None = None
-
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key in BUILDING_KEYS:
-                    current_type = BUILDING_KEYS[event.key][0]
-                elif event.key == pygame.K_e:
-                    export(buildings, output_path)
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.pos[0] < VIEW_WIDTH:
-                start_pos = event.pos
-                current_rect = pygame.Rect(start_pos, (0, 0))
-            elif event.type == pygame.MOUSEMOTION and start_pos and current_rect:
-                x, y = start_pos
-                w = event.pos[0] - x
-                h = event.pos[1] - y
-                current_rect.width = w
-                current_rect.height = h
-            elif event.type == pygame.MOUSEBUTTONUP and start_pos and current_rect:
-                rect = current_rect.copy()
-                if rect.width < 0:
-                    rect.x += rect.width
-                    rect.width = abs(rect.width)
-                if rect.height < 0:
-                    rect.y += rect.height
-                    rect.height = abs(rect.height)
-                if rect.width == 0 or rect.height == 0:
-                    rect.width = max(rect.width, MIN_BUILDING_SIZE)
-                    rect.height = max(rect.height, MIN_BUILDING_SIZE)
-                    print(
-                        f"Zero size detected; using minimum {MIN_BUILDING_SIZE}x{MIN_BUILDING_SIZE} building"
-                    )
-                buildings.append(Building(current_type, rect))
-                start_pos = None
-                current_rect = None
-
-        screen.fill((30, 30, 30))
-        for b in buildings:
-            pygame.draw.rect(
-                screen, BUILDING_COLORS.get(b.type, (255, 255, 255)), b.rect
-            )
-        if current_rect:
-            pygame.draw.rect(
-                screen, BUILDING_COLORS.get(current_type, (255, 255, 255)), current_rect, 1
-            )
-
-        draw_panel(screen, buildings, current_type)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                x, y = event.pos
+                size = BUILDING_SIZE * SCALE
+                rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
+                buildings.append(rect)
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                export(buildings, output_path)
+        screen.fill(COLOR_BG)
+        for rect in buildings:
+            pygame.draw.rect(screen, COLOR_BUILDING, rect)
         pygame.display.flip()
-
-    export(buildings, output_path)
+        clock.tick(60)
     pygame.quit()
 
 
 if __name__ == "__main__":
-    out_path = sys.argv[1] if len(sys.argv) > 1 else "custom_map.json"
-    main(out_path)
+    out = sys.argv[1] if len(sys.argv) > 1 else "custom_map.json"
+    main(out)
