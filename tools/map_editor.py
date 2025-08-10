@@ -55,6 +55,9 @@ FONT = pygame.font.Font(None, FONT_SIZE)
 PANEL_WIDTH = config.PANEL_WIDTH
 FONT = pygame.font.Font(None, config.FONT_SIZE)
 
+MIN_BUILDING_SIZE = 10
+HELP_MESSAGE = f"Click without dragging places a {MIN_BUILDING_SIZE}x{MIN_BUILDING_SIZE} building"
+
 
 BUILDING_KEYS = {
     pygame.K_1: ("HouseNode", (50, 100, 200)),
@@ -80,7 +83,7 @@ class Building:
 def draw_panel(screen, buildings, current_type):
     panel_rect = pygame.Rect(VIEW_WIDTH, 0, PANEL_WIDTH, VIEW_HEIGHT)
     pygame.draw.rect(screen, (50, 50, 50), panel_rect)
-    lines = [f"Current: {current_type}", "Buildings:"]
+    lines = [f"Current: {current_type}", HELP_MESSAGE, "Buildings:"]
     for b in buildings:
         w = b.rect.width / SCALE
         h = b.rect.height / SCALE
@@ -152,6 +155,12 @@ def main(output_path: str = "custom_map.json"):
                 if rect.height < 0:
                     rect.y += rect.height
                     rect.height = abs(rect.height)
+                if rect.width == 0 or rect.height == 0:
+                    rect.width = max(rect.width, MIN_BUILDING_SIZE)
+                    rect.height = max(rect.height, MIN_BUILDING_SIZE)
+                    print(
+                        f"Zero size detected; using minimum {MIN_BUILDING_SIZE}x{MIN_BUILDING_SIZE} building"
+                    )
                 buildings.append(Building(current_type, rect))
                 start_pos = None
                 current_rect = None
