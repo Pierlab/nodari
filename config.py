@@ -6,6 +6,11 @@ VIEW_HEIGHT = 720
 PANEL_WIDTH = 320
 FONT_SIZE = 14
 
+# Map editor defaults
+SCALE = 5
+WORLD_WIDTH = 240
+WORLD_HEIGHT = 144
+
 # Simulation timing
 FPS = 24
 TIME_SCALE = 600  # one simulated minute per real second

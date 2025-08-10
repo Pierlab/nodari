@@ -15,9 +15,9 @@ All map coordinates, distances and speeds in the simulation use meters as the
 base unit. Velocities are expressed in meters per second. Utility conversion
 helpers (kilometres, km/h, square kilometres…) live in `core/units.py`.
 
-Runtime parameters such as time scaling, initial time and display sizes are
-centralised in `config.py`. By default the simulation advances one simulated
-minute per real second and starts at 07:30.
+Runtime parameters such as time scaling, initial time, display sizes and map
+dimensions are centralised in `config.py`. By default the simulation advances
+one simulated minute per real second and starts at 07:30.
 
 ## Running the simulation
 
@@ -39,6 +39,8 @@ python tools/map_editor.py [output.json]
 Use the mouse to draw buildings and the number keys `1`–`6` to switch between
 building types. The current map is automatically exported when the window is
 closed, or you can press `E` to export manually to the chosen JSON file.
+The editor's pixel scale and world size can be adjusted via `SCALE`,
+`WORLD_WIDTH` and `WORLD_HEIGHT` in `config.py`.
 
 ## Development
 
