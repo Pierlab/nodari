@@ -1,8 +1,8 @@
 """Simple AI behaviour reacting to needs."""
 from __future__ import annotations
 
-from typing import Callable, Dict, List, Optional
-import random
+from typing import Any, Dict, List, Optional, Type
+import importlib
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
@@ -11,6 +11,7 @@ import config
 from .inventory import InventoryNode
 from .transform import TransformNode
 from . import ai_utils
+from .routines.base import BaseRoutine
 
 _DEFAULT_IDLE_JITTER_DISTANCE = 0.5  # meters when random_speed is 2 km/h
 
@@ -48,6 +49,7 @@ class AIBehaviorNode(SimNode):
         water_per_fetch: int = 5,
         wheat_threshold: int = 20,
         update_interval: float | None = None,
+        routine: str | Type[BaseRoutine] | None = None,
         **kwargs,
     ) -> None:
         """Create the AI behaviour.
@@ -98,12 +100,8 @@ class AIBehaviorNode(SimNode):
         self._task: Optional[str] = None
         # simple configurable state machine
         self.state: str = "idle"
-        self.state_handlers: Dict[str, Callable[[float, TransformNode], None]] = {
-            "idle": self._state_idle,
-            "moving": self._state_moving,
-            "working": self._state_working,
-        }
-        self.on_event("need_threshold_reached", self._on_need)
+        self.routine = self._load_routine(routine)
+        self.on_event("need_threshold_reached", self.routine.on_need)
         self.update_interval = update_interval
         if update_interval:
             scheduler = ai_utils.scheduler_system(self)
@@ -115,15 +113,7 @@ class AIBehaviorNode(SimNode):
         if transform is None:
             super().update(dt)
             return
-        if self.home or self.work:
-            self.resolve_references()
-            target = self.plan(transform)
-            self.navigate(transform, target, dt)
-            self.interact(transform, target, dt)
-        else:
-            # fallback random walk
-            transform.position[0] += random.uniform(-1, 1) * self.random_speed * dt
-            transform.position[1] += random.uniform(-1, 1) * self.random_speed * dt
+        self.routine.update(dt, transform)
         super().update(dt)
 
     # ------------------------------------------------------------------
@@ -135,65 +125,33 @@ class AIBehaviorNode(SimNode):
     def resolve_references(self) -> None:
         self._resolve_references()
 
-    # Planning / Navigation / Economic interactions --------------------
-    def plan(self, transform: TransformNode) -> Optional[List[float]]:
-        target = ai_utils.determine_target(self)
-        if target is None:
-            self.change_state("idle")
-        else:
-            self.change_state("moving")
-        return target
-
-    def navigate(self, transform: TransformNode, target: Optional[List[float]], dt: float) -> None:
-        if target is None:
-            return
-        ai_utils.move_towards(transform, target, self.speed, dt)
-        if ai_utils.is_at_position(transform.position, target):
-            ai_utils.apply_idle_jitter(
-                transform,
-                target,
-                self.random_speed,
-                self.idle_jitter_distance,
-                self._sleeping,
-            )
-            self.change_state("working")
-
-    def interact(self, transform: TransformNode, target: Optional[List[float]], dt: float) -> None:
-        if target is None:
-            return
-        handler = self.state_handlers.get(self.state)
-        if handler:
-            handler(dt, transform)
-
-    # State handlers ----------------------------------------------------
-    def _state_idle(self, dt: float, transform: TransformNode) -> None:  # pragma: no cover - trivial
-        pass
-
-    def _state_moving(self, dt: float, transform: TransformNode) -> None:  # pragma: no cover - handled in navigate
-        pass
-
-    def _state_working(self, dt: float, transform: TransformNode) -> None:
-        target = self._determine_target()
-        if target is not None:
-            self._handle_work(transform, target, dt)
-
-    def _on_need(self, emitter: SimNode, event_name: str, payload) -> None:
-        if payload.get("need") != "hunger":
-            return
-        my_inv = ai_utils.find_inventory(self.parent)
-        hunger = ai_utils.find_need(self.parent, "hunger")
-        if my_inv is None or hunger is None or self.target_inventory is None:
-            return
-        if self.target_inventory.items.get("wheat", 0) > 0:
-            self.target_inventory.transfer_to(my_inv, "wheat", 1)
-            hunger.satisfy(50)
-
     # Backward compatibility wrappers ---------------------------------
     def _determine_target(self) -> Optional[List[float]]:
-        return ai_utils.determine_target(self)
+        return self.routine._determine_target()
 
     def _handle_work(self, transform: TransformNode, target: List[float], dt: float) -> None:
-        ai_utils.handle_work(self, transform, target, dt)
+        self.routine._handle_work(transform, target, dt)
+
+    def serialize(self) -> Dict[str, Any]:
+        data = super().serialize()
+        cls = self.routine.__class__
+        data["state"]["routine"] = f"{cls.__module__}.{cls.__name__}"
+        return data
+
+    # ------------------------------------------------------------------
+    # Routine loading helper
+    # ------------------------------------------------------------------
+    def _load_routine(self, routine: str | Type[BaseRoutine] | None) -> BaseRoutine:
+        if routine is None:
+            from .routines.farmer import FarmerRoutine  # local import to avoid cycles
+            routine_cls: Type[BaseRoutine] = FarmerRoutine
+        elif isinstance(routine, str):
+            module_name, class_name = routine.rsplit(".", 1)
+            module = importlib.import_module(module_name)
+            routine_cls = getattr(module, class_name)
+        else:
+            routine_cls = routine
+        return routine_cls(self)
 
     # ------------------------------------------------------------------
     # Scheduling helpers

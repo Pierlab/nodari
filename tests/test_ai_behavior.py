@@ -5,6 +5,13 @@ from nodes.need import NeedNode
 from nodes.character import CharacterNode
 from nodes.transform import TransformNode
 from systems.time import TimeSystem
+from nodes.routines.base import BaseRoutine
+
+
+class DummyRoutine(BaseRoutine):
+    def update(self, dt, transform):
+        self.ai.change_state("custom")
+
 
 
 def test_ai_eats_when_hungry():
@@ -29,3 +36,22 @@ def test_ai_schedule_configurable():
     time.current_time = 5.5 * 3600
     ai._determine_target()
     assert ai._sleeping is False
+
+
+def test_ai_custom_routine_class():
+    world = SimNode()
+    char = CharacterNode(name="farmer", parent=world)
+    TransformNode(parent=char, position=[0.0, 0.0])
+    ai = AIBehaviorNode(parent=char, routine=DummyRoutine)
+    ai.update(1.0)
+    assert ai.state == "custom"
+
+
+def test_ai_custom_routine_path():
+    world = SimNode()
+    char = CharacterNode(name="farmer", parent=world)
+    TransformNode(parent=char, position=[0.0, 0.0])
+    path = "tests.test_ai_behavior.DummyRoutine"
+    ai = AIBehaviorNode(parent=char, routine=path)
+    ai.update(1.0)
+    assert ai.state == "custom"

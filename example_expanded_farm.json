@@ -54,7 +54,7 @@
         "children": [
           {"type": "TransformNode", "config": {"position": [10, 10]}},
           {"type": "InventoryNode", "id": "farmer_inventory", "config": {"items": {}}},
-          {"type": "AIBehaviorNode", "config": {"home": "farm", "work": "farm", "home_inventory": "farm_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "field": "farm", "field_inventory": "farm_inventory", "lunch_position": [50, 50], "idle_chance": 0.2}}
+          {"type": "AIBehaviorNode", "config": {"home": "farm", "work": "farm", "home_inventory": "farm_inventory", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "field": "farm", "field_inventory": "farm_inventory", "lunch_position": [50, 50], "idle_chance": 0.2, "routine": "nodes.routines.farmer.FarmerRoutine"}}
         ]
       }
     ]

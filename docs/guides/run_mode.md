@@ -94,7 +94,7 @@ sequenceDiagram
 ```
 
 - `NeedNode` augmente sa valeur et déclenche `need_threshold_reached` quand un seuil est atteint.
-- `AIBehaviorNode` écoute cet événement pour transférer des ressources depuis un inventaire cible et appelle `satisfy` sur le besoin.
+- `AIBehaviorNode` (via sa routine) écoute cet événement pour transférer des ressources depuis un inventaire cible et appelle `satisfy` sur le besoin.
 
 ### 3.3 Échanges économiques
 
