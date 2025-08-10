@@ -54,6 +54,16 @@ def export(buildings, path="custom_map.json") -> None:
         }
     }
     for i, (rect, btype) in enumerate(buildings, 1):
+        if rect.width <= 0 or rect.height <= 0:
+            raise ValueError(f"Building {i} has non-positive size")
+        if (
+            rect.x < 0
+            or rect.y < 0
+            or rect.right > WORLD_WIDTH * SCALE
+            or rect.bottom > WORLD_HEIGHT * SCALE
+        ):
+            raise ValueError(f"Building {i} is out of bounds")
+
         cell_x = rect.x // SCALE
         cell_y = rect.y // SCALE
         node: dict[str, Any] = {
