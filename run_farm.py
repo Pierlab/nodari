@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 import pygame
 
 import config
@@ -11,6 +13,8 @@ from core.plugins import load_plugins
 from nodes.ai_behavior import AIBehaviorNode
 from nodes.inventory import InventoryNode
 from nodes.resource_producer import ResourceProducerNode
+from nodes.character import CharacterNode
+from nodes.house import HouseNode
 from systems.pygame_viewer import PygameViewerSystem
 from systems.time import TimeSystem
 
@@ -53,7 +57,8 @@ def _find(node, name):
 
 
 # Charge la simulation depuis un fichier JSON/YAML
-world = load_simulation_from_file("example_farm.json")
+config_file = sys.argv[1] if len(sys.argv) > 1 else "example_farm.json"
+world = load_simulation_from_file(config_file)
 
 # Relie les producteurs de ressources à leur inventaire sibling
 
@@ -67,6 +72,30 @@ def _link_producers(node):
 
 
 _link_producers(world)
+
+
+def _walk(node):
+    yield node
+    for child in node.children:
+        yield from _walk(child)
+
+
+def _assign_houses(root):
+    houses = [n for n in _walk(root) if isinstance(n, HouseNode)]
+    characters = [n for n in _walk(root) if isinstance(n, CharacterNode)]
+    for i, char in enumerate(characters):
+        ai = next((c for c in char.children if isinstance(c, AIBehaviorNode)), None)
+        if ai is None:
+            continue
+        if ai.home is None and houses:
+            house = houses[i % len(houses)]
+            ai.home = house
+            inv = next((c for c in house.children if isinstance(c, InventoryNode)), None)
+            if ai.home_inventory is None and inv:
+                ai.home_inventory = inv
+
+
+_assign_houses(world)
 
 # Ajoute un système d'affichage si absent
 if not any(isinstance(c, PygameViewerSystem) for c in world.children):
