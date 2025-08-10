@@ -19,6 +19,8 @@ from nodes.character import CharacterNode
 from nodes.ai_behavior import AIBehaviorNode
 
 char = CharacterNode(name="farmer", parent=root)
+# by default the AI uses ``FarmerRoutine`` but any routine class can be
+# provided via the ``routine`` argument
 AIBehaviorNode(parent=char)
 ```
 

@@ -82,6 +82,10 @@ random seed used to make simulations deterministic.
 
 ## AIBehaviorNode
 
-Light‑weight behaviour controller for characters. It handles navigation,
-basic daily routines and interactions with inventories and needs such as
-fetching water or eating when hungry.
+Light‑weight behaviour controller for characters. The node delegates its
+logic to a pluggable *routine* class, allowing different behaviours to be
+swapped without modifying the core engine. The default
+`FarmerRoutine` handles navigation, daily schedules and interactions with
+inventories (fetching water, eating when hungry, delivering goods). Other
+routines can be referenced in configuration files via their dotted class
+path.
