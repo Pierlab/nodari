@@ -1,11 +1,14 @@
 import json
 import os
+
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+
 from typing import List, Tuple
 
 import pygame
+
 
 # Allow running from the tools directory by ensuring the repository root is on
 # ``sys.path``.  This lets us import the shared configuration module even when
@@ -22,6 +25,9 @@ except Exception:  # pragma: no cover - fall back to defaults
     PANEL_WIDTH = 320
     FONT_SIZE = 14
 
+import config
+
+
 # Use dummy driver if headless
 if "DISPLAY" not in os.environ and os.environ.get("SDL_VIDEODRIVER") is None:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -33,7 +39,12 @@ WORLD_WIDTH = 240
 WORLD_HEIGHT = 144
 VIEW_WIDTH = WORLD_WIDTH * SCALE
 VIEW_HEIGHT = WORLD_HEIGHT * SCALE
+
 FONT = pygame.font.Font(None, FONT_SIZE)
+=======
+PANEL_WIDTH = config.PANEL_WIDTH
+FONT = pygame.font.Font(None, config.FONT_SIZE)
+
 
 BUILDING_KEYS = {
     pygame.K_1: ("HouseNode", (50, 100, 200)),
@@ -44,7 +55,9 @@ BUILDING_KEYS = {
     pygame.K_6: ("WarehouseNode", (150, 150, 150)),
 }
 
+
 BUILDING_COLORS = {v[0]: v[1] for v in BUILDING_KEYS.values()}
+
 
 default_type = "HouseNode"
 
@@ -135,6 +148,7 @@ def main():
 
         screen.fill((30, 30, 30))
         for b in buildings:
+
             pygame.draw.rect(
                 screen, BUILDING_COLORS.get(b.type, (255, 255, 255)), b.rect
             )
@@ -142,6 +156,7 @@ def main():
             pygame.draw.rect(
                 screen, BUILDING_COLORS.get(current_type, (255, 255, 255)), current_rect, 1
             )
+
         draw_panel(screen, buildings, current_type)
         pygame.display.flip()
 
