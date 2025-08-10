@@ -1,11 +1,32 @@
 import json
 import os
+
+import sys
 from dataclasses import dataclass
+from pathlib import Path
+
 from typing import List, Tuple
 
 import pygame
 
+
+# Allow running from the tools directory by ensuring the repository root is on
+# ``sys.path``.  This lets us import the shared configuration module even when
+# the editor is executed directly via ``python tools/map_editor.py``.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:  # pragma: no cover - import guard
+    import config  # type: ignore
+    PANEL_WIDTH = getattr(config, "PANEL_WIDTH", 320)
+    FONT_SIZE = getattr(config, "FONT_SIZE", 14)
+except Exception:  # pragma: no cover - fall back to defaults
+    PANEL_WIDTH = 320
+    FONT_SIZE = 14
+
 import config
+
 
 # Use dummy driver if headless
 if "DISPLAY" not in os.environ and os.environ.get("SDL_VIDEODRIVER") is None:
@@ -18,8 +39,12 @@ WORLD_WIDTH = 240
 WORLD_HEIGHT = 144
 VIEW_WIDTH = WORLD_WIDTH * SCALE
 VIEW_HEIGHT = WORLD_HEIGHT * SCALE
+
+FONT = pygame.font.Font(None, FONT_SIZE)
+=======
 PANEL_WIDTH = config.PANEL_WIDTH
 FONT = pygame.font.Font(None, config.FONT_SIZE)
+
 
 BUILDING_KEYS = {
     pygame.K_1: ("HouseNode", (50, 100, 200)),
@@ -29,6 +54,10 @@ BUILDING_KEYS = {
     pygame.K_5: ("SiloNode", (200, 200, 50)),
     pygame.K_6: ("WarehouseNode", (150, 150, 150)),
 }
+
+
+BUILDING_COLORS = {v[0]: v[1] for v in BUILDING_KEYS.values()}
+
 
 default_type = "HouseNode"
 
@@ -119,11 +148,15 @@ def main():
 
         screen.fill((30, 30, 30))
         for b in buildings:
-            color = BUILDING_KEYS[[k for k, v in BUILDING_KEYS.items() if v[0] == b.type][0]][1]
-            pygame.draw.rect(screen, color, b.rect)
+
+            pygame.draw.rect(
+                screen, BUILDING_COLORS.get(b.type, (255, 255, 255)), b.rect
+            )
         if current_rect:
-            color = BUILDING_KEYS[[k for k, v in BUILDING_KEYS.items() if v[0] == current_type][0]][1]
-            pygame.draw.rect(screen, color, current_rect, 1)
+            pygame.draw.rect(
+                screen, BUILDING_COLORS.get(current_type, (255, 255, 255)), current_rect, 1
+            )
+
         draw_panel(screen, buildings, current_type)
         pygame.display.flip()
 
