@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 
 import pygame
@@ -17,6 +18,17 @@ from nodes.character import CharacterNode
 from nodes.house import HouseNode
 from systems.pygame_viewer import PygameViewerSystem
 from systems.time import TimeSystem
+
+
+# Ensure pygame can be used even when no display is available
+if "DISPLAY" not in os.environ and os.environ.get("SDL_VIDEODRIVER") is None:
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+try:
+    pygame.init()
+except pygame.error as exc:  # pragma: no cover - environment-specific
+    print(f"Unable to initialize pygame: {exc}")
+    sys.exit(1)
 
 
 # Charge tous les plugins nécessaires pour la simulation
