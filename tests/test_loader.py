@@ -34,6 +34,7 @@ def test_map_editor_export_types(tmp_path: Path):
     from nodes.warehouse import WarehouseNode
     from nodes.well import WellNode
     from nodes.transform import TransformNode  # noqa: F401
+    import config
 
     types = [
         ("HouseNode", HouseNode),
@@ -51,5 +52,7 @@ def test_map_editor_export_types(tmp_path: Path):
     export(buildings, path)
     root = load_simulation_from_file(str(path))
     assert isinstance(root, WorldNode)
-    for node, (_, cls) in zip(root.children, types):
+    for i, (node, (_, cls)) in enumerate(zip(root.children, types)):
         assert isinstance(node, cls)
+        expected_x = (i * 10) // config.SCALE
+        assert node.position == [expected_x, 0]

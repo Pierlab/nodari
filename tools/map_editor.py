@@ -57,6 +57,7 @@ def export(buildings, path="custom_map.json") -> None:
         node = {
             "type": btype,
             "id": f"building{i}",
+            "config": {"position": [cell_x, cell_y]},
             "children": [
                 {
                     "type": "TransformNode",
