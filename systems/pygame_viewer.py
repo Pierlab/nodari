@@ -129,13 +129,15 @@ class PygameViewerSystem(SystemNode):
         for attr, value in vars(node).items():
             if attr.startswith("_") or attr in {"parent", "children"}:
                 continue
-            lines.append(f"{attr}: {value}")
+            lines.append(f"{attr}:")
+            lines.append(f"  {value}")
         for child in node.children:
             lines.append(child.__class__.__name__ + ":")
             for attr, value in vars(child).items():
                 if attr.startswith("_") or attr in {"parent", "children"}:
                     continue
-                lines.append(f"  {attr}: {value}")
+                lines.append(f"  {attr}:")
+                lines.append(f"    {value}")
         return lines
 
     def update(self, dt: float) -> None:  # noqa: D401 - inherit docstring
