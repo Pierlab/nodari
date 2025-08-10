@@ -1,6 +1,8 @@
 import pygame
 from pathlib import Path
 
+import pytest
+
 from core.loader import load_simulation_from_file
 from tools.map_editor import export
 from nodes.world import WorldNode
@@ -34,3 +36,22 @@ def test_export_and_reload_buildings(tmp_path: Path) -> None:
         assert node.position == expected_pos
         assert node.width is None
         assert node.height is None
+
+
+def test_export_rejects_negative_coordinates(tmp_path: Path) -> None:
+    buildings = [(pygame.Rect(-10, 0, 10, 20), "HouseNode")]
+    with pytest.raises(ValueError):
+        export(buildings, tmp_path / "map.json")
+
+
+def test_export_rejects_out_of_bounds(tmp_path: Path) -> None:
+    out_x = config.WORLD_WIDTH * config.SCALE + 1
+    buildings = [(pygame.Rect(out_x, 0, 10, 20), "BarnNode")]
+    with pytest.raises(ValueError):
+        export(buildings, tmp_path / "map.json")
+
+
+def test_export_rejects_non_positive_size(tmp_path: Path) -> None:
+    buildings = [(pygame.Rect(0, 0, 0, 10), "HouseNode")]
+    with pytest.raises(ValueError):
+        export(buildings, tmp_path / "map.json")
