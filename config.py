@@ -3,8 +3,8 @@
 # Display settings
 VIEW_WIDTH = 1200
 VIEW_HEIGHT = 720
-PANEL_WIDTH = 220
-FONT_SIZE = 18
+PANEL_WIDTH = 320
+FONT_SIZE = 14
 
 # Simulation timing
 FPS = 24
