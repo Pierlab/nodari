@@ -117,7 +117,7 @@ def export(buildings, path="custom_map.json"):
     print(f"Exported {len(buildings)} buildings to {path}")
 
 
-def main():
+def main(output_path: str = "custom_map.json"):
     screen = pygame.display.set_mode((VIEW_WIDTH + PANEL_WIDTH, VIEW_HEIGHT))
     pygame.display.set_caption("Map Editor")
     running = True
@@ -134,7 +134,7 @@ def main():
                 if event.key in BUILDING_KEYS:
                     current_type = BUILDING_KEYS[event.key][0]
                 elif event.key == pygame.K_e:
-                    export(buildings)
+                    export(buildings, output_path)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.pos[0] < VIEW_WIDTH:
                 start_pos = event.pos
                 current_rect = pygame.Rect(start_pos, (0, 0))
@@ -158,7 +158,6 @@ def main():
 
         screen.fill((30, 30, 30))
         for b in buildings:
-
             pygame.draw.rect(
                 screen, BUILDING_COLORS.get(b.type, (255, 255, 255)), b.rect
             )
@@ -170,8 +169,10 @@ def main():
         draw_panel(screen, buildings, current_type)
         pygame.display.flip()
 
+    export(buildings, output_path)
     pygame.quit()
 
 
 if __name__ == "__main__":
-    main()
+    out_path = sys.argv[1] if len(sys.argv) > 1 else "custom_map.json"
+    main(out_path)
