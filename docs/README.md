@@ -19,3 +19,16 @@ This directory contains guides, specifications, checklists and prompts for the N
 - [Select a task](prompts/task_selection.md)
 
 Additional images live in the [images](images) folder.
+
+## Map editor key bindings
+
+The map editor (`tools/map_editor.py`) supports placing various building types. Use the number keys to select the current building:
+
+- `1` – `HouseNode` (default)
+- `2` – `BarnNode`
+- `3` – `SiloNode`
+- `4` – `PastureNode`
+- `5` – `WellNode`
+- `6` – `WarehouseNode`
+
+Press `E` to export the current map to JSON.

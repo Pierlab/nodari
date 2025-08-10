@@ -22,3 +22,34 @@ def test_load_json(tmp_path: Path):
     assert isinstance(root, WorldNode)
     assert isinstance(root.children[0], InventoryNode)
     assert root.children[0].items["wheat"] == 1
+
+
+def test_map_editor_export_types(tmp_path: Path):
+    import pygame
+    from tools.map_editor import export
+    from nodes.barn import BarnNode
+    from nodes.house import HouseNode
+    from nodes.pasture import PastureNode
+    from nodes.silo import SiloNode
+    from nodes.warehouse import WarehouseNode
+    from nodes.well import WellNode
+    from nodes.transform import TransformNode  # noqa: F401
+
+    types = [
+        ("HouseNode", HouseNode),
+        ("BarnNode", BarnNode),
+        ("SiloNode", SiloNode),
+        ("PastureNode", PastureNode),
+        ("WellNode", WellNode),
+        ("WarehouseNode", WarehouseNode),
+    ]
+    buildings = []
+    for i, (name, _) in enumerate(types):
+        rect = pygame.Rect(i * 10, 0, 10, 10)
+        buildings.append((rect, name))
+    path = tmp_path / "map.json"
+    export(buildings, path)
+    root = load_simulation_from_file(str(path))
+    assert isinstance(root, WorldNode)
+    for node, (_, cls) in zip(root.children, types):
+        assert isinstance(node, cls)
