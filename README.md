@@ -36,12 +36,31 @@ configuration files for new simulations. Launch it with:
 python tools/map_editor.py [output.json]
 ```
 
-Use the mouse to draw buildings and the number keys `1`–`6` to switch between
-building types. Right-click removes the topmost building under the cursor and
-`Z` undoes the most recent placement. The current map is automatically exported
-when the window is closed, or you can press `E` to export manually to the
-chosen JSON file. The editor's pixel scale and world size can be adjusted via
-`SCALE`, `WORLD_WIDTH` and `WORLD_HEIGHT` in `config.py`.
+Use the mouse to place buildings and the number keys `1`–`6` to switch between
+building types. Right‑click deletes the topmost building under the cursor and
+pressing `Z` undoes the most recent placement. Export the map at any time with
+`E` or simply close the window to write the chosen JSON file. The editor writes
+`WorldNode` JSON with each building entry containing its `type` and grid
+`position`. A minimal example looks like:
+
+```json
+{
+  "world": {
+    "type": "WorldNode",
+    "config": {"width": 100, "height": 100},
+    "children": [
+      {
+        "type": "BarnNode",
+        "id": "building1",
+        "config": {"position": [10, 20]}
+      }
+    ]
+  }
+}
+```
+
+The editor's pixel scale and world dimensions are controlled by `SCALE`,
+`WORLD_WIDTH` and `WORLD_HEIGHT` in `config.py`.
 
 ## Development
 
