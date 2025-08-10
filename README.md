@@ -27,6 +27,19 @@ After installing the dependencies, launch the Pygame-powered example farm:
 python run_farm.py
 ```
 
+## Map editor
+
+An interactive map editor is provided in `tools/map_editor.py` to create
+configuration files for new simulations. Launch it with:
+
+```
+python tools/map_editor.py [output.json]
+```
+
+Use the mouse to draw buildings and the number keys `1`–`6` to switch between
+building types. The current map is automatically exported when the window is
+closed, or you can press `E` to export manually to the chosen JSON file.
+
 ## Development
 
 * Python 3.11+
