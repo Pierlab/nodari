@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Tuple, Type
 
 import pygame
 
@@ -16,12 +16,26 @@ from nodes.farm import FarmNode
 from nodes.house import HouseNode
 from nodes.well import WellNode
 from nodes.warehouse import WarehouseNode
+from nodes.barn import BarnNode
+from nodes.silo import SiloNode
+from nodes.pasture import PastureNode
 from systems.time import TimeSystem
 
-BUILDING_SIZES = {
+DEFAULT_BUILDING_SIZES: dict[Type[SimNode], Tuple[int, int]] = {
     FarmNode: (60, 40),
     HouseNode: (40, 40),
     WarehouseNode: (50, 30),
+    BarnNode: (60, 30),
+    SiloNode: (20, 40),
+    PastureNode: (80, 80),
+}
+BUILDING_COLORS: dict[Type[SimNode], Tuple[int, int, int]] = {
+    FarmNode: (150, 100, 50),
+    HouseNode: (50, 100, 200),
+    WarehouseNode: (150, 150, 150),
+    BarnNode: (139, 69, 19),
+    SiloNode: (200, 200, 50),
+    PastureNode: (34, 139, 34),
 }
 WELL_RADIUS = 10
 CHAR_RADIUS = 5
@@ -100,28 +114,25 @@ class PygameViewerSystem(SystemNode):
                     if isinstance(parent, CharacterNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= CHAR_RADIUS ** 2:
                             selected = parent
-                    elif isinstance(parent, FarmNode):
-                        w, h = BUILDING_SIZES[FarmNode]
-                        rect = pygame.Rect(0, 0, w, h)
-                        rect.center = (int(sx), int(sy))
-                        if rect.collidepoint(pos):
-                            selected = parent
-                    elif isinstance(parent, HouseNode):
-                        w, h = BUILDING_SIZES[HouseNode]
-                        rect = pygame.Rect(0, 0, w, h)
-                        rect.center = (int(sx), int(sy))
-                        if rect.collidepoint(pos):
-                            selected = parent
                     elif isinstance(parent, WellNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= WELL_RADIUS ** 2:
                             selected = parent
-                    elif isinstance(parent, WarehouseNode):
-                        w, h = BUILDING_SIZES[WarehouseNode]
-                        rect = pygame.Rect(0, 0, w, h)
-                        rect.center = (int(sx), int(sy))
-                        if rect.collidepoint(pos):
-                            selected = parent
+                    else:
+                        rect = self._building_rect(parent)
+                        if rect is not None:
+                            rect.center = (int(sx), int(sy))
+                            if rect.collidepoint(pos):
+                                selected = parent
         return selected
+
+    def _building_rect(self, node: SimNode) -> Optional[pygame.Rect]:
+        if isinstance(node, (FarmNode, HouseNode, WarehouseNode, BarnNode, SiloNode, PastureNode)):
+            w = getattr(node, "width", None)
+            h = getattr(node, "height", None)
+            if w is None or h is None:
+                w, h = DEFAULT_BUILDING_SIZES.get(type(node), (0, 0))
+            return pygame.Rect(0, 0, int(w), int(h))
+        return None
 
     def _info_lines(self, node: SimNode) -> List[str]:
         """Return a list of human-readable attributes for ``node``."""
@@ -157,41 +168,24 @@ class PygameViewerSystem(SystemNode):
                 if isinstance(parent, CharacterNode):
                     color = (50, 150, 255) if getattr(parent, "gender", "male") == "male" else (255, 105, 180)
                     pygame.draw.circle(self.screen, color, pos, CHAR_RADIUS)
-                elif isinstance(parent, FarmNode):
-                    w, h = BUILDING_SIZES[FarmNode]
-                    rect = pygame.Rect(0, 0, w, h)
-                    rect.center = pos
-                    pygame.draw.rect(self.screen, (150, 100, 50), rect)
-                    name = self.font.render(parent.name, True, (255, 255, 255))
-                    name_rect = name.get_rect()
-                    name_rect.center = (pos[0], pos[1] + h // 2 + name_rect.height // 2 + 2)
-                    self.screen.blit(name, name_rect)
-                elif isinstance(parent, HouseNode):
-                    w, h = BUILDING_SIZES[HouseNode]
-                    rect = pygame.Rect(0, 0, w, h)
-                    rect.center = pos
-                    pygame.draw.rect(self.screen, (50, 100, 200), rect)
-                    name = self.font.render(parent.name, True, (255, 255, 255))
-                    name_rect = name.get_rect()
-                    name_rect.center = (pos[0], pos[1] + h // 2 + name_rect.height // 2 + 2)
-                    self.screen.blit(name, name_rect)
                 elif isinstance(parent, WellNode):
                     pygame.draw.circle(self.screen, (0, 100, 200), pos, WELL_RADIUS)
                     name = self.font.render(parent.name, True, (255, 255, 255))
                     name_rect = name.get_rect()
                     name_rect.center = (pos[0], pos[1] + WELL_RADIUS + name_rect.height // 2 + 2)
                     self.screen.blit(name, name_rect)
-                elif isinstance(parent, WarehouseNode):
-                    w, h = BUILDING_SIZES[WarehouseNode]
-                    rect = pygame.Rect(0, 0, w, h)
-                    rect.center = pos
-                    pygame.draw.rect(self.screen, (150, 150, 150), rect)
-                    name = self.font.render(parent.name, True, (255, 255, 255))
-                    name_rect = name.get_rect()
-                    name_rect.center = (pos[0], pos[1] + h // 2 + name_rect.height // 2 + 2)
-                    self.screen.blit(name, name_rect)
                 else:
-                    pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
+                    rect = self._building_rect(parent)
+                    if rect is not None:
+                        rect.center = pos
+                        color = BUILDING_COLORS.get(type(parent), (200, 200, 200))
+                        pygame.draw.rect(self.screen, color, rect)
+                        name = self.font.render(parent.name, True, (255, 255, 255))
+                        name_rect = name.get_rect()
+                        name_rect.center = (pos[0], pos[1] + rect.height // 2 + name_rect.height // 2 + 2)
+                        self.screen.blit(name, name_rect)
+                    else:
+                        pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):
                 time_sys = node
 

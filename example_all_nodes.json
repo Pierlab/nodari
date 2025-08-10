@@ -1,0 +1,69 @@
+{
+  "world": {
+    "type": "WorldNode",
+    "config": {"width": 240, "height": 144, "seed": 42},
+    "children": [
+      {"type": "HouseNode", "id": "house1", "config": {"width": 40, "height": 40},
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 20]}},
+          {"type": "InventoryNode", "id": "house1_inventory", "config": {"items": {}}}
+        ]
+      },
+      {"type": "BarnNode", "id": "barn", "config": {"width": 60, "height": 30},
+        "children": [
+          {"type": "TransformNode", "config": {"position": [80, 40]}},
+          {"type": "InventoryNode", "id": "barn_inventory", "config": {"items": {}}}
+        ]
+      },
+      {"type": "PastureNode", "id": "pasture", "config": {"width": 80, "height": 80},
+        "children": [
+          {"type": "TransformNode", "config": {"position": [120, 100]}},
+          {"type": "AnimalNode", "id": "cow1", "config": {"species": "cow"},
+            "children": [
+              {"type": "NeedNode", "config": {"need_name": "hunger", "threshold": 50, "increase_rate": 1}},
+              {"type": "ResourceProducerNode", "config": {"resource": "milk", "rate_per_tick": 1}}
+            ]
+          }
+        ]
+      },
+      {"type": "SiloNode", "id": "silo", "config": {"width": 20, "height": 40},
+        "children": [
+          {"type": "TransformNode", "config": {"position": [160, 40]}},
+          {"type": "InventoryNode", "id": "silo_inventory", "config": {"items": {}}}
+        ]
+      },
+      {"type": "FarmNode", "id": "farm", "config": {"width": 60, "height": 40},
+        "children": [
+          {"type": "TransformNode", "config": {"position": [120, 60]}},
+          {"type": "InventoryNode", "id": "farm_inventory", "config": {"items": {}}},
+          {"type": "ResourceProducerNode", "id": "field_producer", "config": {"resource": "wheat", "rate_per_tick": 1, "inputs": {"water": 1}}}
+        ]
+      },
+      {"type": "WellNode", "id": "well",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [40, 70]}},
+          {"type": "InventoryNode", "id": "well_inventory", "config": {"items": {"water": 0}}},
+          {"type": "ResourceProducerNode", "id": "well_producer", "config": {"resource": "water", "rate_per_tick": 1, "auto": false}}
+        ]
+      },
+      {"type": "WarehouseNode", "id": "warehouse", "config": {"width": 50, "height": 30},
+        "children": [
+          {"type": "TransformNode", "config": {"position": [200, 70]}},
+          {"type": "InventoryNode", "id": "warehouse_inventory", "config": {"items": {}}}
+        ]
+      },
+      {"type": "CharacterNode", "id": "jean",
+        "children": [
+          {"type": "TransformNode", "config": {"position": [20, 20]}},
+          {"type": "InventoryNode", "id": "jean_inventory", "config": {"items": {}}},
+          {"type": "AIBehaviorNode", "config": {"work": "farm", "work_inventory": "farm_inventory", "well_inventory": "well_inventory", "warehouse_inventory": "warehouse_inventory", "field": "farm", "field_inventory": "farm_inventory", "lunch_position": [120, 80], "routine": "nodes.routines.farmer.FarmerRoutine"}}
+        ]
+      },
+      {"type": "TimeSystem", "id": "time", "config": {"tick_duration": 60}},
+      {"type": "EconomySystem", "id": "economy"},
+      {"type": "LoggingSystem", "id": "logger"},
+      {"type": "DistanceSystem", "id": "distance"},
+      {"type": "PygameViewerSystem", "id": "viewer", "config": {"scale": 5}}
+    ]
+  }
+}
