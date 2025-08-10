@@ -19,13 +19,9 @@ if str(ROOT) not in sys.path:
 
 try:  # pragma: no cover - import guard
     import config  # type: ignore
-except Exception:  # pragma: no cover - fall back to defaults
-    class config:  # type: ignore
-        PANEL_WIDTH = 320
-        FONT_SIZE = 14
-        SCALE = 5
-        WORLD_WIDTH = 240
-        WORLD_HEIGHT = 144
+except Exception:  # pragma: no cover - config module is optional
+    # The `config` module is optional. Defaults below are used if it is missing.
+    pass
 
 
 # Use a dummy video driver only when running on a headless Linux system.
@@ -44,14 +40,23 @@ if (
 
 pygame.init()
 
-SCALE = config.SCALE
-WORLD_WIDTH = config.WORLD_WIDTH
-WORLD_HEIGHT = config.WORLD_HEIGHT
+if "config" in locals():
+    SCALE = config.SCALE
+    WORLD_WIDTH = config.WORLD_WIDTH
+    WORLD_HEIGHT = config.WORLD_HEIGHT
+    PANEL_WIDTH = config.PANEL_WIDTH
+    FONT_SIZE = config.FONT_SIZE
+else:
+    SCALE = 5
+    WORLD_WIDTH = 240
+    WORLD_HEIGHT = 144
+    PANEL_WIDTH = 320
+    FONT_SIZE = 14
+
 VIEW_WIDTH = WORLD_WIDTH * SCALE
 VIEW_HEIGHT = WORLD_HEIGHT * SCALE
 
-PANEL_WIDTH = config.PANEL_WIDTH
-FONT = pygame.font.Font(None, config.FONT_SIZE)
+FONT = pygame.font.Font(None, FONT_SIZE)
 
 MIN_BUILDING_SIZE = 10
 HELP_MESSAGE = f"Click without dragging places a {MIN_BUILDING_SIZE}x{MIN_BUILDING_SIZE} building"
