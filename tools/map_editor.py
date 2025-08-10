@@ -41,7 +41,7 @@ VIEW_WIDTH = WORLD_WIDTH * SCALE
 VIEW_HEIGHT = WORLD_HEIGHT * SCALE
 
 FONT = pygame.font.Font(None, FONT_SIZE)
-=======
+
 PANEL_WIDTH = config.PANEL_WIDTH
 FONT = pygame.font.Font(None, config.FONT_SIZE)
 
