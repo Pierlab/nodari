@@ -32,6 +32,15 @@ BUILDING_SIZE = 10  # in world units
 COLOR_BG = (30, 30, 30)
 COLOR_BUILDING = (200, 180, 80)
 
+KEY_TO_TYPE = {
+    pygame.K_1: "HouseNode",
+    pygame.K_2: "BarnNode",
+    pygame.K_3: "SiloNode",
+    pygame.K_4: "PastureNode",
+    pygame.K_5: "WellNode",
+    pygame.K_6: "WarehouseNode",
+}
+
 
 def export(buildings, path="custom_map.json") -> None:
     """Export buildings to ``path`` in the required JSON format."""
@@ -42,17 +51,18 @@ def export(buildings, path="custom_map.json") -> None:
             "children": [],
         }
     }
-    for i, rect in enumerate(buildings, 1):
+    for i, (rect, btype) in enumerate(buildings, 1):
         cell_x = rect.x // SCALE
         cell_y = rect.y // SCALE
         node = {
-            "type": "Building",
+            "type": btype,
             "id": f"building{i}",
-            "config": {
-                "position": [cell_x, cell_y],
-                "width": BUILDING_SIZE,
-                "height": BUILDING_SIZE,
-            },
+            "children": [
+                {
+                    "type": "TransformNode",
+                    "config": {"position": [cell_x, cell_y]},
+                }
+            ],
         }
         data["world"]["children"].append(node)
     with open(path, "w", encoding="utf8") as fh:
@@ -64,7 +74,8 @@ def main(output_path: str = "custom_map.json") -> None:
     screen = pygame.display.set_mode((WORLD_WIDTH * SCALE, WORLD_HEIGHT * SCALE))
     pygame.display.set_caption("Map Editor")
     clock = pygame.time.Clock()
-    buildings: list[pygame.Rect] = []
+    buildings: list[tuple[pygame.Rect, str]] = []
+    current_type = KEY_TO_TYPE[pygame.K_1]
     running = True
     while running:
         for event in pygame.event.get():
@@ -74,11 +85,14 @@ def main(output_path: str = "custom_map.json") -> None:
                 x, y = event.pos
                 size = BUILDING_SIZE * SCALE
                 rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
-                buildings.append(rect)
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                export(buildings, output_path)
+                buildings.append((rect, current_type))
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_e:
+                    export(buildings, output_path)
+                elif event.key in KEY_TO_TYPE:
+                    current_type = KEY_TO_TYPE[event.key]
         screen.fill(COLOR_BG)
-        for rect in buildings:
+        for rect, _ in buildings:
             pygame.draw.rect(screen, COLOR_BUILDING, rect)
         pygame.display.flip()
         clock.tick(60)
