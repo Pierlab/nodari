@@ -3,19 +3,19 @@
     "type": "WorldNode",
     "config": {"width": 240, "height": 144, "seed": 42},
     "children": [
-      {"type": "HouseNode", "id": "house1", "config": {"width": 40, "height": 40},
+      {"type": "HouseNode", "id": "house1", "config": {"width": 40, "height": 40, "position": [20, 20]},
         "children": [
           {"type": "TransformNode", "config": {"position": [20, 20]}},
           {"type": "InventoryNode", "id": "house1_inventory", "config": {"items": {}}}
         ]
       },
-      {"type": "BarnNode", "id": "barn", "config": {"width": 60, "height": 30},
+      {"type": "BarnNode", "id": "barn", "config": {"width": 60, "height": 30, "position": [80, 40]},
         "children": [
           {"type": "TransformNode", "config": {"position": [80, 40]}},
           {"type": "InventoryNode", "id": "barn_inventory", "config": {"items": {}}}
         ]
       },
-      {"type": "PastureNode", "id": "pasture", "config": {"width": 80, "height": 80},
+      {"type": "PastureNode", "id": "pasture", "config": {"width": 80, "height": 80, "position": [120, 100]},
         "children": [
           {"type": "TransformNode", "config": {"position": [120, 100]}},
           {"type": "AnimalNode", "id": "cow1", "config": {"species": "cow"},
@@ -26,7 +26,7 @@
           }
         ]
       },
-      {"type": "SiloNode", "id": "silo", "config": {"width": 20, "height": 40},
+      {"type": "SiloNode", "id": "silo", "config": {"width": 20, "height": 40, "position": [160, 40]},
         "children": [
           {"type": "TransformNode", "config": {"position": [160, 40]}},
           {"type": "InventoryNode", "id": "silo_inventory", "config": {"items": {}}}
@@ -39,14 +39,14 @@
           {"type": "ResourceProducerNode", "id": "field_producer", "config": {"resource": "wheat", "rate_per_tick": 1, "inputs": {"water": 1}}}
         ]
       },
-      {"type": "WellNode", "id": "well",
+      {"type": "WellNode", "id": "well", "config": {"position": [40, 70]},
         "children": [
           {"type": "TransformNode", "config": {"position": [40, 70]}},
           {"type": "InventoryNode", "id": "well_inventory", "config": {"items": {"water": 0}}},
           {"type": "ResourceProducerNode", "id": "well_producer", "config": {"resource": "water", "rate_per_tick": 1, "auto": false}}
         ]
       },
-      {"type": "WarehouseNode", "id": "warehouse", "config": {"width": 50, "height": 30},
+      {"type": "WarehouseNode", "id": "warehouse", "config": {"width": 50, "height": 30, "position": [200, 70]},
         "children": [
           {"type": "TransformNode", "config": {"position": [200, 70]}},
           {"type": "InventoryNode", "id": "warehouse_inventory", "config": {"items": {}}}

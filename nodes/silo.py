@@ -13,12 +13,14 @@ class SiloNode(SimNode):
         capacity: int | None = None,
         width: int | None = None,
         height: int | None = None,
+        position: list[int] | None = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.capacity = capacity
         self.width = width
         self.height = height
+        self.position = position or [0, 0]
 
 
 register_node_type("SiloNode", SiloNode)
