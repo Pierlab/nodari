@@ -19,13 +19,13 @@ if str(ROOT) not in sys.path:
 
 try:  # pragma: no cover - import guard
     import config  # type: ignore
-    PANEL_WIDTH = getattr(config, "PANEL_WIDTH", 320)
-    FONT_SIZE = getattr(config, "FONT_SIZE", 14)
 except Exception:  # pragma: no cover - fall back to defaults
-    PANEL_WIDTH = 320
-    FONT_SIZE = 14
-
-import config
+    class config:  # type: ignore
+        PANEL_WIDTH = 320
+        FONT_SIZE = 14
+        SCALE = 5
+        WORLD_WIDTH = 240
+        WORLD_HEIGHT = 144
 
 
 # Use a dummy video driver only when running on a headless Linux system.
@@ -44,13 +44,11 @@ if (
 
 pygame.init()
 
-SCALE = 5
-WORLD_WIDTH = 240
-WORLD_HEIGHT = 144
+SCALE = config.SCALE
+WORLD_WIDTH = config.WORLD_WIDTH
+WORLD_HEIGHT = config.WORLD_HEIGHT
 VIEW_WIDTH = WORLD_WIDTH * SCALE
 VIEW_HEIGHT = WORLD_HEIGHT * SCALE
-
-FONT = pygame.font.Font(None, FONT_SIZE)
 
 PANEL_WIDTH = config.PANEL_WIDTH
 FONT = pygame.font.Font(None, config.FONT_SIZE)
