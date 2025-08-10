@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import pygame
 
@@ -44,17 +45,18 @@ KEY_TO_TYPE = {
 
 def export(buildings, path="custom_map.json") -> None:
     """Export buildings to ``path`` in the required JSON format."""
-    data = {
+    children: list[dict[str, Any]] = []
+    data: dict[str, Any] = {
         "world": {
             "type": "WorldNode",
             "config": {"width": WORLD_WIDTH, "height": WORLD_HEIGHT},
-            "children": [],
+            "children": children,
         }
     }
     for i, (rect, btype) in enumerate(buildings, 1):
         cell_x = rect.x // SCALE
         cell_y = rect.y // SCALE
-        node = {
+        node: dict[str, Any] = {
             "type": btype,
             "id": f"building{i}",
             "config": {"position": [cell_x, cell_y]},
@@ -65,7 +67,7 @@ def export(buildings, path="custom_map.json") -> None:
                 }
             ],
         }
-        data["world"]["children"].append(node)
+        children.append(node)
     with open(path, "w", encoding="utf8") as fh:
         json.dump(data, fh, indent=2)
     print(f"Exported {len(buildings)} buildings to {path}")
@@ -82,14 +84,25 @@ def main(output_path: str = "custom_map.json") -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                x, y = event.pos
-                size = BUILDING_SIZE * SCALE
-                rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
-                buildings.append((rect, current_type))
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    x, y = event.pos
+                    size = BUILDING_SIZE * SCALE
+                    rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
+                    buildings.append((rect, current_type))
+                elif event.button == 3:
+                    x, y = event.pos
+                    for i in range(len(buildings) - 1, -1, -1):
+                        rect, _ = buildings[i]
+                        if rect.collidepoint(x, y):
+                            del buildings[i]
+                            break
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_e:
                     export(buildings, output_path)
+                elif event.key == pygame.K_z:
+                    if buildings:
+                        buildings.pop()
                 elif event.key in KEY_TO_TYPE:
                     current_type = KEY_TO_TYPE[event.key]
         screen.fill(COLOR_BG)

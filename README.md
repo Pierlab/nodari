@@ -37,10 +37,11 @@ python tools/map_editor.py [output.json]
 ```
 
 Use the mouse to draw buildings and the number keys `1`–`6` to switch between
-building types. The current map is automatically exported when the window is
-closed, or you can press `E` to export manually to the chosen JSON file.
-The editor's pixel scale and world size can be adjusted via `SCALE`,
-`WORLD_WIDTH` and `WORLD_HEIGHT` in `config.py`.
+building types. Right-click removes the topmost building under the cursor and
+`Z` undoes the most recent placement. The current map is automatically exported
+when the window is closed, or you can press `E` to export manually to the
+chosen JSON file. The editor's pixel scale and world size can be adjusted via
+`SCALE`, `WORLD_WIDTH` and `WORLD_HEIGHT` in `config.py`.
 
 ## Development
 
