@@ -28,8 +28,18 @@ except Exception:  # pragma: no cover - fall back to defaults
 import config
 
 
-# Use dummy driver if headless
-if "DISPLAY" not in os.environ and os.environ.get("SDL_VIDEODRIVER") is None:
+# Use a dummy video driver only when running on a headless Linux system.
+# Windows and macOS typically do not define a ``DISPLAY`` environment
+# variable even though a graphical display is available. Previously the
+# editor would therefore force the SDL ``dummy`` driver on those platforms,
+# resulting in a non-interactive window where buildings could not be drawn.
+# Restricting the check to Linux prevents this unintended behaviour while
+# still allowing headless execution in continuous integration environments.
+if (
+    sys.platform.startswith("linux")
+    and "DISPLAY" not in os.environ
+    and os.environ.get("SDL_VIDEODRIVER") is None
+):
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 pygame.init()
