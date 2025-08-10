@@ -49,6 +49,8 @@ The editor's pixel scale and world size can be adjusted via `SCALE`,
 * Run checks with `flake8`, `mypy` and `pytest`
 * See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines and the [Code of Conduct](CODE_OF_CONDUCT.md)
 
+Continuous integration is currently disabled, so run all checks locally.
+
 ## Roadmap and Tasks
 
 Project objectives, completed milestones and remaining tasks are tracked in [project_spec.md](docs/specs/project_spec.md). A high-level view of upcoming features also appears in [TODO.md](docs/checklists/todo.md).
