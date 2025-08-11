@@ -6,6 +6,8 @@ Project objectives, current progress and the complete roadmap live in [project_s
 
 An example configuration file `example_farm.json` demonstrates a minimal world setup loaded via the declarative loader.
 
+Configurations are validated against a schema to catch structural errors early and ensure community scenarios remain consistent.
+
 Configurations may include a `seed` in the `WorldNode` configuration to ensure
 deterministic simulations.
 
