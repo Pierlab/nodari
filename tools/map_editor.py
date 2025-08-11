@@ -30,6 +30,7 @@ BUILDING_SIZE = 10  # in world units
 
 COLOR_BG = (30, 30, 30)
 COLOR_BUILDING = (200, 180, 80)
+COLOR_GRID = (50, 50, 50)
 
 KEY_TO_TYPE = {
     pygame.K_1: "HouseNode",
@@ -97,6 +98,10 @@ def main(output_path: str = "custom_map.json") -> None:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = event.pos
+                    # Snap the position to the nearest grid cell so that buildings
+                    # are always aligned to the map scale.
+                    x = round(x / SCALE) * SCALE
+                    y = round(y / SCALE) * SCALE
                     size = BUILDING_SIZE * SCALE
                     rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
                     buildings.append((rect, current_type))
@@ -116,8 +121,18 @@ def main(output_path: str = "custom_map.json") -> None:
                 elif event.key in KEY_TO_TYPE:
                     current_type = KEY_TO_TYPE[event.key]
         screen.fill(COLOR_BG)
+
+        # Draw a grid to help users place buildings aligned with the scale.
+        for gx in range(0, WORLD_WIDTH * SCALE, SCALE):
+            pygame.draw.line(screen, COLOR_GRID, (gx, 0), (gx, WORLD_HEIGHT * SCALE))
+        for gy in range(0, WORLD_HEIGHT * SCALE, SCALE):
+            pygame.draw.line(
+                screen, COLOR_GRID, (0, gy), (WORLD_WIDTH * SCALE, gy)
+            )
+
         for rect, _ in buildings:
             pygame.draw.rect(screen, COLOR_BUILDING, rect)
+
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()
