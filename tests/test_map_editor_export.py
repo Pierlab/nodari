@@ -34,8 +34,10 @@ def test_export_and_reload_buildings(tmp_path: Path) -> None:
         assert isinstance(node, expected_cls)
         expected_pos = [rect.x // config.SCALE, rect.y // config.SCALE]
         assert node.position == expected_pos
-        assert node.width is None
-        assert node.height is None
+        expected_width = rect.width // config.SCALE
+        expected_height = rect.height // config.SCALE
+        assert node.width == expected_width
+        assert node.height == expected_height
 
 
 def test_export_rejects_negative_coordinates(tmp_path: Path) -> None:
