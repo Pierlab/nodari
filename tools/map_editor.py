@@ -23,8 +23,6 @@ if (
 ):
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-pygame.init()
-
 SCALE = config.SCALE
 WORLD_WIDTH = config.WORLD_WIDTH
 WORLD_HEIGHT = config.WORLD_HEIGHT
@@ -84,6 +82,7 @@ def export(buildings, path="custom_map.json") -> None:
 
 
 def main(output_path: str = "custom_map.json") -> None:
+    pygame.init()
     screen = pygame.display.set_mode((WORLD_WIDTH * SCALE, WORLD_HEIGHT * SCALE))
     pygame.display.set_caption("Map Editor")
     clock = pygame.time.Clock()
