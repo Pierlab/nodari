@@ -31,4 +31,4 @@ The map editor (`tools/map_editor.py`) supports placing various building types. 
 - `5` – `WellNode`
 - `6` – `WarehouseNode`
 
-Press `E` to export the current map to JSON.
+Press `E` to export the current map to JSON, or simply close the window to save automatically.
