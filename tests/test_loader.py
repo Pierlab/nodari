@@ -56,3 +56,6 @@ def test_map_editor_export_types(tmp_path: Path):
         assert isinstance(node, cls)
         expected_x = (i * 10) // config.SCALE
         assert node.position == [expected_x, 0]
+        expected_size = 10 // config.SCALE
+        assert node.width == expected_size
+        assert node.height == expected_size

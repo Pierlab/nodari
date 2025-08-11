@@ -26,7 +26,7 @@ if (
 SCALE = config.SCALE
 WORLD_WIDTH = config.WORLD_WIDTH
 WORLD_HEIGHT = config.WORLD_HEIGHT
-BUILDING_SIZE = 10  # in world units
+BUILDING_SIZE = config.BUILDING_SIZE  # in world units
 
 COLOR_BG = (30, 30, 30)
 COLOR_BUILDING = (200, 180, 80)
@@ -68,7 +68,11 @@ def export(buildings, path="custom_map.json") -> None:
         node: dict[str, Any] = {
             "type": btype,
             "id": f"building{i}",
-            "config": {"position": [cell_x, cell_y]},
+            "config": {
+                "position": [cell_x, cell_y],
+                "width": rect.width // SCALE,
+                "height": rect.height // SCALE,
+            },
             "children": [
                 {
                     "type": "TransformNode",

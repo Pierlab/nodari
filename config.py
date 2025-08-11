@@ -10,6 +10,7 @@ FONT_SIZE = 14
 SCALE = 5
 WORLD_WIDTH = 240
 WORLD_HEIGHT = 144
+BUILDING_SIZE = 10  # in world units
 
 # Simulation timing
 FPS = 24
