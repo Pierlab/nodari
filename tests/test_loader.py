@@ -54,8 +54,11 @@ def test_map_editor_export_types(tmp_path: Path):
     assert isinstance(root, WorldNode)
     for i, (node, (_, cls)) in enumerate(zip(root.children, types)):
         assert isinstance(node, cls)
+        transform = next(
+            child for child in node.children if isinstance(child, TransformNode)
+        )
         expected_x = (i * 10) // config.SCALE
-        assert node.position == [expected_x, 0]
+        assert transform.position == [expected_x, 0]
         expected_size = 10 // config.SCALE
         assert node.width == expected_size
         assert node.height == expected_size
