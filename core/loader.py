@@ -7,6 +7,7 @@ from typing import Any, Dict
 import inspect
 
 from .plugins import get_node_type
+from .schema import validate_simulation_config
 
 try:  # optional YAML support
     import yaml  # type: ignore
@@ -17,8 +18,7 @@ except Exception:  # pragma: no cover - yaml not installed
 def load_simulation_from_file(path: str) -> Any:
     """Load a simulation tree from a JSON or YAML file."""
     data = _load_data(Path(path))
-    if not isinstance(data, dict) or len(data) != 1:
-        raise ValueError("Configuration must contain a single root node")
+    validate_simulation_config(data)
     root_name, spec = next(iter(data.items()))
     return _build_node(spec, root_name)
 
