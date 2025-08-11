@@ -1,10 +1,11 @@
+import json
 import pygame
 from pathlib import Path
 
 import pytest
 
 from core.loader import load_simulation_from_file
-from tools.map_editor import export
+from tools.map_editor import export, load_key_mapping
 from nodes.world import WorldNode
 from nodes.transform import TransformNode  # noqa: F401
 from nodes.house import HouseNode
@@ -57,3 +58,28 @@ def test_export_rejects_non_positive_size(tmp_path: Path) -> None:
     buildings = [(pygame.Rect(0, 0, 0, 10), "HouseNode")]
     with pytest.raises(ValueError):
         export(buildings, tmp_path / "map.json")
+
+
+def test_load_key_mapping_from_dict() -> None:
+    pygame.init()
+    mapping = load_key_mapping({"1": "HouseNode", "2": "BarnNode"})
+    assert mapping[pygame.K_1] == "HouseNode"
+    assert mapping[pygame.K_2] == "BarnNode"
+    pygame.quit()
+
+
+def test_load_key_mapping_from_file(tmp_path: Path) -> None:
+    data = {"1": "HouseNode"}
+    path = tmp_path / "keys.json"
+    path.write_text(json.dumps(data))
+    pygame.init()
+    mapping = load_key_mapping(str(path))
+    assert mapping[pygame.K_1] == "HouseNode"
+    pygame.quit()
+
+
+def test_load_key_mapping_invalid_type() -> None:
+    pygame.init()
+    with pytest.raises(KeyError):
+        load_key_mapping({"1": "UnknownNode"})
+    pygame.quit()

@@ -1,18 +1,21 @@
+import importlib
 import json
 import os
+import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 import pygame
 
-# Ensure repository root on path so ``config`` can be imported when
+# Ensure repository root on path so ``config`` and ``core`` can be imported when
 # executing the script from the ``tools`` directory.
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import config
+from core import plugins
 
 # Allow headless execution (e.g. in CI) by falling back to the SDL
 # ``dummy`` video driver when a display is not available.
@@ -32,7 +35,7 @@ COLOR_BG = (30, 30, 30)
 COLOR_BUILDING = (200, 180, 80)
 COLOR_GRID = (50, 50, 50)
 
-KEY_TO_TYPE = {
+DEFAULT_KEYMAP: dict[int, str] = {
     pygame.K_1: "HouseNode",
     pygame.K_2: "BarnNode",
     pygame.K_3: "SiloNode",
@@ -40,6 +43,42 @@ KEY_TO_TYPE = {
     pygame.K_5: "WellNode",
     pygame.K_6: "WarehouseNode",
 }
+
+
+def _load_plugin_for_type(type_name: str) -> None:
+    """Import the module defining ``type_name`` to register the plugin."""
+    module = re.sub(r"(?<!^)(?=[A-Z])", "_", type_name).lower()
+    if module.endswith("_node"):
+        module = module[: -len("_node")]
+    try:
+        importlib.import_module(f"nodes.{module}")
+    except ModuleNotFoundError:
+        pass
+
+
+def load_key_mapping(source: Mapping[int | str, str] | str | None = None) -> dict[int, str]:
+    """Return a key-to-type mapping verifying node type existence.
+
+    ``source`` may be a mapping or path to a JSON file. Keys may be either
+    integers (pygame key codes) or strings acceptable to ``pygame.key.key_code``.
+    """
+    if source is None:
+        data: Mapping[int | str, str] = DEFAULT_KEYMAP
+    elif isinstance(source, str):
+        with open(source, "r", encoding="utf8") as fh:
+            data = json.load(fh)
+    else:
+        data = source
+
+    mapping: dict[int, str] = {}
+    for key, type_name in data.items():
+        key_code = (
+            pygame.key.key_code(key) if isinstance(key, str) else int(key)
+        )
+        _load_plugin_for_type(type_name)
+        plugins.get_node_type(type_name)  # raises if type is unknown
+        mapping[key_code] = type_name
+    return mapping
 
 
 def export(buildings, path="custom_map.json") -> None:
@@ -86,13 +125,17 @@ def export(buildings, path="custom_map.json") -> None:
     print(f"Exported {len(buildings)} buildings to {path}")
 
 
-def main(output_path: str = "custom_map.json") -> None:
+def main(
+    output_path: str = "custom_map.json",
+    keymap: Mapping[int | str, str] | str | None = None,
+) -> None:
     pygame.init()
+    key_to_type = load_key_mapping(keymap)
     screen = pygame.display.set_mode((WORLD_WIDTH * SCALE, WORLD_HEIGHT * SCALE))
     pygame.display.set_caption("Map Editor")
     clock = pygame.time.Clock()
     buildings: list[tuple[pygame.Rect, str]] = []
-    current_type = KEY_TO_TYPE[pygame.K_1]
+    current_type = next(iter(key_to_type.values()))
     running = True
     while running:
         for event in pygame.event.get():
@@ -122,8 +165,8 @@ def main(output_path: str = "custom_map.json") -> None:
                 elif event.key == pygame.K_z:
                     if buildings:
                         buildings.pop()
-                elif event.key in KEY_TO_TYPE:
-                    current_type = KEY_TO_TYPE[event.key]
+                elif event.key in key_to_type:
+                    current_type = key_to_type[event.key]
         screen.fill(COLOR_BG)
 
         # Draw a grid to help users place buildings aligned with the scale.
@@ -144,4 +187,5 @@ def main(output_path: str = "custom_map.json") -> None:
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "custom_map.json"
-    main(out)
+    cfg = sys.argv[2] if len(sys.argv) > 2 else None
+    main(out, cfg)
