@@ -92,6 +92,7 @@ def main(output_path: str = "custom_map.json") -> None:
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                export(buildings, output_path)
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
