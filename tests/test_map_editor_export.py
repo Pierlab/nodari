@@ -33,8 +33,11 @@ def test_export_and_reload_buildings(tmp_path: Path) -> None:
     for (rect, btype), node in zip(buildings, root.children):
         expected_cls = HouseNode if btype == "HouseNode" else BarnNode
         assert isinstance(node, expected_cls)
+        transform = next(
+            child for child in node.children if isinstance(child, TransformNode)
+        )
         expected_pos = [rect.x // config.SCALE, rect.y // config.SCALE]
-        assert node.position == expected_pos
+        assert transform.position == expected_pos
         expected_width = rect.width // config.SCALE
         expected_height = rect.height // config.SCALE
         assert node.width == expected_width

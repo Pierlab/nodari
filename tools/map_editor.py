@@ -108,7 +108,6 @@ def export(buildings, path="custom_map.json") -> None:
             "type": btype,
             "id": f"building{i}",
             "config": {
-                "position": [cell_x, cell_y],
                 "width": rect.width // SCALE,
                 "height": rect.height // SCALE,
             },
