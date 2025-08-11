@@ -227,6 +227,8 @@ Steps must be completed in order, each with accompanying unit tests.
 - [x] Integrate `SchedulerSystem` to allow nodes like `NeedNode` and `AIBehaviorNode` to update at custom intervals.
 - [x] Implement a basic `WeatherSystem` emitting `weather_changed` events.
 - [x] Enhance `EconomySystem` with simple dynamic pricing reacting to stock levels.
+- [x] Generate parameter inventory documentation for all nodes and systems.
+- [x] Support class-level default configuration merged by the loader (e.g. `WellNode` dimensions).
 
 ### 5.2 Upcoming
 #### Core Engine Enhancements

@@ -10,7 +10,7 @@
           {"type": "ResourceProducerNode", "id": "field_producer", "config": {"resource": "wheat", "rate_per_tick": 1, "inputs": {"water": 1}}}
         ]
       },
-      {"type": "WellNode", "id": "well",
+      {"type": "WellNode", "id": "well", "config": {"width": 12, "height": 12},
         "children": [
           {"type": "TransformNode", "config": {"position": [30, 50]}},
           {"type": "InventoryNode", "id": "well_inventory", "config": {"items": {"water": 0}}},

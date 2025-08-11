@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any, Dict
+import inspect
 
 from .plugins import get_node_type
 
@@ -37,6 +38,20 @@ def _build_node(spec: Dict[str, Any], default_name: str) -> Any:
     node_type = spec["type"]
     cls = get_node_type(node_type)
     config = spec.get("config", {})
+    # merge class level defaults if provided
+    if hasattr(cls, "DEFAULT_CONFIG"):
+        defaults = dict(getattr(cls, "DEFAULT_CONFIG"))
+        defaults.update(config)
+        config = defaults
+
+    # Basic validation: reject unknown parameters to help catch typos
+    sig = inspect.signature(cls.__init__)
+    valid_params = set(sig.parameters)
+    if "kwargs" not in sig.parameters:
+        unknown = set(config) - (valid_params - {"self"})
+        if unknown:
+            raise TypeError(f"Unknown config parameters for {cls.__name__}: {unknown}")
+
     name = spec.get("id", default_name)
     node = cls(name=name, **config)
     for child_spec in spec.get("children", []):

@@ -75,6 +75,8 @@ Continuous integration is currently disabled, so run all checks locally.
 
 Project objectives, completed milestones and remaining tasks are tracked in [project_spec.md](docs/specs/project_spec.md). A high-level view of upcoming features also appears in [TODO.md](docs/checklists/todo.md).
 
+For details on configurable parameters of each node and system, see the generated [parameter inventory](docs/parameter_inventory.md).
+
 ## Future Possibilities
 
 Thanks to its modular design, the engine can ultimately power a wide range of simulations:
