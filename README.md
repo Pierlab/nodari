@@ -38,12 +38,13 @@ configuration files for new simulations. Launch it with:
 python tools/map_editor.py [output.json]
 ```
 
-Use the mouse to place buildings and the number keys `1`–`6` to switch between
-building types. Right‑click deletes the topmost building under the cursor and
-pressing `Z` undoes the most recent placement. Export the map at any time with
-`E` or simply close the window to write the chosen JSON file. The editor writes
-`WorldNode` JSON with each building entry containing its `type` and grid
-`position`. A minimal example looks like:
+Use the mouse to place objects on the map. Number keys `1`–`6` switch between
+building types while `M` and `F` select male or female characters. Right‑click
+deletes the topmost item under the cursor and pressing `Z` undoes the most
+recent placement. Export the map at any time with `E` or simply close the
+window to write the chosen JSON file. The editor writes `WorldNode` JSON with
+each building or character entry containing its `type` and grid `position`. A
+minimal example with a single barn looks like:
 
 ```json
 {

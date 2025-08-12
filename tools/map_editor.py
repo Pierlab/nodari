@@ -34,6 +34,9 @@ BUILDING_SIZE = config.BUILDING_SIZE  # in world units
 COLOR_BG = (30, 30, 30)
 COLOR_BUILDING = (200, 180, 80)
 COLOR_GRID = (50, 50, 50)
+COLOR_CHARACTER_MALE = (50, 150, 255)
+COLOR_CHARACTER_FEMALE = (255, 105, 180)
+CHAR_RADIUS = 5
 
 DEFAULT_KEYMAP: dict[int, str] = {
     pygame.K_1: "HouseNode",
@@ -81,8 +84,14 @@ def load_key_mapping(source: Mapping[int | str, str] | str | None = None) -> dic
     return mapping
 
 
-def export(buildings, path="custom_map.json") -> None:
-    """Export buildings to ``path`` in the required JSON format."""
+def export(
+    buildings,
+    path: str = "custom_map.json",
+    characters: list[tuple[tuple[int, int], str]] | None = None,
+) -> None:
+    """Export buildings and characters to ``path`` in the required JSON format."""
+    if characters is None:
+        characters = []
     children: list[dict[str, Any]] = []
     data: dict[str, Any] = {
         "world": {
@@ -119,9 +128,33 @@ def export(buildings, path="custom_map.json") -> None:
             ],
         }
         children.append(node)
+    for i, ((x, y), gender) in enumerate(characters, 1):
+        if (
+            x < 0
+            or y < 0
+            or x >= WORLD_WIDTH * SCALE
+            or y >= WORLD_HEIGHT * SCALE
+        ):
+            raise ValueError(f"Character {i} is out of bounds")
+        cell_x = x // SCALE
+        cell_y = y // SCALE
+        node = {
+            "type": "CharacterNode",
+            "id": f"character{i}",
+            "config": {"gender": gender},
+            "children": [
+                {
+                    "type": "TransformNode",
+                    "config": {"position": [cell_x, cell_y]},
+                }
+            ],
+        }
+        children.append(node)
     with open(path, "w", encoding="utf8") as fh:
         json.dump(data, fh, indent=2)
-    print(f"Exported {len(buildings)} buildings to {path}")
+    print(
+        f"Exported {len(buildings)} buildings and {len(characters)} characters to {path}"
+    )
 
 
 def main(
@@ -133,24 +166,32 @@ def main(
     screen = pygame.display.set_mode((WORLD_WIDTH * SCALE, WORLD_HEIGHT * SCALE))
     pygame.display.set_caption("Map Editor")
     clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 20)
     buildings: list[tuple[pygame.Rect, str]] = []
+    characters: list[tuple[tuple[int, int], str]] = []
+    history: list[str] = []
     current_type = next(iter(key_to_type.values()))
+    mode = "building"
+    current_gender = "male"
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                export(buildings, output_path)
+                export(buildings, output_path, characters)
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = event.pos
-                    # Snap the position to the nearest grid cell so that buildings
-                    # are always aligned to the map scale.
                     x = round(x / SCALE) * SCALE
                     y = round(y / SCALE) * SCALE
-                    size = BUILDING_SIZE * SCALE
-                    rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
-                    buildings.append((rect, current_type))
+                    if mode == "building":
+                        size = BUILDING_SIZE * SCALE
+                        rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
+                        buildings.append((rect, current_type))
+                        history.append("building")
+                    else:
+                        characters.append(((x, y), current_gender))
+                        history.append("character")
                 elif event.button == 3:
                     x, y = event.pos
                     for i in range(len(buildings) - 1, -1, -1):
@@ -158,14 +199,31 @@ def main(
                         if rect.collidepoint(x, y):
                             del buildings[i]
                             break
+                    else:
+                        for i in range(len(characters) - 1, -1, -1):
+                            (cx, cy), _ = characters[i]
+                            if (cx - x) ** 2 + (cy - y) ** 2 <= CHAR_RADIUS ** 2:
+                                del characters[i]
+                                break
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_e:
-                    export(buildings, output_path)
+                    export(buildings, output_path, characters)
                 elif event.key == pygame.K_z:
-                    if buildings:
-                        buildings.pop()
+                    if history:
+                        last = history.pop()
+                        if last == "building" and buildings:
+                            buildings.pop()
+                        elif last == "character" and characters:
+                            characters.pop()
                 elif event.key in key_to_type:
                     current_type = key_to_type[event.key]
+                    mode = "building"
+                elif event.key == pygame.K_m:
+                    mode = "character"
+                    current_gender = "male"
+                elif event.key == pygame.K_f:
+                    mode = "character"
+                    current_gender = "female"
         screen.fill(COLOR_BG)
 
         # Draw a grid to help users place buildings aligned with the scale.
@@ -178,6 +236,20 @@ def main(
 
         for rect, _ in buildings:
             pygame.draw.rect(screen, COLOR_BUILDING, rect)
+        for (x, y), gender in characters:
+            color = COLOR_CHARACTER_MALE if gender == "male" else COLOR_CHARACTER_FEMALE
+            pygame.draw.circle(screen, color, (x, y), CHAR_RADIUS)
+
+        lines = [
+            f"Current: {current_type if mode == 'building' else f'Character ({current_gender})'}",
+            "1-6: buildings",
+            "M/F: male/female character",
+            "Left click: place, Right click: delete",
+            "Z: undo, E: export",
+        ]
+        for i, line in enumerate(lines):
+            text = font.render(line, True, (255, 255, 255))
+            screen.blit(text, (5, 5 + i * 18))
 
         pygame.display.flip()
         clock.tick(60)
