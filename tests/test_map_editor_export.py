@@ -10,6 +10,7 @@ from nodes.world import WorldNode
 from nodes.transform import TransformNode  # noqa: F401
 from nodes.house import HouseNode
 from nodes.barn import BarnNode
+from nodes.character import CharacterNode
 import config
 
 
@@ -42,6 +43,24 @@ def test_export_and_reload_buildings(tmp_path: Path) -> None:
         expected_height = rect.height // config.SCALE
         assert node.width == expected_width
         assert node.height == expected_height
+
+
+def test_export_and_reload_characters(tmp_path: Path) -> None:
+    buildings: list[tuple[pygame.Rect, str]] = []
+    characters = [((0, 0), "male"), ((10, 10), "female")]
+    path = tmp_path / "chars.json"
+    export(buildings, path, characters)
+    root = load_simulation_from_file(str(path))
+    assert isinstance(root, WorldNode)
+    chars = [c for c in root.children if isinstance(c, CharacterNode)]
+    assert len(chars) == 2
+    for (pos, gender), node in zip(characters, chars):
+        assert node.gender == gender
+        transform = next(
+            child for child in node.children if isinstance(child, TransformNode)
+        )
+        expected = [pos[0] // config.SCALE, pos[1] // config.SCALE]
+        assert transform.position == expected
 
 
 def test_export_rejects_negative_coordinates(tmp_path: Path) -> None:

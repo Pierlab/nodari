@@ -31,4 +31,9 @@ The map editor (`tools/map_editor.py`) supports placing various building types. 
 - `5` – `WellNode`
 - `6` – `WarehouseNode`
 
+Characters can also be placed on the map:
+
+- `M` – male `CharacterNode`
+- `F` – female `CharacterNode`
+
 Press `E` to export the current map to JSON, or simply close the window to save automatically.

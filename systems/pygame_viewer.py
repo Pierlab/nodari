@@ -136,7 +136,7 @@ class PygameViewerSystem(SystemNode):
 
     def _info_lines(self, node: SimNode) -> List[str]:
         """Return a list of human-readable attributes for ``node``."""
-        lines: List[str] = [node.name]
+        lines: List[str] = [f"{node.name} ({node.__class__.__name__})"]
         for attr, value in vars(node).items():
             if attr.startswith("_") or attr in {"parent", "children"}:
                 continue
