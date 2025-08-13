@@ -4,7 +4,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, cast
 
 import pygame
 
@@ -66,7 +66,7 @@ def load_key_mapping(source: Mapping[int | str, str] | str | None = None) -> dic
     integers (pygame key codes) or strings acceptable to ``pygame.key.key_code``.
     """
     if source is None:
-        data: Mapping[int | str, str] = DEFAULT_KEYMAP
+        data = cast(Mapping[int | str, str], DEFAULT_KEYMAP)
     elif isinstance(source, str):
         with open(source, "r", encoding="utf8") as fh:
             data = json.load(fh)
@@ -160,6 +160,7 @@ def export(
 def main(
     output_path: str = "custom_map.json",
     keymap: Mapping[int | str, str] | str | None = None,
+    input_path: str | None = None,
 ) -> None:
     pygame.init()
     key_to_type = load_key_mapping(keymap)
@@ -173,6 +174,28 @@ def main(
     current_type = next(iter(key_to_type.values()))
     mode = "building"
     current_gender = "male"
+    selected: int | None = None
+
+    if input_path and os.path.exists(input_path):
+        with open(input_path, "r", encoding="utf8") as fh:
+            data = json.load(fh)
+        children = data.get("world", {}).get("children", [])
+        for child in children:
+            _load_plugin_for_type(child.get("type", ""))
+            if child.get("type") == "CharacterNode":
+                pos = child.get("children", [])[0]["config"].get("position", [0, 0])
+                x, y = pos[0] * SCALE, pos[1] * SCALE
+                gender = child.get("config", {}).get("gender", "male")
+                characters.append(((x, y), gender))
+            else:
+                pos = child.get("children", [])[0]["config"].get("position", [0, 0])
+                width = child.get("config", {}).get("width", BUILDING_SIZE)
+                height = child.get("config", {}).get("height", BUILDING_SIZE)
+                rect = pygame.Rect(
+                    pos[0] * SCALE, pos[1] * SCALE, width * SCALE, height * SCALE
+                )
+                buildings.append((rect, child.get("type", "Unknown")))
+
     running = True
     while running:
         for event in pygame.event.get():
@@ -189,9 +212,16 @@ def main(
                         rect = pygame.Rect(x - size // 2, y - size // 2, size, size)
                         buildings.append((rect, current_type))
                         history.append("building")
-                    else:
+                    elif mode == "character":
                         characters.append(((x, y), current_gender))
                         history.append("character")
+                    else:  # selection
+                        selected = None
+                        for i in range(len(buildings) - 1, -1, -1):
+                            rect, _ = buildings[i]
+                            if rect.collidepoint(x, y):
+                                selected = i
+                                break
                 elif event.button == 3:
                     x, y = event.pos
                     for i in range(len(buildings) - 1, -1, -1):
@@ -218,12 +248,32 @@ def main(
                 elif event.key in key_to_type:
                     current_type = key_to_type[event.key]
                     mode = "building"
+                    selected = None
                 elif event.key == pygame.K_m:
                     mode = "character"
                     current_gender = "male"
+                    selected = None
                 elif event.key == pygame.K_f:
                     mode = "character"
                     current_gender = "female"
+                    selected = None
+                elif event.key == pygame.K_s:
+                    mode = "select"
+                elif selected is not None and event.key in (
+                    pygame.K_LEFT,
+                    pygame.K_RIGHT,
+                    pygame.K_UP,
+                    pygame.K_DOWN,
+                ):
+                    rect, btype = buildings[selected]
+                    if event.key == pygame.K_LEFT and rect.width > SCALE:
+                        rect.width -= SCALE
+                    elif event.key == pygame.K_RIGHT:
+                        rect.width += SCALE
+                    elif event.key == pygame.K_UP and rect.height > SCALE:
+                        rect.height -= SCALE
+                    elif event.key == pygame.K_DOWN:
+                        rect.height += SCALE
         screen.fill(COLOR_BG)
 
         # Draw a grid to help users place buildings aligned with the scale.
@@ -234,8 +284,10 @@ def main(
                 screen, COLOR_GRID, (0, gy), (WORLD_WIDTH * SCALE, gy)
             )
 
-        for rect, _ in buildings:
+        for i, (rect, _) in enumerate(buildings):
             pygame.draw.rect(screen, COLOR_BUILDING, rect)
+            if i == selected:
+                pygame.draw.rect(screen, (255, 255, 255), rect, 2)
         for (x, y), gender in characters:
             color = COLOR_CHARACTER_MALE if gender == "male" else COLOR_CHARACTER_FEMALE
             pygame.draw.circle(screen, color, (x, y), CHAR_RADIUS)
@@ -244,7 +296,9 @@ def main(
             f"Current: {current_type if mode == 'building' else f'Character ({current_gender})'}",
             "1-6: buildings",
             "M/F: male/female character",
-            "Left click: place, Right click: delete",
+            "S: select/resize mode",
+            "Arrows: resize selected",
+            "Left click: place/select, Right click: delete",
             "Z: undo, E: export",
         ]
         for i, line in enumerate(lines):
@@ -259,4 +313,5 @@ def main(
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "custom_map.json"
     cfg = sys.argv[2] if len(sys.argv) > 2 else None
-    main(out, cfg)
+    inp = sys.argv[3] if len(sys.argv) > 3 else None
+    main(out, cfg, inp)
