@@ -7,10 +7,18 @@ This checklist gathers outstanding tasks from the project specification and main
 - [x] **High** Introduce a configurable state machine or behaviour tree for `AIBehaviorNode`.
 - [x] **High** Resolve `AIBehaviorNode` references during loading to avoid repeated lookups.
 - [ ] **Medium** Parameterise durations, speeds and thresholds via configuration files.
+- [ ] **Medium** Replace `_manual_update` flag with explicit update control in `SimNode` to avoid deep call chains.
+- [ ] **Low** Add duplicate detection and error handling to the plugin registry.
+- [ ] **Low** Optimise configuration loader by reducing runtime introspection and enforcing JSON schema validation.
+- [ ] **Low** Replace global constants file with structured configuration supporting dynamic overrides.
 
 ## Core Engine Enhancements
 - [ ] **Medium** Hot-reload node logic without restarting simulations.
 - [ ] **Medium** State diffing and time-travel debugging for deterministic replay.
+- [ ] **Medium** Implement `decrease_rate` in `NeedNode` and cache scheduler lookup.
+- [ ] **Medium** Refactor `SchedulerSystem` to avoid manipulating node internals and to use a priority-based queue with pause/prioritisation API.
+- [ ] **Low** Extend `DistanceSystem` with persistent caching and 3D position support.
+- [ ] **Low** Allow `TimeSystem` to configure day length and support global pause or external clocks.
 
 ## Tools for Creation
 - [x] **High** Command-line tool to scaffold new node or system plugins from templates.
