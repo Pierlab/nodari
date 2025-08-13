@@ -32,19 +32,20 @@ python run_farm.py
 ## Map editor
 
 An interactive map editor is provided in `tools/map_editor.py` to create
-configuration files for new simulations. Launch it with:
+layout files for new simulations. Launch it with:
 
 ```
-python tools/map_editor.py [output.json]
+python tools/map_editor.py [output.json] [keymap.json] [existing_map.json]
 ```
 
 Use the mouse to place objects on the map. Number keys `1`–`6` switch between
-building types while `M` and `F` select male or female characters. Right‑click
-deletes the topmost item under the cursor and pressing `Z` undoes the most
-recent placement. Export the map at any time with `E` or simply close the
-window to write the chosen JSON file. The editor writes `WorldNode` JSON with
-each building or character entry containing its `type` and grid `position`. A
-minimal example with a single barn looks like:
+building types while `M` and `F` select male or female characters. Press `S` to
+enter selection mode and use the arrow keys to resize the highlighted building.
+Right‑click deletes the topmost item under the cursor and pressing `Z` undoes
+the most recent placement. Export the map at any time with `E` or simply close
+the window to write the chosen JSON file. The editor writes `WorldNode` JSON
+with each building or character entry containing its `type` and grid
+`position`. A minimal example with a single barn looks like:
 
 ```json
 {
@@ -62,8 +63,17 @@ minimal example with a single barn looks like:
 }
 ```
 
-The editor's pixel scale and world dimensions are controlled by `SCALE`,
-`WORLD_WIDTH` and `WORLD_HEIGHT` in `config.py`.
+The editor focuses purely on spatial layout. To turn an exported map into a
+complete scenario, run:
+
+```
+python tools/build_scenario.py custom_map.json scenario.json [profile]
+```
+
+`build_scenario.py` adds inventories and the core systems (time, economy,
+viewer…) to the map file based on the selected `profile` (default: `farm`).
+The editor's pixel scale and world dimensions are
+controlled by `SCALE`, `WORLD_WIDTH` and `WORLD_HEIGHT` in `config.py`.
 
 ## Development
 

@@ -23,6 +23,21 @@ This checklist gathers outstanding tasks from the project specification and main
 - [ ] **Low** Configuration auto-completion and linting support for editors.
 - [ ] **Low** Behaviour scripting DSL with a safe sandbox.
 
+### Map Editor & Scenario Builder
+- [ ] Clarify documentation: editor handles spatial layout while scenarios add behaviour and systems.
+- [ ] Generic scenario builder supporting multiple profiles (farm, quest, battle…).
+- [ ] Load and edit existing maps or scenarios from JSON.
+- [ ] In-editor property panel to configure node attributes.
+- [ ] Visual linking tool to define dependencies between nodes.
+- [ ] Scenario profiles and presets for different genres.
+- [ ] Export extended to include properties and links with plugin-based validation.
+- [ ] Optional simulation preview launched directly from the editor.
+- [ ] Refactor map editor into UI, node management and serialisation modules.
+- [ ] Dynamic form generation for node-specific properties.
+- [ ] Graphical module to manage and display links between nodes.
+- [ ] Round-trip tests and CLI to combine map layouts with scenario profiles.
+- [ ] Documentation and examples for non-farm scenarios.
+
 ## Visualization and Rendering
 - [ ] **Medium** Extend the Pygame viewer with camera controls, zoom and overlays.
 - [ ] **Low** Headless rendering mode that streams frames or state for remote dashboards.
