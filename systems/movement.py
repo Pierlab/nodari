@@ -1,7 +1,7 @@
 """System to move units toward targets considering terrain and morale."""
 from __future__ import annotations
 
-from math import atan2, cos, hypot, sin
+from math import atan2, cos, hypot, sin, pi
 from typing import Iterable, List, Optional
 import random
 
@@ -33,6 +33,7 @@ class MovementSystem(SystemNode):
         terrain: TerrainNode | str | None = None,
         obstacles: Optional[List[List[int]]] | None = None,
         direction_noise: float = 0.0,
+        avoid_obstacles: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -40,6 +41,7 @@ class MovementSystem(SystemNode):
         self.terrain: TerrainNode | None = terrain if isinstance(terrain, TerrainNode) else None
         self.obstacles = {tuple(o) for o in (obstacles or [])}
         self.direction_noise = direction_noise
+        self.avoid_obstacles = avoid_obstacles
 
     # ------------------------------------------------------------------
     def _resolve_terrain(self) -> None:
@@ -114,7 +116,25 @@ class MovementSystem(SystemNode):
             if not blocked and self.terrain is not None:
                 blocked = self.terrain.is_obstacle(ix, iy)
             if blocked:
-                continue
+                if not self.avoid_obstacles:
+                    continue
+                angle = atan2(dy, dx)
+                options = [angle + pi / 2, angle - pi / 2]
+                random.shuffle(options)
+                moved = False
+                for ang in options:
+                    nx = tx + cos(ang) * step
+                    ny = ty + sin(ang) * step
+                    ix, iy = int(round(nx)), int(round(ny))
+                    blocked = (ix, iy) in self.obstacles
+                    if not blocked and self.terrain is not None:
+                        blocked = self.terrain.is_obstacle(ix, iy)
+                    if not blocked:
+                        new_x, new_y = nx, ny
+                        moved = True
+                        break
+                if not moved:
+                    continue
             transform.position[0] = new_x
             transform.position[1] = new_y
             unit.state = "moving"
