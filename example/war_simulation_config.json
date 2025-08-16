@@ -18,6 +18,11 @@
         "config": {"terrain": "terrain"}
       },
       {
+        "type": "CombatSystem",
+        "id": "combat",
+        "config": {"terrain": "terrain"}
+      },
+      {
         "type": "TerrainNode",
         "id": "terrain",
         "config": {

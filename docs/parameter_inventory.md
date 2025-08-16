@@ -219,6 +219,13 @@
 | logger | Optional[logging.Logger] | None |  Optional :class:`logging.Logger` instance. Defaults to one named after the system. |
 | kwargs | _empty |  |  |
 
+### CombatSystem
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| terrain | Optional[TerrainNode | str] | None | Terrain node or id providing combat bonuses. |
+| kwargs | _empty |  |  |
+
 ### MovementSystem
 
 | Parameter | Type | Default | Description |
