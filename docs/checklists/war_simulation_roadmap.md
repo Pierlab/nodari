@@ -35,8 +35,8 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **Moral collapse** – End simulation if a nation's morale reaches zero.
 
 ## Visualization Enhancements (Later Iterations)
-- [ ] **Zoom and inspect** – Ability to zoom into specific units or armies.
-- [ ] **Clear map overlay** – Show terrain types, unit icons and movement arrows.
+ - [x] **Zoom and inspect** – Ability to zoom into specific units or armies.
+ - [ ] **Clear map overlay** – Show terrain types, unit icons and movement arrows.
 - [ ] **Optional hex grid rendering** – If hex grid adopted, update visualization accordingly.
 
 ## Extensions & Analysis
