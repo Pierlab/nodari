@@ -11,7 +11,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **GeneralNode** – Stores tactical style (aggressive/defensive/balanced) and owns one or more armies. Listens to partial battlefield events due to fog of war.
 - [x] **ArmyNode** – Groups `UnitNode`s, tracks goal (advance, defend, retreat) and current size. Interfaces with Movement and Combat systems.
 - [x] **UnitNode** – Represents ~100 soldiers with state (moving, fighting, fleeing) and attributes such as speed and morale. Emits `unit_engaged` and `unit_routed`.
-- [ ] **TerrainNode** – Defines map tiles: plain, forest, hill. Influences movement speed and combat bonuses.
+- [x] **TerrainNode** – Defines map tiles: plain, forest, hill. Influences movement speed and combat bonuses.
 
 ## Global Systems
 - [ ] **TimeSystem extension** – Support accelerated and real‑time modes for war scenarios.
