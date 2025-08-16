@@ -1,7 +1,7 @@
 """Terrain node defining map tiles and modifiers."""
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
@@ -19,6 +19,9 @@ class TerrainNode(SimNode):
         Optional mapping of terrain type to movement speed modifier.
     combat_bonuses:
         Optional mapping of terrain type to combat bonus value.
+    grid_type:
+        ``"square"`` for a 4-neighbour grid or ``"hex"`` for a hexagonal
+        layout. Only the square grid is fully supported for now.
     """
 
     def __init__(
@@ -26,6 +29,7 @@ class TerrainNode(SimNode):
         tiles: List[List[str]],
         speed_modifiers: Optional[Dict[str, float]] | None = None,
         combat_bonuses: Optional[Dict[str, int]] | None = None,
+        grid_type: str = "square",
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -42,6 +46,9 @@ class TerrainNode(SimNode):
             "forest": 1,
             "hill": 2,
         }
+        self.grid_type = grid_type
+        if self.grid_type not in {"square", "hex"}:
+            raise ValueError("grid_type must be 'square' or 'hex'")
 
     # ------------------------------------------------------------------
     def get_tile(self, x: int, y: int) -> str | None:
@@ -68,6 +75,26 @@ class TerrainNode(SimNode):
         if terrain is None:
             return 0
         return self.combat_bonuses.get(terrain, 0)
+
+    # ------------------------------------------------------------------
+    def get_neighbors(self, x: int, y: int) -> List[Tuple[int, int]]:
+        """Return neighbouring coordinates for the given tile.
+
+        For a square grid this returns up to four neighbours (N, S, E, W).
+        For a hex grid, up to six neighbours are returned using a simple
+        axial coordinate system.
+        """
+
+        if self.grid_type == "square":
+            offsets = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        else:  # hex grid
+            offsets = [(1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1)]
+        neighbors: List[Tuple[int, int]] = []
+        for dx, dy in offsets:
+            nx, ny = x + dx, y + dy
+            if 0 <= ny < self.height and 0 <= nx < self.width:
+                neighbors.append((nx, ny))
+        return neighbors
 
 
 register_node_type("TerrainNode", TerrainNode)

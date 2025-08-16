@@ -55,6 +55,8 @@ For modelling the farm and inhabitants:
 - **ResourceProducerNode** – produces a resource every tick consuming optional inputs. Emits `resource_produced`.
 - **AIBehaviorNode** – decides actions based on internal state and events (`need_threshold_reached`, `phase_changed`, etc.).
 - **TransformNode** (optional) – stores position in meters and velocity in meters per second.
+- **TerrainNode** – describes terrain tiles on a square or hex grid with
+  movement and combat modifiers (`grid_type` defaults to ``square``).
 - **AnimalNode** – represents livestock or wildlife with needs and optional resource production. Emits events such as `animal_fed`.
 
 Example usage:
@@ -170,6 +172,13 @@ Steps must be completed in order, each with accompanying unit tests.
 - `on_event` reacts to needs, time and production events.
 - `update` may emit regular commands.
 - Tests for reacting to a need threshold by eating, etc.
+
+#### 4.5 TerrainNode
+- Attributes: `tiles`, optional `grid_type` (``square`` or ``hex``),
+  `speed_modifiers`, `combat_bonuses`.
+- Methods: `get_tile`, `get_speed_modifier`, `get_combat_bonus`,
+  `get_neighbors`.
+- Tests for tile lookup, modifiers and neighbour calculation.
 
 ### Step 5: Global Systems
 #### 5.1 TimeSystem

@@ -43,6 +43,7 @@
         "type": "TerrainNode",
         "id": "terrain",
         "config": {
+          "grid_type": "square",
           "tiles": [
             [
               "plain",

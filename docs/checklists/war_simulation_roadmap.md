@@ -21,7 +21,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **Event Logging/Visualization System** – Provide clear real‑time or accelerated visualisation; for now log movements and combats, later connect to a dedicated viewer.
 
 ## Map & Positioning
-- [ ] **Grid selection** – Start with simple square grid; evaluate hexagonal grid for future upgrade.
+- [x] **Grid selection** – Start with simple square grid; evaluate hexagonal grid for future upgrade.
 - [ ] **Initial placements** – Define starting positions for each nation's capital, generals and armies within the config file.
 - [ ] **Obstacles** – Represent impassable terrain or temporary obstacles (e.g., rivers) in the map data.
 
