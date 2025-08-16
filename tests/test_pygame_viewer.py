@@ -6,6 +6,9 @@ from nodes.world import WorldNode
 from nodes.inventory import InventoryNode
 from nodes.character import CharacterNode
 from nodes.transform import TransformNode
+from nodes.terrain import TerrainNode
+from nodes.unit import UnitNode
+from nodes.nation import NationNode
 
 
 def test_pygame_viewer_runs():
@@ -38,4 +41,23 @@ def test_viewer_zoom_and_center():
     expected_y = 30 - viewer.view_height / (2 * viewer.scale)
     assert viewer.offset_x == pytest.approx(expected_x)
     assert viewer.offset_y == pytest.approx(expected_y)
+    pygame.quit()
+
+
+def test_viewer_draws_overlay():
+    pygame = pytest.importorskip("pygame")
+    from systems.pygame_viewer import PygameViewerSystem
+
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+    world = WorldNode(name="world")
+    TerrainNode(name="terrain", tiles=[["plain"]], parent=world)
+    nation = NationNode(name="n", morale=100, capital_position=[0, 0], parent=world)
+    unit = UnitNode(name="u", target=[0.5, 1.5], parent=nation)
+    TransformNode(position=[0.5, 0.5], parent=unit)
+    viewer = PygameViewerSystem(parent=world, width=40, height=40, scale=20, panel_width=0)
+    world.update(0)
+
+    assert viewer.screen.get_at((5, 5))[:3] == (80, 160, 80)
+    assert viewer.screen.get_at((10, 10))[:3] == (200, 50, 50)
+    assert viewer.screen.get_at((10, 25))[:3] == (255, 255, 0)
     pygame.quit()

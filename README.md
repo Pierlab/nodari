@@ -29,6 +29,8 @@ After installing the dependencies, launch the Pygame-powered example farm:
 python run_farm.py
 ```
 
+The window renders terrain tiles, unit icons and yellow arrows pointing to their movement targets.
+
 ## Map editor
 
 An interactive map editor is provided in `tools/map_editor.py` to create

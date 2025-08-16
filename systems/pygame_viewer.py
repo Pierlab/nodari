@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from math import atan2, cos, sin, pi
 from typing import Iterator, List, Optional, Tuple, Type
 
 import pygame
@@ -19,6 +20,9 @@ from nodes.warehouse import WarehouseNode
 from nodes.barn import BarnNode
 from nodes.silo import SiloNode
 from nodes.pasture import PastureNode
+from nodes.unit import UnitNode
+from nodes.terrain import TerrainNode
+from nodes.nation import NationNode
 from systems.time import TimeSystem
 
 DEFAULT_BUILDING_SIZES: dict[Type[SimNode], Tuple[int, int]] = {
@@ -39,6 +43,20 @@ BUILDING_COLORS: dict[Type[SimNode], Tuple[int, int, int]] = {
 }
 WELL_RADIUS = 10
 CHAR_RADIUS = 5
+UNIT_RADIUS = 4
+
+TERRAIN_COLORS: dict[str, Tuple[int, int, int]] = {
+    "plain": (80, 160, 80),
+    "forest": (34, 139, 34),
+    "hill": (110, 110, 110),
+}
+ARROW_COLOR = (255, 255, 0)
+NATION_COLORS = [
+    (200, 50, 50),
+    (50, 50, 200),
+    (50, 200, 50),
+    (200, 200, 50),
+]
 
 
 class PygameViewerSystem(SystemNode):
@@ -127,6 +145,9 @@ class PygameViewerSystem(SystemNode):
                     if isinstance(parent, CharacterNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= CHAR_RADIUS ** 2:
                             selected = parent
+                    elif isinstance(parent, UnitNode):
+                        if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= UNIT_RADIUS ** 2:
+                            selected = parent
                     elif isinstance(parent, WellNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= WELL_RADIUS ** 2:
                             selected = parent
@@ -173,16 +194,60 @@ class PygameViewerSystem(SystemNode):
                 lines.append(f"    {value}")
         return lines
 
+    # ------------------------------------------------------------------
+    def _nation_of(self, node: SimNode) -> Optional[SimNode]:
+        cur: Optional[SimNode] = node
+        while cur is not None:
+            if isinstance(cur, NationNode):
+                return cur
+            cur = cur.parent
+        return None
+
+    def _draw_arrow(
+        self, start: Tuple[int, int], end: Tuple[int, int], color: Tuple[int, int, int]
+    ) -> None:
+        pygame.draw.line(self.screen, color, start, end, 2)
+        angle = atan2(end[1] - start[1], end[0] - start[0])
+        size = 6
+        left = (
+            end[0] - size * cos(angle - pi / 6),
+            end[1] - size * sin(angle - pi / 6),
+        )
+        right = (
+            end[0] - size * cos(angle + pi / 6),
+            end[1] - size * sin(angle + pi / 6),
+        )
+        pygame.draw.polygon(self.screen, color, [end, left, right])
+
+    def _draw_terrain(self, terrain: TerrainNode) -> None:
+        for y, row in enumerate(terrain.tiles):
+            for x, tile in enumerate(row):
+                color = TERRAIN_COLORS.get(tile, (80, 80, 80))
+                px = int((x - self.offset_x) * self.scale)
+                py = int((y - self.offset_y) * self.scale)
+                rect = pygame.Rect(px, py, int(self.scale), int(self.scale))
+                pygame.draw.rect(self.screen, color, rect)
+
     def update(self, dt: float) -> None:  # noqa: D401 - inherit docstring
         """Update the window and render state."""
         self.screen.fill((30, 30, 30))
 
+        root = self._root()
+        terrain = next((n for n in self._walk(root) if isinstance(n, TerrainNode)), None)
+        if terrain is not None:
+            self._draw_terrain(terrain)
+        nations = [n for n in self._walk(root) if isinstance(n, NationNode)]
+        nation_colors = {n: NATION_COLORS[i % len(NATION_COLORS)] for i, n in enumerate(nations)}
+
         lines: List[str] = []
         time_sys: Optional[TimeSystem] = None
         character_count = 0
-        for node in self._walk(self._root()):
+        unit_count = 0
+        for node in self._walk(root):
             if isinstance(node, CharacterNode):
                 character_count += 1
+            if isinstance(node, UnitNode):
+                unit_count += 1
             if isinstance(node, TransformNode):
                 parent = node.parent
                 x, y = node.position
@@ -190,7 +255,17 @@ class PygameViewerSystem(SystemNode):
                     int((x - self.offset_x) * self.scale),
                     int((y - self.offset_y) * self.scale),
                 )
-                if isinstance(parent, CharacterNode):
+                if isinstance(parent, UnitNode):
+                    col = nation_colors.get(self._nation_of(parent), (200, 200, 200))
+                    target = getattr(parent, "target", None)
+                    if target is not None:
+                        end = (
+                            int((target[0] - self.offset_x) * self.scale),
+                            int((target[1] - self.offset_y) * self.scale),
+                        )
+                        self._draw_arrow(pos, end, ARROW_COLOR)
+                    pygame.draw.circle(self.screen, col, pos, UNIT_RADIUS)
+                elif isinstance(parent, CharacterNode):
                     color = (50, 150, 255) if getattr(parent, "gender", "male") == "male" else (255, 105, 180)
                     pygame.draw.circle(self.screen, color, pos, CHAR_RADIUS)
                 elif isinstance(parent, WellNode):
@@ -237,6 +312,7 @@ class PygameViewerSystem(SystemNode):
             lines.insert(0, f"Tick: {time_sys.current_tick}")
             lines.insert(0, time_text)
         lines.insert(0, f"Characters: {character_count}")
+        lines.insert(0, f"Units: {unit_count}")
 
         line_height = self.font.get_linesize()
         for i, text in enumerate(lines):
