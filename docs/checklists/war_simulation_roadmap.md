@@ -22,7 +22,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 
 ## Map & Positioning
 - [x] **Grid selection** – Start with simple square grid; evaluate hexagonal grid for future upgrade.
-- [ ] **Initial placements** – Define starting positions for each nation's capital, generals and armies within the config file.
+- [x] **Initial placements** – Define starting positions for each nation's capital, generals and armies within the config file.
 - [ ] **Obstacles** – Represent impassable terrain or temporary obstacles (e.g., rivers) in the map data.
 
 ## Behaviour & AI
