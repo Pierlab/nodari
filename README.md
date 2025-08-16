@@ -31,6 +31,14 @@ python run_farm.py
 
 The window renders terrain tiles, unit icons and yellow arrows pointing to their movement targets.
 
+For a minimal war scenario showcasing nations, armies and real‑time combat, run:
+
+```
+python run_war.py example/war_simulation_config.json
+```
+
+Pause the simulation with the space bar and close the window or press the close button to exit.
+
 ## Map editor
 
 An interactive map editor is provided in `tools/map_editor.py` to create
