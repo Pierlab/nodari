@@ -13,7 +13,8 @@ class ArmyNode(SimNode):
     Parameters
     ----------
     goal:
-        Current objective of the army: ``"advance"``, ``"defend"`` or ``"retreat"``.
+        Current objective of the army: ``"advance"``, ``"defend"``, ``"retreat"``
+        or ``"flank"``.
     size:
         Number of unit groups in the army.
     """

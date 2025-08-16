@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import List, Dict
+import random
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
@@ -15,11 +16,14 @@ class GeneralNode(SimNode):
     style:
         Tactical approach of the general: ``"aggressive"``, ``"defensive"``
         or ``"balanced"``.
+    flank_success_chance:
+        Probability in ``[0, 1]`` that a flanking manoeuvre succeeds.
     """
 
-    def __init__(self, style: str, **kwargs) -> None:
+    def __init__(self, style: str, flank_success_chance: float = 0.25, **kwargs) -> None:
         super().__init__(**kwargs)
         self.style = style
+        self.flank_success_chance = flank_success_chance
         self.reports: List[Dict] = []
         self.on_event("battlefield_event", self._record_report)
 
@@ -34,6 +38,19 @@ class GeneralNode(SimNode):
         """Return direct child nodes considered armies."""
 
         return [c for c in self.children if c.__class__.__name__ == "ArmyNode"]
+
+    # ------------------------------------------------------------------
+    def attempt_flank(self, army: SimNode) -> bool:
+        """Attempt a flanking manoeuvre with *army*.
+
+        Returns ``True`` if the manoeuvre succeeds and the army's goal is
+        changed to ``"flank"``.
+        """
+
+        success = random.random() < self.flank_success_chance
+        if success:
+            army.change_goal("flank")
+        return success
 
 
     # ------------------------------------------------------------------

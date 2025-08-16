@@ -78,6 +78,7 @@
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | style | str |  |  Tactical approach of the general: ``"aggressive"``, ``"defensive"`` or ``"balanced"``. |
+| flank_success_chance | float | 0.25 |  Probability that a flanking manoeuvre initiated by the general succeeds. |
 | kwargs | _empty |  |  |
 
 ### HouseNode

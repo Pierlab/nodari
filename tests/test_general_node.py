@@ -35,3 +35,18 @@ def test_general_ai_changes_army_goal_based_on_morale_and_reports():
     army.emit("battlefield_event", {"type": "unit_routed"})
     general.update(0)
     assert army.goal == "retreat"
+
+
+def test_general_attempts_flank_with_probability():
+    general = GeneralNode(style="balanced", flank_success_chance=1.0)
+    army = ArmyNode(parent=general, goal="advance", size=1)
+
+    # Guaranteed success
+    assert general.attempt_flank(army) is True
+    assert army.goal == "flank"
+
+    # Guaranteed failure
+    other_army = ArmyNode(parent=general, goal="advance", size=1)
+    general.flank_success_chance = 0.0
+    assert general.attempt_flank(other_army) is False
+    assert other_army.goal == "advance"
