@@ -3,7 +3,7 @@
 This roadmap breaks down the tasks required to build the simplified war simulation scenario on top of the Nodari engine. Each item provides enough context to implement the feature without referring back to the specs.
 
 ## Foundations
-- [ ] **Confirm engine setup** – Reuse the existing `SimNode`, event bus, systems and declarative loader from the core project.
+- [x] **Confirm engine setup** – Reuse the existing `SimNode`, event bus, systems and declarative loader from the core project.
 - [ ] **Create base configuration** – In `example/war_simulation_config.json`, describe two nations, their generals, starting armies (100 units each) and initial terrain layout.
 
 ## Domain Nodes
