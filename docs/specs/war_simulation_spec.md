@@ -26,11 +26,15 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 - Caractéristique principale : **style tactique** (agressif, défensif, équilibré).
 - Reçoit les informations partielles du champ de bataille (brouillard de guerre).
 - Ajuste les objectifs des armées selon ces rapports et le moral national.
+- Peut tenter une **manœuvre de flanc** avec une probabilité de succès
+  configurable (`flank_success_chance`, 25 % par défaut). En cas de
+  réussite, l’armée ciblée change son objectif en ``flank``.
 
 ### Armée
 - Regroupe un ensemble d’unités.
 - Caractéristique principale : **taille** (nombre d’unités).
-- Objectif : avancer vers le camp adverse ou exécuter les ordres du général.
+- Objectif : avancer vers le camp adverse, flanquer, défendre ou battre en
+  retraite selon les ordres du général.
 
 ### Unité
 - Représente un petit groupe de soldats (ex. 100 hommes = 1 unité).

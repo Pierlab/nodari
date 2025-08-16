@@ -89,7 +89,8 @@
             "type": "GeneralNode",
             "id": "north_general",
             "config": {
-              "style": "balanced"
+              "style": "balanced",
+              "flank_success_chance": 0.25
             },
             "children": [
               {
@@ -164,7 +165,8 @@
             "type": "GeneralNode",
             "id": "south_general",
             "config": {
-              "style": "balanced"
+              "style": "balanced",
+              "flank_success_chance": 0.25
             },
             "children": [
               {
