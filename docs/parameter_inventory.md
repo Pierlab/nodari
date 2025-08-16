@@ -65,6 +65,13 @@
 | height | int | None | None |  |
 | kwargs | _empty |  |  |
 
+### GeneralNode
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| style | str |  | Tactical approach of the general (``"aggressive"``, ``"defensive"`` or ``"balanced"``). |
+| kwargs | _empty |  |  |
+
 ### HouseNode
 
 | Parameter | Type | Default | Description |
