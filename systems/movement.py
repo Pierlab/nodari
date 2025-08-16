@@ -107,6 +107,11 @@ class MovementSystem(SystemNode):
             transform.position[0] = new_x
             transform.position[1] = new_y
             unit.state = "moving"
+            unit.emit(
+                "unit_moved",
+                {"from": [tx, ty], "to": [new_x, new_y]},
+                direction="up",
+            )
         super().update(dt)
 
 

@@ -81,15 +81,25 @@ class CombatSystem(SystemNode):
         if strength_a == strength_b:
             return
         if strength_a > strength_b:
-            loser = b
+            loser, winner = b, a
         else:
-            loser = a
+            loser, winner = a, b
         loss = max(1, int(loser.size * 0.1))
         loser.size = max(0, loser.size - loss)
         nation = self._get_nation(loser)
         if nation is not None:
             nation.change_morale(-loss)
         loser.route(loss=loss)
+        self.emit(
+            "combat_occurred",
+            {
+                "position": [x, y],
+                "winner": winner.name,
+                "loser": loser.name,
+                "loss": loss,
+            },
+            direction="up",
+        )
 
     # ------------------------------------------------------------------
     def update(self, dt: float) -> None:

@@ -33,6 +33,13 @@
         "id": "moral"
       },
       {
+        "type": "LoggingSystem",
+        "id": "logger",
+        "config": {
+          "events": ["unit_moved", "combat_occurred", "unit_engaged", "unit_routed"]
+        }
+      },
+      {
         "type": "TerrainNode",
         "id": "terrain",
         "config": {
