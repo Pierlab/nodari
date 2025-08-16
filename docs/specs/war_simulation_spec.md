@@ -56,8 +56,10 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 - Le paramètre `time_scale` du `TimeSystem` ajuste l'accélération du temps.
 
 ### Mouvement
-- Les unités se déplacent à une vitesse dépendant du terrain.
-- Gestion simplifiée : chaque tick = déplacement d’un pas en fonction de la vitesse.
+- Les unités se déplacent vers une position cible.
+- La vitesse est affectée par le type de terrain et le moral de l’unité.
+- Les obstacles définis sur la carte sont infranchissables.
+- Implémentation initiale en grille carrée (préparation pour une grille hexagonale ultérieure).
 
 ### Combat
 - Lorsque deux unités ennemies se rencontrent :

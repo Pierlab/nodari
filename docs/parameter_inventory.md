@@ -168,6 +168,7 @@
 | state | str | 'idle' | Current state of the unit: ``"idle"``, ``"moving"``, ``"fighting"`` or ``"fleeing"``. |
 | speed | float | 1.0 | Movement speed of the unit. |
 | morale | int | 100 | Morale value of the unit. |
+| target | Optional[List[int]] | None | ``[x, y]`` coordinates the unit is moving toward. |
 | kwargs | _empty |  |  |
 
 ### WarehouseNode
@@ -216,6 +217,14 @@
 | --- | --- | --- | --- |
 | events | Optional[Iterable[str]] | None |  Iterable of event names to log. If ``None``, a default set of common events is used. |
 | logger | Optional[logging.Logger] | None |  Optional :class:`logging.Logger` instance. Defaults to one named after the system. |
+| kwargs | _empty |  |  |
+
+### MovementSystem
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| terrain | Optional[TerrainNode | str] | None | Terrain node or id providing speed modifiers. |
+| obstacles | Optional[List[List[int]]] | None | List of impassable ``[x, y]`` coordinates. |
 | kwargs | _empty |  |  |
 
 ### PygameViewerSystem

@@ -13,6 +13,11 @@
         "config": {"time_scale": 60}
       },
       {
+        "type": "MovementSystem",
+        "id": "movement",
+        "config": {"terrain": "terrain"}
+      },
+      {
         "type": "TerrainNode",
         "id": "terrain",
         "config": {
@@ -74,8 +79,15 @@
                       "size": 100,
                       "state": "idle",
                       "speed": 1.0,
-                      "morale": 100
-                    }
+                      "morale": 100,
+                      "target": [95, 25]
+                    },
+                    "children": [
+                      {
+                        "type": "TransformNode",
+                        "config": {"position": [5, 25]}
+                      }
+                    ]
                   }
                 ]
               }
@@ -116,8 +128,15 @@
                       "size": 100,
                       "state": "idle",
                       "speed": 1.0,
-                      "morale": 100
-                    }
+                      "morale": 100,
+                      "target": [5, 25]
+                    },
+                    "children": [
+                      {
+                        "type": "TransformNode",
+                        "config": {"position": [95, 25]}
+                      }
+                    ]
                   }
                 ]
               }
