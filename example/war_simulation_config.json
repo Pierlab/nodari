@@ -9,7 +9,8 @@
     "children": [
       {
         "type": "TimeSystem",
-        "id": "time"
+        "id": "time",
+        "config": {"time_scale": 60}
       },
       {
         "type": "TerrainNode",

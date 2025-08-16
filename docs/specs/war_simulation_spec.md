@@ -53,6 +53,7 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 ### Temps
 - Simulation basée sur des ticks (1 tick = 1 unité de temps).
 - Possibilité de mode temps réel ou accéléré.
+- Le paramètre `time_scale` du `TimeSystem` ajuste l'accélération du temps.
 
 ### Mouvement
 - Les unités se déplacent à une vitesse dépendant du terrain.

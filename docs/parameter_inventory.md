@@ -242,6 +242,7 @@
 | tick_duration | float | 1.0 |  |
 | phase_length | int | 10 |  |
 | start_time | float | 0.0 |  |
+| time_scale | float | 1.0 | Multiplier for elapsed time (``>1`` accelerates). |
 | kwargs | _empty |  |  |
 
 ### WeatherSystem

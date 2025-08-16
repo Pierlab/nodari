@@ -12,6 +12,14 @@ def test_time_system_emits_events():
     assert phases == [1]
 
 
+def test_time_system_time_scale_accelerates():
+    sys = TimeSystem(tick_duration=1.0, time_scale=2.0)
+    ticks = []
+    sys.on_event("tick", lambda e, n, p: ticks.append(p["tick"]))
+    sys.update(0.5)  # scaled to 1.0, triggers a tick
+    assert ticks == [1]
+
+
 def test_economy_buy_success():
     econ = EconomySystem()
     buyer = InventoryNode(items={"money": 10})
