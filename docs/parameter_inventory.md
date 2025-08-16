@@ -42,6 +42,14 @@
 | producer | ResourceProducerNode | None | None |  |
 | kwargs | _empty |  |  |
 
+### ArmyNode
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| goal | str |  |  Current objective of the army: ``"advance"``, ``"defend"`` or ``"retreat"``. |
+| size | int | 0 |  Number of unit groups in the army. |
+| kwargs | _empty |  |  |
+
 ### BarnNode
 
 | Parameter | Type | Default | Description |
@@ -69,7 +77,7 @@
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| style | str |  | Tactical approach of the general (``"aggressive"``, ``"defensive"`` or ``"balanced"``). |
+| style | str |  |  Tactical approach of the general: ``"aggressive"``, ``"defensive"`` or ``"balanced"``. |
 | kwargs | _empty |  |  |
 
 ### HouseNode
