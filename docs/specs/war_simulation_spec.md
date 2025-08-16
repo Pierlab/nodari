@@ -63,8 +63,8 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 
 ### Combat
 - Lorsque deux unités ennemies se rencontrent :
-  - Jet de combat simplifié basé sur la taille de l’unité et un facteur aléatoire.
-  - Le perdant subit une perte de taille et/ou passe en état **fuite**.
+  - Jet de combat simplifié basé sur la taille de l’unité, un bonus de terrain et un facteur aléatoire.
+  - Le perdant subit une perte de taille, voit son moral national réduit et passe en état **fuite**.
 
 ### Moral
 - Chaque nation possède un moral global.
