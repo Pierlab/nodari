@@ -26,7 +26,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **Obstacles** – Represent impassable terrain or temporary obstacles (e.g., rivers) in the map data.
 
 ## Behaviour & AI
-- [ ] **General decision making** – Implement simple AI reacting to partial information, moral status and objectives.
+- [x] **General decision making** – Implement simple AI reacting to partial information, moral status and objectives.
 - [ ] **Unit behaviour** – Units move toward targets, avoid obstacles, engage enemies or retreat when morale is low.
 - [ ] **Surprise maneuvers** – Allow generals to attempt flanking moves with a success probability.
 
