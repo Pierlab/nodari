@@ -80,6 +80,14 @@
 | items | Optional[Dict[str, int]] | None |  |
 | kwargs | _empty |  |  |
 
+### NationNode
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| morale | int |  |  Initial morale value. |
+| capital_position | List[int] |  |  ``[x, y]`` coordinates of the nation's capital. |
+| kwargs | _empty |  |  |
+
 ### NeedNode
 
 | Parameter | Type | Default | Description |

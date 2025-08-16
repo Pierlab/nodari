@@ -7,7 +7,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **Create base configuration** – In `example/war_simulation_config.json`, describe two nations, their generals, starting armies (100 units each) and initial terrain layout.
 
 ## Domain Nodes
-- [ ] **NationNode** – Holds moral, capital position and references to generals and armies. Emits `moral_changed` and `capital_captured`.
+ - [x] **NationNode** – Holds moral, capital position and references to generals and armies. Emits `moral_changed` and `capital_captured`.
 - [ ] **GeneralNode** – Stores tactical style (aggressive/defensive/balanced) and owns one or more armies. Listens to partial battlefield events due to fog of war.
 - [ ] **ArmyNode** – Groups `UnitNode`s, tracks goal (advance, defend, retreat) and current size. Interfaces with Movement and Combat systems.
 - [ ] **UnitNode** – Represents ~100 soldiers with state (moving, fighting, fleeing) and attributes such as speed and morale. Emits `unit_engaged` and `unit_routed`.
