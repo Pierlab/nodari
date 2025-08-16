@@ -24,6 +24,8 @@ class VictorySystem(SystemNode):
         super().__init__(**kwargs)
         self.capture_unit_threshold = capture_unit_threshold
         self._captured: set[NationNode] = set()
+        self._collapsed: set[NationNode] = set()
+        self.on_event("nation_collapsed", self._on_nation_collapsed)
 
     # ------------------------------------------------------------------
     def _iter_nations(self, node: SimNode) -> Iterable[NationNode]:
@@ -56,6 +58,20 @@ class VictorySystem(SystemNode):
                 return cur
             cur = cur.parent
         return None
+
+    # ------------------------------------------------------------------
+    def _on_nation_collapsed(self, origin: SimNode, _event: str, payload: dict) -> None:
+        """Emit ``nation_defeated`` when morale reaches zero."""
+
+        nation = origin if isinstance(origin, NationNode) else self._find_nation(origin)
+        if nation is None or nation in self._collapsed:
+            return
+        nation.emit(
+            "nation_defeated",
+            {"reason": "moral_collapse", "morale": payload.get("morale")},
+            direction="down",
+        )
+        self._collapsed.add(nation)
 
     # ------------------------------------------------------------------
     def update(self, dt: float) -> None:

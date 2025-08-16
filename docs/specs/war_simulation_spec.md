@@ -85,6 +85,7 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 ### Moral
 - Chaque nation possède un moral global.
 - Un `MoralSystem` agrège les variations de moral et émet `nation_collapsed` quand il atteint zéro.
+- Le `VictorySystem` écoute cet événement et réémet `nation_defeated` pour signaler la fin de la simulation.
 - Le moral baisse lorsque :
   - Une armée subit une lourde défaite.
   - Un général est battu ou tué.
@@ -103,7 +104,7 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
     capitale). Le ``VictorySystem`` déclenche ``capital_captured`` lorsque au
     moins ``capture_unit_threshold`` unités ennemies occupent la tuile de la
     capitale (valeur par défaut : ``3``).
-  - **Le moral adverse tombe à 0**.
+  - **Le moral adverse tombe à 0** : le `MoralSystem` déclenche `nation_collapsed` et le `VictorySystem` réémet `nation_defeated`.
 
 ---
 

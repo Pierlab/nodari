@@ -273,6 +273,7 @@
 | kwargs | _empty |  |  |
 
 ### VictorySystem
+Monitors capital capture and morale collapse, emitting ``nation_defeated`` when a nation loses.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
