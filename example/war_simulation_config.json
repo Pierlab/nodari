@@ -1,36 +1,123 @@
 {
   "war_world": {
     "type": "WorldNode",
-    "config": {"width": 100, "height": 50, "seed": 1},
+    "config": {
+      "width": 100,
+      "height": 50,
+      "seed": 1
+    },
     "children": [
-      {"type": "TimeSystem", "id": "time"},
-      {"type": "TerrainNode", "id": "terrain", "config": {
-        "tiles": [
-          ["plain", "plain", "plain", "plain", "plain"],
-          ["plain", "plain", "plain", "plain", "plain"],
-          ["plain", "plain", "plain", "plain", "plain"]
-        ]
-      }},
-      {"type": "NationNode", "id": "north", "config": {"capital_position": [5, 25], "morale": 100},
+      {
+        "type": "TimeSystem",
+        "id": "time"
+      },
+      {
+        "type": "TerrainNode",
+        "id": "terrain",
+        "config": {
+          "tiles": [
+            [
+              "plain",
+              "plain",
+              "plain",
+              "plain",
+              "plain"
+            ],
+            [
+              "plain",
+              "plain",
+              "plain",
+              "plain",
+              "plain"
+            ],
+            [
+              "plain",
+              "plain",
+              "plain",
+              "plain",
+              "plain"
+            ]
+          ]
+        }
+      },
+      {
+        "type": "NationNode",
+        "id": "north",
+        "config": {
+          "capital_position": [
+            5,
+            25
+          ],
+          "morale": 100
+        },
         "children": [
-          {"type": "GeneralNode", "id": "north_general", "config": {"style": "balanced"},
+          {
+            "type": "GeneralNode",
+            "id": "north_general",
+            "config": {
+              "style": "balanced"
+            },
             "children": [
-              {"type": "ArmyNode", "id": "north_army", "config": {"goal": "advance", "size": 1},
+              {
+                "type": "ArmyNode",
+                "id": "north_army",
+                "config": {
+                  "goal": "advance",
+                  "size": 1
+                },
                 "children": [
-                  {"type": "UnitNode", "id": "north_unit_1", "config": {"size": 100, "state": "idle"}}
+                  {
+                    "type": "UnitNode",
+                    "id": "north_unit_1",
+                    "config": {
+                      "size": 100,
+                      "state": "idle",
+                      "speed": 1.0,
+                      "morale": 100
+                    }
+                  }
                 ]
               }
             ]
           }
         ]
       },
-      {"type": "NationNode", "id": "south", "config": {"capital_position": [95, 25], "morale": 100},
+      {
+        "type": "NationNode",
+        "id": "south",
+        "config": {
+          "capital_position": [
+            95,
+            25
+          ],
+          "morale": 100
+        },
         "children": [
-          {"type": "GeneralNode", "id": "south_general", "config": {"style": "balanced"},
+          {
+            "type": "GeneralNode",
+            "id": "south_general",
+            "config": {
+              "style": "balanced"
+            },
             "children": [
-              {"type": "ArmyNode", "id": "south_army", "config": {"goal": "advance", "size": 1},
+              {
+                "type": "ArmyNode",
+                "id": "south_army",
+                "config": {
+                  "goal": "advance",
+                  "size": 1
+                },
                 "children": [
-                  {"type": "UnitNode", "id": "south_unit_1", "config": {"size": 100, "state": "idle"}}
+                  {
+                    "type": "UnitNode",
+                    "id": "south_unit_1",
+                    "config": {
+                      "size": 100,
+                      "state": "idle",
+                      "speed": 1.0,
+                      "morale": 100
+                    }
+                  }
                 ]
               }
             ]
