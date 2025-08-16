@@ -31,6 +31,9 @@ python run_farm.py
 
 The window renders terrain tiles, unit icons and yellow arrows pointing to their movement targets.
 
+The viewer opens centered on the battlefield with a compact sidebar so troop
+movement is immediately visible.
+
 For a minimal war scenario showcasing nations, armies and real‑time combat, run:
 
 ```

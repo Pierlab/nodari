@@ -11,7 +11,7 @@
         "type": "TimeSystem",
         "id": "time",
         "config": {
-          "time_scale": 60
+          "time_scale": 10
         }
       },
       {
@@ -74,11 +74,7 @@
               "plain"
             ]
           ],
-          "obstacles": [
-            [50, 24],
-            [50, 25],
-            [50, 26]
-          ]
+          "obstacles": []
         }
       },
       {
