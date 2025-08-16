@@ -18,7 +18,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **MovementSystem** – Moves units each tick toward targets while considering terrain speed modifiers, obstacles and morale penalties. Prepare for future hex‑grid pathfinding (initial version may use square grid).
 - [x] **CombatSystem** – When opposing units occupy the same tile, resolve combat using unit size, randomness and terrain modifiers. Update unit states and nation morale.
 - [x] **MoralSystem** – Aggregates morale changes from defeats, general losses and events. Triggers nation collapse at zero morale.
-- [ ] **Event Logging/Visualization System** – Provide clear real‑time or accelerated visualisation; for now log movements and combats, later connect to a dedicated viewer.
+- [x] **Event Logging/Visualization System** – Provide clear real‑time or accelerated visualisation; for now log movements and combats, later connect to a dedicated viewer.
 
 ## Map & Positioning
 - [ ] **Grid selection** – Start with simple square grid; evaluate hexagonal grid for future upgrade.

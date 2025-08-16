@@ -74,6 +74,11 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
   - Un général est battu ou tué.
 - Si le moral atteint 0 → effondrement, la nation perd.
 
+### Journalisation des événements
+- Un `LoggingSystem` écoute les événements comme `unit_moved`, `combat_occurred`,
+  `unit_engaged` et `unit_routed`.
+- Il consigne ces événements pour une visualisation en temps réel ou accélérée.
+
 ---
 
 ## 4. Conditions de victoire
