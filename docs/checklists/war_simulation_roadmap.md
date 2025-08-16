@@ -32,7 +32,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 
 ## Victory Conditions
 - [x] **Capital capture** – Detect when a sufficient number of allied units occupy the enemy capital tile.
-- [ ] **Moral collapse** – End simulation if a nation's morale reaches zero.
+- [x] **Moral collapse** – End simulation if a nation's morale reaches zero.
 
 ## Visualization Enhancements (Later Iterations)
 - [ ] **Zoom and inspect** – Ability to zoom into specific units or armies.
