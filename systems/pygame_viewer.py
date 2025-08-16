@@ -51,6 +51,7 @@ TERRAIN_COLORS: dict[str, Tuple[int, int, int]] = {
     "hill": (110, 110, 110),
 }
 ARROW_COLOR = (255, 255, 0)
+ARROW_MAX_LEN = 40
 NATION_COLORS = [
     (200, 50, 50),
     (50, 50, 200),
@@ -98,6 +99,7 @@ class PygameViewerSystem(SystemNode):
         self.offset_x = 0.0
         self.offset_y = 0.0
         self.selected: Optional[SimNode] = None
+        self.unit_radius = UNIT_RADIUS
 
     # ------------------------------------------------------------------
     # Helpers
@@ -146,7 +148,7 @@ class PygameViewerSystem(SystemNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= CHAR_RADIUS ** 2:
                             selected = parent
                     elif isinstance(parent, UnitNode):
-                        if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= UNIT_RADIUS ** 2:
+                        if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= self.unit_radius ** 2:
                             selected = parent
                     elif isinstance(parent, WellNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= WELL_RADIUS ** 2:
@@ -206,8 +208,14 @@ class PygameViewerSystem(SystemNode):
     def _draw_arrow(
         self, start: Tuple[int, int], end: Tuple[int, int], color: Tuple[int, int, int]
     ) -> None:
+        dx, dy = end[0] - start[0], end[1] - start[1]
+        dist = (dx ** 2 + dy ** 2) ** 0.5
+        if dist > ARROW_MAX_LEN:
+            scale = ARROW_MAX_LEN / dist
+            end = (start[0] + dx * scale, start[1] + dy * scale)
+            dx, dy = end[0] - start[0], end[1] - start[1]
         pygame.draw.line(self.screen, color, start, end, 2)
-        angle = atan2(end[1] - start[1], end[0] - start[0])
+        angle = atan2(dy, dx)
         size = 6
         left = (
             end[0] - size * cos(angle - pi / 6),
@@ -264,7 +272,7 @@ class PygameViewerSystem(SystemNode):
                             int((target[1] - self.offset_y) * self.scale),
                         )
                         self._draw_arrow(pos, end, ARROW_COLOR)
-                    pygame.draw.circle(self.screen, col, pos, UNIT_RADIUS)
+                    pygame.draw.circle(self.screen, col, pos, self.unit_radius)
                 elif isinstance(parent, CharacterNode):
                     color = (50, 150, 255) if getattr(parent, "gender", "male") == "male" else (255, 105, 180)
                     pygame.draw.circle(self.screen, color, pos, CHAR_RADIUS)
@@ -313,6 +321,11 @@ class PygameViewerSystem(SystemNode):
             lines.insert(0, time_text)
         lines.insert(0, f"Characters: {character_count}")
         lines.insert(0, f"Units: {unit_count}")
+
+        lines.append("")
+        lines.append("Controls:")
+        lines.append(" Space: pause/resume")
+        lines.append(" +/- : change speed")
 
         line_height = self.font.get_linesize()
         for i, text in enumerate(lines):
