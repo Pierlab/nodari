@@ -112,7 +112,7 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 - Vue aérienne du champ de bataille.
 - Chaque armée représentée par un bloc.
 - Déplacements visibles en temps réel ou accéléré.
-- Possibilité de zoomer sur une unité.
+ - Possibilité de zoomer et de centrer la vue sur une unité ou une armée sélectionnée via la molette de la souris.
 
 ---
 

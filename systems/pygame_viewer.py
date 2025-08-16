@@ -77,6 +77,8 @@ class PygameViewerSystem(SystemNode):
         pygame.display.set_caption(self.name)
         self.font = pygame.font.Font(None, font_size)
         self.scale = scale
+        self.offset_x = 0.0
+        self.offset_y = 0.0
         self.selected: Optional[SimNode] = None
 
     # ------------------------------------------------------------------
@@ -101,6 +103,16 @@ class PygameViewerSystem(SystemNode):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.pos[0] < self.view_width:
                 self.selected = self._node_at_pixel(event.pos)
+                if self.selected:
+                    self._center_on(self.selected)
+            elif event.type == pygame.MOUSEWHEEL:
+                factor = 1.1 if event.y > 0 else 0.9
+                prev_scale = self.scale
+                self.scale = max(0.1, self.scale * factor)
+                cx = self.offset_x + self.view_width / (2 * prev_scale)
+                cy = self.offset_y + self.view_height / (2 * prev_scale)
+                self.offset_x = cx - self.view_width / (2 * self.scale)
+                self.offset_y = cy - self.view_height / (2 * self.scale)
 
     def _node_at_pixel(self, pos) -> Optional[SimNode]:
         """Return the topmost node at the given pixel position."""
@@ -110,7 +122,8 @@ class PygameViewerSystem(SystemNode):
                 if isinstance(child, TransformNode):
                     px, py = child.position
                     parent = child.parent
-                    sx, sy = px * self.scale, py * self.scale
+                    sx = (px - self.offset_x) * self.scale
+                    sy = (py - self.offset_y) * self.scale
                     if isinstance(parent, CharacterNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= CHAR_RADIUS ** 2:
                             selected = parent
@@ -124,6 +137,15 @@ class PygameViewerSystem(SystemNode):
                             if rect.collidepoint(pos):
                                 selected = parent
         return selected
+
+    def _center_on(self, node: SimNode) -> None:
+        """Center the camera on ``node`` if it has a transform."""
+        for child in node.children:
+            if isinstance(child, TransformNode):
+                x, y = child.position
+                self.offset_x = x - self.view_width / (2 * self.scale)
+                self.offset_y = y - self.view_height / (2 * self.scale)
+                break
 
     def _building_rect(self, node: SimNode) -> Optional[pygame.Rect]:
         if isinstance(node, (FarmNode, HouseNode, WarehouseNode, BarnNode, SiloNode, PastureNode)):
@@ -164,7 +186,10 @@ class PygameViewerSystem(SystemNode):
             if isinstance(node, TransformNode):
                 parent = node.parent
                 x, y = node.position
-                pos = (int(x * self.scale), int(y * self.scale))
+                pos = (
+                    int((x - self.offset_x) * self.scale),
+                    int((y - self.offset_y) * self.scale),
+                )
                 if isinstance(parent, CharacterNode):
                     color = (50, 150, 255) if getattr(parent, "gender", "male") == "male" else (255, 105, 180)
                     pygame.draw.circle(self.screen, color, pos, CHAR_RADIUS)
