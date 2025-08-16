@@ -45,6 +45,8 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
   - Plaines → déplacements rapides
   - Forêts → ralentissement, bonus défensif
   - Collines → bonus de visibilité et de défense
+- La grille est contrôlée par le paramètre ``grid_type`` du ``TerrainNode``
+  (``square`` par défaut, ``hex`` prévu pour une future version).
 
 ---
 
