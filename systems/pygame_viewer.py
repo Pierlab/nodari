@@ -51,7 +51,9 @@ TERRAIN_COLORS: dict[str, Tuple[int, int, int]] = {
     "hill": (110, 110, 110),
 }
 ARROW_COLOR = (255, 255, 0)
-ARROW_MAX_LEN = 40
+# Shorter arrows for unit targets
+ARROW_MAX_LEN = 25
+CAPITAL_COLOR = (0, 200, 0)
 NATION_COLORS = [
     (200, 50, 50),
     (50, 50, 200),
@@ -82,6 +84,7 @@ class PygameViewerSystem(SystemNode):
         scale: float = 5.0,
         panel_width: int = config.PANEL_WIDTH,
         font_size: int = config.FONT_SIZE,
+        draw_capital: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -100,6 +103,9 @@ class PygameViewerSystem(SystemNode):
         self.offset_y = 0.0
         self.selected: Optional[SimNode] = None
         self.unit_radius = UNIT_RADIUS
+        self.draw_capital = draw_capital
+        # Extra informational lines injected by external code (e.g. pause menu)
+        self.extra_info: List[str] = []
 
     # ------------------------------------------------------------------
     # Helpers
@@ -227,6 +233,16 @@ class PygameViewerSystem(SystemNode):
         )
         pygame.draw.polygon(self.screen, color, [end, left, right])
 
+    def _draw_cross(self, center: Tuple[int, int], size: int) -> None:
+        """Draw a cross centered on ``center`` with given ``size``."""
+        x, y = center
+        pygame.draw.line(
+            self.screen, (255, 0, 0), (x - size, y - size), (x + size, y + size), 2
+        )
+        pygame.draw.line(
+            self.screen, (255, 0, 0), (x - size, y + size), (x + size, y - size), 2
+        )
+
     def _draw_terrain(self, terrain: TerrainNode) -> None:
         for y, row in enumerate(terrain.tiles):
             for x, tile in enumerate(row):
@@ -246,6 +262,14 @@ class PygameViewerSystem(SystemNode):
             self._draw_terrain(terrain)
         nations = [n for n in self._walk(root) if isinstance(n, NationNode)]
         nation_colors = {n: NATION_COLORS[i % len(NATION_COLORS)] for i, n in enumerate(nations)}
+        if nations and self.draw_capital:
+            cap = getattr(nations[0], "capital_position", None)
+            if cap is not None:
+                cx = int((cap[0] - self.offset_x) * self.scale)
+                cy = int((cap[1] - self.offset_y) * self.scale)
+                size = int(self.unit_radius * 3)
+                rect = pygame.Rect(cx - size, cy - size, size * 2, size * 2)
+                pygame.draw.rect(self.screen, CAPITAL_COLOR, rect)
 
         lines: List[str] = []
         time_sys: Optional[TimeSystem] = None
@@ -266,13 +290,17 @@ class PygameViewerSystem(SystemNode):
                 if isinstance(parent, UnitNode):
                     col = nation_colors.get(self._nation_of(parent), (200, 200, 200))
                     target = getattr(parent, "target", None)
-                    if target is not None:
+                    if target is not None and parent.state != "defeated":
                         end = (
                             int((target[0] - self.offset_x) * self.scale),
                             int((target[1] - self.offset_y) * self.scale),
                         )
                         self._draw_arrow(pos, end, ARROW_COLOR)
-                    pygame.draw.circle(self.screen, col, pos, self.unit_radius)
+                    radius = int(self.unit_radius * max(0.5, (parent.size / 100) ** 0.5))
+                    if parent.state == "defeated":
+                        self._draw_cross(pos, radius)
+                    else:
+                        pygame.draw.circle(self.screen, col, pos, radius)
                 elif isinstance(parent, CharacterNode):
                     color = (50, 150, 255) if getattr(parent, "gender", "male") == "male" else (255, 105, 180)
                     pygame.draw.circle(self.screen, color, pos, CHAR_RADIUS)
@@ -326,6 +354,7 @@ class PygameViewerSystem(SystemNode):
         lines.append("Controls:")
         lines.append(" Space: pause/resume")
         lines.append(" +/- : change speed")
+        lines.extend(self.extra_info)
 
         line_height = self.font.get_linesize()
         for i, text in enumerate(lines):

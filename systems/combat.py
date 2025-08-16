@@ -89,7 +89,12 @@ class CombatSystem(SystemNode):
         nation = self._get_nation(loser)
         if nation is not None:
             nation.change_morale(-loss)
-        loser.route(loss=loss)
+        if loser.size == 0:
+            loser.state = "defeated"
+            loser.target = None
+            loser.emit("unit_routed", {"loss": loss}, direction="up")
+        else:
+            loser.route(loss=loss)
         self.emit(
             "combat_occurred",
             {

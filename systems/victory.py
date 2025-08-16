@@ -83,6 +83,8 @@ class VictorySystem(SystemNode):
             cx, cy = nation.capital_position
             count = 0
             for unit in units:
+                if getattr(unit, "state", "") == "defeated":
+                    continue
                 owner = self._find_nation(unit)
                 if owner is nation:
                     continue
