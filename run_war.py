@@ -70,6 +70,10 @@ TIME_SCALE = config.TIME_SCALE
 
 clock = pygame.time.Clock()
 viewer = next((c for c in world.children if isinstance(c, PygameViewerSystem)), None)
+# Center the view on the world by default
+if viewer:
+    viewer.offset_x = world.width / 2 - viewer.view_width / (2 * viewer.scale)
+    viewer.offset_y = world.height / 2 - viewer.view_height / (2 * viewer.scale)
 paused = False
 running = True
 while running and pygame.get_init():
