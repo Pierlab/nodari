@@ -151,6 +151,16 @@
 | velocity | List[float] | None | None |  Initial velocity in meters per second. Defaults to ``[0.0, 0.0]``. |
 | kwargs | _empty |  |  |
 
+### UnitNode
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| size | int | 100 | Number of soldiers in the unit. |
+| state | str | 'idle' | Current state of the unit: ``"idle"``, ``"moving"``, ``"fighting"`` or ``"fleeing"``. |
+| speed | float | 1.0 | Movement speed of the unit. |
+| morale | int | 100 | Morale value of the unit. |
+| kwargs | _empty |  |  |
+
 ### WarehouseNode
 
 | Parameter | Type | Default | Description |

@@ -10,7 +10,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **NationNode** – Holds moral, capital position and references to generals and armies. Emits `moral_changed` and `capital_captured`.
 - [x] **GeneralNode** – Stores tactical style (aggressive/defensive/balanced) and owns one or more armies. Listens to partial battlefield events due to fog of war.
 - [x] **ArmyNode** – Groups `UnitNode`s, tracks goal (advance, defend, retreat) and current size. Interfaces with Movement and Combat systems.
-- [ ] **UnitNode** – Represents ~100 soldiers with state (moving, fighting, fleeing) and attributes such as speed and morale. Emits `unit_engaged` and `unit_routed`.
+- [x] **UnitNode** – Represents ~100 soldiers with state (moving, fighting, fleeing) and attributes such as speed and morale. Emits `unit_engaged` and `unit_routed`.
 - [ ] **TerrainNode** – Defines map tiles: plain, forest, hill. Influences movement speed and combat bonuses.
 
 ## Global Systems
