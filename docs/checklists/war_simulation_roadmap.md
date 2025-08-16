@@ -27,7 +27,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 
 ## Behaviour & AI
 - [x] **General decision making** – Implement simple AI reacting to partial information, moral status and objectives.
-- [ ] **Unit behaviour** – Units move toward targets, avoid obstacles, engage enemies or retreat when morale is low.
+- [x] **Unit behaviour** – Units move toward targets, avoid obstacles, engage enemies or retreat when morale is low.
 - [ ] **Surprise maneuvers** – Allow generals to attempt flanking moves with a success probability.
 
 ## Victory Conditions

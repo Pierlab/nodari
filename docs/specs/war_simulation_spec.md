@@ -39,6 +39,8 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
   - Se déplacer
   - Combattre
   - Battre en retraite
+- Une unité bat en retraite vers la capitale de sa nation si son **moral**
+  descend sous ``30``.
 
 ### Terrain
 - La carte est divisée en zones : **plaine, forêt, colline**.
