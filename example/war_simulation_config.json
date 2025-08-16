@@ -15,7 +15,7 @@
         "children": [
           {"type": "GeneralNode", "id": "north_general", "config": {"style": "balanced"},
             "children": [
-              {"type": "ArmyNode", "id": "north_army", "config": {"goal": "advance"},
+              {"type": "ArmyNode", "id": "north_army", "config": {"goal": "advance", "size": 1},
                 "children": [
                   {"type": "UnitNode", "id": "north_unit_1", "config": {"size": 100, "state": "idle"}}
                 ]
@@ -28,7 +28,7 @@
         "children": [
           {"type": "GeneralNode", "id": "south_general", "config": {"style": "balanced"},
             "children": [
-              {"type": "ArmyNode", "id": "south_army", "config": {"goal": "advance"},
+              {"type": "ArmyNode", "id": "south_army", "config": {"goal": "advance", "size": 1},
                 "children": [
                   {"type": "UnitNode", "id": "south_unit_1", "config": {"size": 100, "state": "idle"}}
                 ]
