@@ -150,6 +150,7 @@
 | tiles | List[List[str]] |  |  Two-dimensional list describing the terrain type at each map position. |
 | speed_modifiers | Optional[Dict[str, float]] | None | None |  Optional mapping of terrain type to movement speed modifier. |
 | combat_bonuses | Optional[Dict[str, int]] | None | None |  Optional mapping of terrain type to combat bonus value. |
+| obstacles | Optional[List[List[int]]] | None | None |  Optional list of impassable ``[x, y]`` coordinates. |
 | kwargs | _empty |  |  |
 
 ### TransformNode
@@ -238,7 +239,7 @@
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | terrain | TerrainNode | str | None | None |  Reference to the :class:`TerrainNode` providing tile modifiers. If a string is supplied the node with this id is looked up on first update. |
-| obstacles | Optional[List[List[int]]] | None | None |  Optional list of impassable ``[x, y]`` coordinates. |
+| obstacles | Optional[List[List[int]]] | None | None |  Additional impassable ``[x, y]`` coordinates merged with terrain obstacles. |
 | kwargs | _empty |  |  |
 
 ### PygameViewerSystem

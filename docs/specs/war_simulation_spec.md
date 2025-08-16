@@ -47,6 +47,8 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
   - Collines → bonus de visibilité et de défense
 - La grille est contrôlée par le paramètre ``grid_type`` du ``TerrainNode``
   (``square`` par défaut, ``hex`` prévu pour une future version).
+- Les obstacles infranchissables (rivières, montagnes) sont listés via
+  ``obstacles`` dans le ``TerrainNode``.
 
 ### Positionnement initial
 - Chaque nation définit une ``capital_position`` dans la configuration.
@@ -65,7 +67,7 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 ### Mouvement
 - Les unités se déplacent vers une position cible.
 - La vitesse est affectée par le type de terrain et le moral de l’unité.
-- Les obstacles définis sur la carte sont infranchissables.
+- Les obstacles définis dans ``TerrainNode.obstacles`` sont infranchissables.
 - Implémentation initiale en grille carrée (préparation pour une grille hexagonale ultérieure).
 
 ### Combat

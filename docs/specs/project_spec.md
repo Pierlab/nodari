@@ -35,6 +35,8 @@ Global behaviours live in `SystemNode` subclasses which traverse the tree or lis
 - **EconomySystem** – listens to buy/sell events, transfers money and updates prices if necessary.
 - **WeatherSystem** – determines current weather, emits events like `rain_started` or `drought` and exposes state.
 - **DistanceSystem** – computes distances between nodes with positions, caches results each tick and answers distance queries in meters.
+- **MovementSystem** – moves units toward targets while factoring in terrain
+  modifiers, morale and impassable obstacles.
 
 Example usage:
 
@@ -56,7 +58,8 @@ For modelling the farm and inhabitants:
 - **AIBehaviorNode** – decides actions based on internal state and events (`need_threshold_reached`, `phase_changed`, etc.).
 - **TransformNode** (optional) – stores position in meters and velocity in meters per second. Used to define initial placements for capitals, generals, armies and units in scenarios like the war simulation.
 - **TerrainNode** – describes terrain tiles on a square or hex grid with
-  movement and combat modifiers (`grid_type` defaults to ``square``).
+  movement and combat modifiers (`grid_type` defaults to ``square``) and
+  an optional list of obstacle coordinates defining impassable tiles.
 - **AnimalNode** – represents livestock or wildlife with needs and optional resource production. Emits events such as `animal_fed`.
 
 Example usage:
@@ -175,10 +178,10 @@ Steps must be completed in order, each with accompanying unit tests.
 
 #### 4.5 TerrainNode
 - Attributes: `tiles`, optional `grid_type` (``square`` or ``hex``),
-  `speed_modifiers`, `combat_bonuses`.
+  `speed_modifiers`, `combat_bonuses`, `obstacles`.
 - Methods: `get_tile`, `get_speed_modifier`, `get_combat_bonus`,
-  `get_neighbors`.
-- Tests for tile lookup, modifiers and neighbour calculation.
+  `get_neighbors`, `is_obstacle`.
+- Tests for tile lookup, modifiers, obstacle detection and neighbour calculation.
 
 ### Step 5: Global Systems
 #### 5.1 TimeSystem

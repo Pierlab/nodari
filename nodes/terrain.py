@@ -22,6 +22,9 @@ class TerrainNode(SimNode):
     grid_type:
         ``"square"`` for a 4-neighbour grid or ``"hex"`` for a hexagonal
         layout. Only the square grid is fully supported for now.
+    obstacles:
+        Optional list of impassable ``[x, y]`` coordinates such as rivers or
+        mountains.
     """
 
     def __init__(
@@ -30,6 +33,7 @@ class TerrainNode(SimNode):
         speed_modifiers: Optional[Dict[str, float]] | None = None,
         combat_bonuses: Optional[Dict[str, int]] | None = None,
         grid_type: str = "square",
+        obstacles: Optional[List[List[int]]] | None = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -49,6 +53,7 @@ class TerrainNode(SimNode):
         self.grid_type = grid_type
         if self.grid_type not in {"square", "hex"}:
             raise ValueError("grid_type must be 'square' or 'hex'")
+        self.obstacles = {tuple(o) for o in (obstacles or [])}
 
     # ------------------------------------------------------------------
     def get_tile(self, x: int, y: int) -> str | None:
@@ -75,6 +80,12 @@ class TerrainNode(SimNode):
         if terrain is None:
             return 0
         return self.combat_bonuses.get(terrain, 0)
+
+    # ------------------------------------------------------------------
+    def is_obstacle(self, x: int, y: int) -> bool:
+        """Return ``True`` if ``(x, y)`` is marked as an obstacle."""
+
+        return (x, y) in self.obstacles
 
     # ------------------------------------------------------------------
     def get_neighbors(self, x: int, y: int) -> List[Tuple[int, int]]:

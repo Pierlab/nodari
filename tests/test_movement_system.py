@@ -20,10 +20,10 @@ def test_movement_considers_terrain_and_morale():
     assert transform.position[0] == 1.0
 
 
-def test_obstacle_blocks_movement():
+def test_map_obstacle_blocks_movement():
     world = WorldNode()
-    terrain = TerrainNode(tiles=[["plain", "plain"]])
-    MovementSystem(parent=world, terrain=terrain, obstacles=[[1, 0]])
+    terrain = TerrainNode(tiles=[["plain", "plain"]], obstacles=[[1, 0]])
+    MovementSystem(parent=world, terrain=terrain)
     unit = UnitNode(parent=world, speed=1.0, morale=100, target=[2, 0])
     TransformNode(parent=unit, position=[0.0, 0.0])
 
