@@ -14,7 +14,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **TerrainNode** – Defines map tiles: plain, forest, hill. Influences movement speed and combat bonuses.
 
 ## Global Systems
-- [ ] **TimeSystem extension** – Support accelerated and real‑time modes for war scenarios.
+- [x] **TimeSystem extension** – Support accelerated and real‑time modes for war scenarios.
 - [ ] **MovementSystem** – Moves units each tick toward targets while considering terrain speed modifiers, obstacles and morale penalties. Prepare for future hex‑grid pathfinding (initial version may use square grid).
 - [ ] **CombatSystem** – When opposing units occupy the same tile, resolve combat using unit size, randomness and terrain modifiers. Update unit states and nation morale.
 - [ ] **MoralSystem** – Aggregates morale changes from defeats, general losses and events. Triggers nation collapse at zero morale.

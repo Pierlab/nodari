@@ -6,13 +6,18 @@ from core.plugins import register_node_type
 
 
 class TimeSystem(SystemNode):
-    """Emit a `tick` event based on elapsed time and track the day cycle."""
+    """Emit a `tick` event based on elapsed time and track the day cycle.
+
+    The system supports time scaling to run simulations in real time or at an
+    accelerated pace.
+    """
 
     def __init__(
         self,
         tick_duration: float = 1.0,
         phase_length: int = 10,
         start_time: float = 0.0,
+        time_scale: float = 1.0,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -23,9 +28,10 @@ class TimeSystem(SystemNode):
         self.current_time = start_time  # seconds since start of day
         self._accumulator = 0.0
         self.day_length = 24 * 3600.0
+        self.time_scale = time_scale
 
     def update(self, dt: float) -> None:
-        self._accumulator += dt
+        self._accumulator += dt * self.time_scale
         while self._accumulator >= self.tick_duration:
             self._accumulator -= self.tick_duration
             self.current_tick += 1
@@ -35,6 +41,10 @@ class TimeSystem(SystemNode):
             if new_phase != self.phase:
                 self.phase = new_phase
                 self.emit("phase_changed", {"phase": self.phase}, direction="down")
+
+    def set_time_scale(self, scale: float) -> None:
+        """Set a new time scale to accelerate or slow the simulation."""
+        self.time_scale = scale
 
 
 register_node_type("TimeSystem", TimeSystem)
