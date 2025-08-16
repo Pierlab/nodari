@@ -18,6 +18,8 @@ class UnitNode(SimNode):
         Movement speed of the unit.
     morale:
         Morale value of the unit.
+    target:
+        Optional ``[x, y]`` coordinates the unit is moving toward.
     """
 
     def __init__(
@@ -26,6 +28,7 @@ class UnitNode(SimNode):
         state: str = "idle",
         speed: float = 1.0,
         morale: int = 100,
+        target: list[int] | None = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -33,6 +36,7 @@ class UnitNode(SimNode):
         self.state = state
         self.speed = speed
         self.morale = morale
+        self.target = target
 
     # ------------------------------------------------------------------
     def engage(self, enemy: str | SimNode | None = None) -> None:

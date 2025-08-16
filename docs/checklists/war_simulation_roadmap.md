@@ -15,7 +15,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 
 ## Global Systems
 - [x] **TimeSystem extension** – Support accelerated and real‑time modes for war scenarios.
-- [ ] **MovementSystem** – Moves units each tick toward targets while considering terrain speed modifiers, obstacles and morale penalties. Prepare for future hex‑grid pathfinding (initial version may use square grid).
+- [x] **MovementSystem** – Moves units each tick toward targets while considering terrain speed modifiers, obstacles and morale penalties. Prepare for future hex‑grid pathfinding (initial version may use square grid).
 - [ ] **CombatSystem** – When opposing units occupy the same tile, resolve combat using unit size, randomness and terrain modifiers. Update unit states and nation morale.
 - [ ] **MoralSystem** – Aggregates morale changes from defeats, general losses and events. Triggers nation collapse at zero morale.
 - [ ] **Event Logging/Visualization System** – Provide clear real‑time or accelerated visualisation; for now log movements and combats, later connect to a dedicated viewer.
