@@ -33,6 +33,13 @@
         "id": "moral"
       },
       {
+        "type": "VictorySystem",
+        "id": "victory",
+        "config": {
+          "capture_unit_threshold": 1
+        }
+      },
+      {
         "type": "LoggingSystem",
         "id": "logger",
         "config": {

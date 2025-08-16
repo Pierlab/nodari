@@ -99,7 +99,10 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 
 ## 4. Conditions de victoire
 - Une nation gagne si :
-  - **Un nombre suffisant d’unités atteint le camp ennemi** (capture de capitale).
+  - **Un nombre suffisant d’unités atteint le camp ennemi** (capture de
+    capitale). Le ``VictorySystem`` déclenche ``capital_captured`` lorsque au
+    moins ``capture_unit_threshold`` unités ennemies occupent la tuile de la
+    capitale (valeur par défaut : ``3``).
   - **Le moral adverse tombe à 0**.
 
 ---
