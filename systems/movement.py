@@ -1,8 +1,9 @@
 """System to move units toward targets considering terrain and morale."""
 from __future__ import annotations
 
-from math import hypot
+from math import atan2, cos, hypot, sin
 from typing import Iterable, List, Optional
+import random
 
 from core.simnode import SystemNode, SimNode
 from core.plugins import register_node_type
@@ -31,12 +32,14 @@ class MovementSystem(SystemNode):
         self,
         terrain: TerrainNode | str | None = None,
         obstacles: Optional[List[List[int]]] | None = None,
+        direction_noise: float = 0.0,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self._terrain_ref = terrain
         self.terrain: TerrainNode | None = terrain if isinstance(terrain, TerrainNode) else None
         self.obstacles = {tuple(o) for o in (obstacles or [])}
+        self.direction_noise = direction_noise
 
     # ------------------------------------------------------------------
     def _resolve_terrain(self) -> None:
@@ -100,8 +103,11 @@ class MovementSystem(SystemNode):
             if step >= dist:
                 new_x, new_y = gx, gy
             else:
-                nx = tx + dx / dist * step
-                ny = ty + dy / dist * step
+                angle = atan2(dy, dx)
+                if self.direction_noise > 0:
+                    angle += random.uniform(-self.direction_noise, self.direction_noise)
+                nx = tx + cos(angle) * step
+                ny = ty + sin(angle) * step
                 new_x, new_y = nx, ny
             ix, iy = int(round(new_x)), int(round(new_y))
             blocked = (ix, iy) in self.obstacles
