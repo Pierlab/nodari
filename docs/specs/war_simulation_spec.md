@@ -68,6 +68,7 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 
 ### Moral
 - Chaque nation possède un moral global.
+- Un `MoralSystem` agrège les variations de moral et émet `nation_collapsed` quand il atteint zéro.
 - Le moral baisse lorsque :
   - Une armée subit une lourde défaite.
   - Un général est battu ou tué.

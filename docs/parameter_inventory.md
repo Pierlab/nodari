@@ -147,9 +147,9 @@
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| tiles | List[List[str]] |  | Two-dimensional grid of terrain types. |
-| speed_modifiers | Optional[Dict[str, float]] | None | Mapping of terrain type to movement speed modifier. |
-| combat_bonuses | Optional[Dict[str, int]] | None | Mapping of terrain type to combat bonus value. |
+| tiles | List[List[str]] |  |  Two-dimensional list describing the terrain type at each map position. |
+| speed_modifiers | Optional[Dict[str, float]] | None | None |  Optional mapping of terrain type to movement speed modifier. |
+| combat_bonuses | Optional[Dict[str, int]] | None | None |  Optional mapping of terrain type to combat bonus value. |
 | kwargs | _empty |  |  |
 
 ### TransformNode
@@ -164,11 +164,11 @@
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| size | int | 100 | Number of soldiers in the unit. |
-| state | str | 'idle' | Current state of the unit: ``"idle"``, ``"moving"``, ``"fighting"`` or ``"fleeing"``. |
-| speed | float | 1.0 | Movement speed of the unit. |
-| morale | int | 100 | Morale value of the unit. |
-| target | Optional[List[int]] | None | ``[x, y]`` coordinates the unit is moving toward. |
+| size | int | 100 |  Number of soldiers in this unit. |
+| state | str | 'idle' |  Current state of the unit: ``"idle"``, ``"moving"``, ``"fighting"`` or ``"fleeing"``. |
+| speed | float | 1.0 |  Movement speed of the unit. |
+| morale | int | 100 |  Morale value of the unit. |
+| target | list[int] | None | None |  Optional ``[x, y]`` coordinates the unit is moving toward. |
 | kwargs | _empty |  |  |
 
 ### WarehouseNode
@@ -198,6 +198,13 @@
 
 ## Systems
 
+### CombatSystem
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| terrain | TerrainNode | str | None | None |  Reference to the :class:`TerrainNode` providing combat bonuses. If a string is supplied the node with this id is looked up on first update. |
+| kwargs | _empty |  |  |
+
 ### DistanceSystem
 
 | Parameter | Type | Default | Description |
@@ -219,19 +226,19 @@
 | logger | Optional[logging.Logger] | None |  Optional :class:`logging.Logger` instance. Defaults to one named after the system. |
 | kwargs | _empty |  |  |
 
-### CombatSystem
+### MoralSystem
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| terrain | Optional[TerrainNode | str] | None | Terrain node or id providing combat bonuses. |
+| collapse_threshold | int | 0 |  Morale value at or below which a nation collapses. |
 | kwargs | _empty |  |  |
 
 ### MovementSystem
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| terrain | Optional[TerrainNode | str] | None | Terrain node or id providing speed modifiers. |
-| obstacles | Optional[List[List[int]]] | None | List of impassable ``[x, y]`` coordinates. |
+| terrain | TerrainNode | str | None | None |  Reference to the :class:`TerrainNode` providing tile modifiers. If a string is supplied the node with this id is looked up on first update. |
+| obstacles | Optional[List[List[int]]] | None | None |  Optional list of impassable ``[x, y]`` coordinates. |
 | kwargs | _empty |  |  |
 
 ### PygameViewerSystem
@@ -258,7 +265,7 @@
 | tick_duration | float | 1.0 |  |
 | phase_length | int | 10 |  |
 | start_time | float | 0.0 |  |
-| time_scale | float | 1.0 | Multiplier for elapsed time (``>1`` accelerates). |
+| time_scale | float | 1.0 |  |
 | kwargs | _empty |  |  |
 
 ### WeatherSystem
