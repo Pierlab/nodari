@@ -4,7 +4,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 
 ## Foundations
 - [x] **Confirm engine setup** – Reuse the existing `SimNode`, event bus, systems and declarative loader from the core project.
-- [ ] **Create base configuration** – In `example/war_simulation_config.json`, describe two nations, their generals, starting armies (100 units each) and initial terrain layout.
+- [x] **Create base configuration** – In `example/war_simulation_config.json`, describe two nations, their generals, starting armies (100 units each) and initial terrain layout.
 
 ## Domain Nodes
 - [ ] **NationNode** – Holds moral, capital position and references to generals and armies. Emits `moral_changed` and `capital_captured`.
