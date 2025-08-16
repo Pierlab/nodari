@@ -23,7 +23,8 @@ class MovementSystem(SystemNode):
         Reference to the :class:`TerrainNode` providing tile modifiers. If a
         string is supplied the node with this id is looked up on first update.
     obstacles:
-        Optional list of impassable ``[x, y]`` coordinates.
+        Optional list of additional impassable ``[x, y]`` coordinates. These
+        are merged with obstacles defined on the :class:`TerrainNode`.
     """
 
     def __init__(
@@ -102,7 +103,11 @@ class MovementSystem(SystemNode):
                 nx = tx + dx / dist * step
                 ny = ty + dy / dist * step
                 new_x, new_y = nx, ny
-            if (int(round(new_x)), int(round(new_y))) in self.obstacles:
+            ix, iy = int(round(new_x)), int(round(new_y))
+            blocked = (ix, iy) in self.obstacles
+            if not blocked and self.terrain is not None:
+                blocked = self.terrain.is_obstacle(ix, iy)
+            if blocked:
                 continue
             transform.position[0] = new_x
             transform.position[1] = new_y
