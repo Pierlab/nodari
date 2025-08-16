@@ -10,17 +10,27 @@
       {
         "type": "TimeSystem",
         "id": "time",
-        "config": {"time_scale": 60}
+        "config": {
+          "time_scale": 60
+        }
       },
       {
         "type": "MovementSystem",
         "id": "movement",
-        "config": {"terrain": "terrain"}
+        "config": {
+          "terrain": "terrain"
+        }
       },
       {
         "type": "CombatSystem",
         "id": "combat",
-        "config": {"terrain": "terrain"}
+        "config": {
+          "terrain": "terrain"
+        }
+      },
+      {
+        "type": "MoralSystem",
+        "id": "moral"
       },
       {
         "type": "TerrainNode",
@@ -85,12 +95,20 @@
                       "state": "idle",
                       "speed": 1.0,
                       "morale": 100,
-                      "target": [95, 25]
+                      "target": [
+                        95,
+                        25
+                      ]
                     },
                     "children": [
                       {
                         "type": "TransformNode",
-                        "config": {"position": [5, 25]}
+                        "config": {
+                          "position": [
+                            5,
+                            25
+                          ]
+                        }
                       }
                     ]
                   }
@@ -134,12 +152,20 @@
                       "state": "idle",
                       "speed": 1.0,
                       "morale": 100,
-                      "target": [5, 25]
+                      "target": [
+                        5,
+                        25
+                      ]
                     },
                     "children": [
                       {
                         "type": "TransformNode",
-                        "config": {"position": [95, 25]}
+                        "config": {
+                          "position": [
+                            95,
+                            25
+                          ]
+                        }
                       }
                     ]
                   }
