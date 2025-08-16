@@ -48,6 +48,11 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 - La grille est contrôlée par le paramètre ``grid_type`` du ``TerrainNode``
   (``square`` par défaut, ``hex`` prévu pour une future version).
 
+### Positionnement initial
+- Chaque nation définit une ``capital_position`` dans la configuration.
+- Les ``GeneralNode`` et ``ArmyNode`` reçoivent un ``TransformNode`` indiquant leur position de départ.
+- Les ``UnitNode`` disposent également d'un ``TransformNode`` pour être placées sur la carte.
+
 ---
 
 ## 3. Systèmes globaux

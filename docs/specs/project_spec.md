@@ -54,7 +54,7 @@ For modelling the farm and inhabitants:
 - **NeedNode** – represents a need (hunger, fatigue). Holds current value, thresholds and change rates. Emits `need_threshold_reached` and `need_satisfied`.
 - **ResourceProducerNode** – produces a resource every tick consuming optional inputs. Emits `resource_produced`.
 - **AIBehaviorNode** – decides actions based on internal state and events (`need_threshold_reached`, `phase_changed`, etc.).
-- **TransformNode** (optional) – stores position in meters and velocity in meters per second.
+- **TransformNode** (optional) – stores position in meters and velocity in meters per second. Used to define initial placements for capitals, generals, armies and units in scenarios like the war simulation.
 - **TerrainNode** – describes terrain tiles on a square or hex grid with
   movement and combat modifiers (`grid_type` defaults to ``square``).
 - **AnimalNode** – represents livestock or wildlife with needs and optional resource production. Emits events such as `animal_fed`.

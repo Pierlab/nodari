@@ -88,6 +88,15 @@
             },
             "children": [
               {
+                "type": "TransformNode",
+                "config": {
+                  "position": [
+                    5,
+                    25
+                  ]
+                }
+              },
+              {
                 "type": "ArmyNode",
                 "id": "north_army",
                 "config": {
@@ -95,6 +104,15 @@
                   "size": 1
                 },
                 "children": [
+                  {
+                    "type": "TransformNode",
+                    "config": {
+                      "position": [
+                        5,
+                        25
+                      ]
+                    }
+                  },
                   {
                     "type": "UnitNode",
                     "id": "north_unit_1",
@@ -145,6 +163,15 @@
             },
             "children": [
               {
+                "type": "TransformNode",
+                "config": {
+                  "position": [
+                    95,
+                    25
+                  ]
+                }
+              },
+              {
                 "type": "ArmyNode",
                 "id": "south_army",
                 "config": {
@@ -152,6 +179,15 @@
                   "size": 1
                 },
                 "children": [
+                  {
+                    "type": "TransformNode",
+                    "config": {
+                      "position": [
+                        95,
+                        25
+                      ]
+                    }
+                  },
                   {
                     "type": "UnitNode",
                     "id": "south_unit_1",
