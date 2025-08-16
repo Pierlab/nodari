@@ -31,7 +31,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 - [x] **Surprise maneuvers** – Allow generals to attempt flanking moves with a success probability.
 
 ## Victory Conditions
-- [ ] **Capital capture** – Detect when a sufficient number of allied units occupy the enemy capital tile.
+- [x] **Capital capture** – Detect when a sufficient number of allied units occupy the enemy capital tile.
 - [ ] **Moral collapse** – End simulation if a nation's morale reaches zero.
 
 ## Visualization Enhancements (Later Iterations)

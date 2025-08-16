@@ -46,7 +46,7 @@
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| goal | str |  |  Current objective of the army: ``"advance"``, ``"defend"`` or ``"retreat"``. |
+| goal | str |  |  Current objective of the army: ``"advance"``, ``"defend"``, ``"retreat"`` or ``"flank"``. |
 | size | int | 0 |  Number of unit groups in the army. |
 | kwargs | _empty |  |  |
 
@@ -78,7 +78,7 @@
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | style | str |  |  Tactical approach of the general: ``"aggressive"``, ``"defensive"`` or ``"balanced"``. |
-| flank_success_chance | float | 0.25 |  Probability that a flanking manoeuvre initiated by the general succeeds. |
+| flank_success_chance | float | 0.25 |  Probability in ``[0, 1]`` that a flanking manoeuvre succeeds. |
 | kwargs | _empty |  |  |
 
 ### HouseNode
@@ -151,7 +151,8 @@
 | tiles | List[List[str]] |  |  Two-dimensional list describing the terrain type at each map position. |
 | speed_modifiers | Optional[Dict[str, float]] | None | None |  Optional mapping of terrain type to movement speed modifier. |
 | combat_bonuses | Optional[Dict[str, int]] | None | None |  Optional mapping of terrain type to combat bonus value. |
-| obstacles | Optional[List[List[int]]] | None | None |  Optional list of impassable ``[x, y]`` coordinates. |
+| grid_type | str | 'square' |  ``"square"`` for a 4-neighbour grid or ``"hex"`` for a hexagonal layout. Only the square grid is fully supported for now. |
+| obstacles | Optional[List[List[int]]] | None | None |  Optional list of impassable ``[x, y]`` coordinates such as rivers or mountains. |
 | kwargs | _empty |  |  |
 
 ### TransformNode
@@ -171,6 +172,7 @@
 | speed | float | 1.0 |  Movement speed of the unit. |
 | morale | int | 100 |  Morale value of the unit. |
 | target | list[int] | None | None |  Optional ``[x, y]`` coordinates the unit is moving toward. |
+| retreat_threshold | int | 30 |  Morale value below which the unit will retreat toward its nation's capital. |
 | kwargs | _empty |  |  |
 
 ### WarehouseNode
@@ -240,7 +242,7 @@
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | terrain | TerrainNode | str | None | None |  Reference to the :class:`TerrainNode` providing tile modifiers. If a string is supplied the node with this id is looked up on first update. |
-| obstacles | Optional[List[List[int]]] | None | None |  Additional impassable ``[x, y]`` coordinates merged with terrain obstacles. |
+| obstacles | Optional[List[List[int]]] | None | None |  Optional list of additional impassable ``[x, y]`` coordinates. These are merged with obstacles defined on the :class:`TerrainNode`. |
 | kwargs | _empty |  |  |
 
 ### PygameViewerSystem
@@ -268,6 +270,13 @@
 | phase_length | int | 10 |  |
 | start_time | float | 0.0 |  |
 | time_scale | float | 1.0 |  |
+| kwargs | _empty |  |  |
+
+### VictorySystem
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| capture_unit_threshold | int | 3 |  Number of enemy units required on a capital tile to capture it. |
 | kwargs | _empty |  |  |
 
 ### WeatherSystem
