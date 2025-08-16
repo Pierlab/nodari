@@ -143,6 +143,15 @@
 | height | int | None | None |  |
 | kwargs | _empty |  |  |
 
+### TerrainNode
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| tiles | List[List[str]] |  | Two-dimensional grid of terrain types. |
+| speed_modifiers | Optional[Dict[str, float]] | None | Mapping of terrain type to movement speed modifier. |
+| combat_bonuses | Optional[Dict[str, int]] | None | Mapping of terrain type to combat bonus value. |
+| kwargs | _empty |  |  |
+
 ### TransformNode
 
 | Parameter | Type | Default | Description |

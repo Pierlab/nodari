@@ -18,22 +18,22 @@
           "tiles": [
             [
               "plain",
-              "plain",
-              "plain",
-              "plain",
-              "plain"
-            ],
-            [
-              "plain",
-              "plain",
-              "plain",
+              "forest",
+              "hill",
               "plain",
               "plain"
             ],
             [
               "plain",
+              "forest",
+              "hill",
               "plain",
+              "plain"
+            ],
+            [
               "plain",
+              "forest",
+              "hill",
               "plain",
               "plain"
             ]
