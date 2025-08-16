@@ -50,7 +50,7 @@ for _ in range(1000):
 PY
 ```
 
-Une fenêtre Pygame apparaît avec un affichage minimal des entités simulées. Fermez la fenêtre ou utilisez `Ctrl+C` dans le terminal pour arrêter la simulation.
+Une fenêtre Pygame apparaît avec un affichage minimal des entités simulées. Le viewer superpose désormais le type de terrain, des icônes d'unités et des flèches indiquant leurs déplacements. Fermez la fenêtre ou utilisez `Ctrl+C` dans le terminal pour arrêter la simulation.
 
 ## 5. Pour aller plus loin
 
