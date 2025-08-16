@@ -25,6 +25,7 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 - Commande une ou plusieurs armées.
 - Caractéristique principale : **style tactique** (agressif, défensif, équilibré).
 - Reçoit les informations partielles du champ de bataille (brouillard de guerre).
+- Ajuste les objectifs des armées selon ces rapports et le moral national.
 
 ### Armée
 - Regroupe un ensemble d’unités.
