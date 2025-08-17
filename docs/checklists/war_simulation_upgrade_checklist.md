@@ -15,12 +15,12 @@
 
 ## 1) Map Scale & Distances (km between HQs)
 
-- [ ] **Add** in `config.py`:
-  - [ ] `WORLD_SCALE_M = 1.0`  # meters per grid unit (float)
-  - [ ] `DEFAULT_WORLD_W = 1000`, `DEFAULT_WORLD_H = 600` (example large map)
-- [ ] **Update** `example/war_simulation_config.json` to use larger `width/height` (e.g. 10_000 × 6_000) placing capitals 8–10 km apart.
-- [ ] **Viewer scale bar:** in `systems/pygame_viewer.py`, update the scale bar to compute label using `WORLD_SCALE_M` so the “100 m” annotation remains correct.
-- [ ] **Add runtime zoom/pan keys** (see §10 Controls).
+- [x] **Add** in `config.py`:
+  - [x] `WORLD_SCALE_M = 1.0`  # meters per grid unit (float)
+  - [x] `DEFAULT_WORLD_W = 1000`, `DEFAULT_WORLD_H = 600` (example large map)
+- [x] **Update** `example/war_simulation_config.json` to use larger `width/height` (e.g. 10_000 × 6_000) placing capitals 8–10 km apart.
+- [x] **Viewer scale bar:** in `systems/pygame_viewer.py`, update the scale bar to compute label using `WORLD_SCALE_M` so the “100 m” annotation remains correct.
+- [x] **Add runtime zoom/pan keys** (see §10 Controls).
 
 ---
 

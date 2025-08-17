@@ -194,6 +194,28 @@ while running and pygame.get_init():
                 TIME_SCALE = max(0.01, TIME_SCALE / 2)
             elif event.key == pygame.K_x:
                 TIME_SCALE = min(100, TIME_SCALE * 2)
+            elif viewer and event.key == pygame.K_LEFTBRACKET:
+                prev = viewer.scale
+                viewer.scale = max(0.1, viewer.scale * 0.9)
+                cx = viewer.offset_x + viewer.view_width / (2 * prev)
+                cy = viewer.offset_y + viewer.view_height / (2 * prev)
+                viewer.offset_x = cx - viewer.view_width / (2 * viewer.scale)
+                viewer.offset_y = cy - viewer.view_height / (2 * viewer.scale)
+            elif viewer and event.key == pygame.K_RIGHTBRACKET:
+                prev = viewer.scale
+                viewer.scale = viewer.scale * 1.1
+                cx = viewer.offset_x + viewer.view_width / (2 * prev)
+                cy = viewer.offset_y + viewer.view_height / (2 * prev)
+                viewer.offset_x = cx - viewer.view_width / (2 * viewer.scale)
+                viewer.offset_y = cy - viewer.view_height / (2 * viewer.scale)
+            elif viewer and event.key == pygame.K_h:
+                viewer.offset_x -= viewer.view_width * 0.1 / viewer.scale
+            elif viewer and event.key == pygame.K_l:
+                viewer.offset_x += viewer.view_width * 0.1 / viewer.scale
+            elif viewer and event.key == pygame.K_j:
+                viewer.offset_y += viewer.view_height * 0.1 / viewer.scale
+            elif viewer and event.key == pygame.K_k:
+                viewer.offset_y -= viewer.view_height * 0.1 / viewer.scale
             elif paused:
                 if event.key == pygame.K_a:
                     troops_per_nation = max(1, troops_per_nation - 1)
