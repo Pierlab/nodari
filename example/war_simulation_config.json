@@ -74,7 +74,41 @@
               "plain"
             ]
           ],
-          "obstacles": []
+          "obstacles": [],
+          "terrain_params": {
+            "rivers": [
+              {
+                "start": [0, 3000],
+                "end": [10000, 3000],
+                "width_min": 5,
+                "width_max": 8,
+                "meander": 0.2
+              }
+            ],
+            "lakes": [
+              {
+                "center": [5000, 2500],
+                "radius": 300,
+                "irregularity": 0.5
+              }
+            ],
+            "forests": {
+              "total_area_pct": 15,
+              "clusters": 6,
+              "cluster_spread": 0.6
+            },
+            "mountains": {
+              "total_area_pct": 8,
+              "perlin_scale": 0.01,
+              "peak_density": 0.2
+            },
+            "swamp_desert": {
+              "swamp_pct": 3,
+              "desert_pct": 5,
+              "clumpiness": 0.5
+            },
+            "obstacle_altitude_threshold": 0.75
+          }
         }
       },
       {

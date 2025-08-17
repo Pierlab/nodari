@@ -27,32 +27,32 @@
 ## 2) Terrain Generators (rivières, lacs, forêts, montagnes, marais, désert)
 
 ### 2.1 Code Organization
-- [ ] **Create module** `tools/terrain_generators.py` with pure functions:
-  - [ ] `generate_base(width, height, fill="plain") -> List[List[str]]`
-  - [ ] `carve_river(tiles, *, start, end, width_min, width_max, meander, obstacles_set)`
-  - [ ] `place_lake(tiles, *, center, radius, irregularity)`
-  - [ ] `place_forest(tiles, *, total_area_pct, clusters, cluster_spread)`
-  - [ ] `place_mountains(tiles, *, total_area_pct, perlin_scale, peak_density, altitude_map_out=None)`
-  - [ ] `place_swamp_desert(tiles, *, swamp_pct, desert_pct, clumpiness)`
-  - [ ] Each function mutates/returns `tiles` and returns an **`obstacles_set`** to feed `TerrainNode.obstacles` (water & high mountains).
+- [x] **Create module** `tools/terrain_generators.py` with pure functions:
+  - [x] `generate_base(width, height, fill="plain") -> List[List[str]]`
+  - [x] `carve_river(tiles, *, start, end, width_min, width_max, meander, obstacles_set)`
+  - [x] `place_lake(tiles, *, center, radius, irregularity)`
+  - [x] `place_forest(tiles, *, total_area_pct, clusters, cluster_spread)`
+  - [x] `place_mountains(tiles, *, total_area_pct, perlin_scale, peak_density, altitude_map_out=None)`
+  - [x] `place_swamp_desert(tiles, *, swamp_pct, desert_pct, clumpiness)`
+  - [x] Each function mutates/returns `tiles` and returns an **`obstacles_set`** to feed `TerrainNode.obstacles` (water & high mountains). 
 
 ### 2.2 Integration
-- [ ] **Extend** `nodes/terrain.py` (no breaking change):
-  - [ ] Keep current API. Add optional `altitude_map` attribute (2D float list) and new `get_altitude(x, y)` helper.
-- [ ] **Replace** `_generate_terrain()` in `run_war.py` with a **pipeline**:
-  - [ ] Start from `generate_base`.
-  - [ ] Apply features depending on parameters (exposed via keyboard & config). 
-  - [ ] Set `terrain.tiles` and `terrain.obstacles` accordingly.
-  - [ ] Preserve/extend `speed_modifiers` and `combat_bonuses` (as done today).
+- [x] **Extend** `nodes/terrain.py` (no breaking change):
+  - [x] Keep current API. Add optional `altitude_map` attribute (2D float list) and new `get_altitude(x, y)` helper.
+- [x] **Replace** `_generate_terrain()` in `run_war.py` with a **pipeline**:
+  - [x] Start from `generate_base`.
+  - [x] Apply features depending on parameters (exposed via keyboard & config).
+  - [x] Set `terrain.tiles` and `terrain.obstacles` accordingly.
+  - [x] Preserve/extend `speed_modifiers` and `combat_bonuses` (as done today).
 
 ### 2.3 Config keys (optional, with defaults)
-- [ ] In world config under the `TerrainNode` or `war_world.config.terrain_params`:
-  - [ ] `rivers: [{start:[x,y], end:[x,y], width_min:2, width_max:8, meander:0.3}]`
-  - [ ] `lakes: [{center:[x,y], radius:60, irregularity:0.4}]`
-  - [ ] `forests: {total_area_pct: 15, clusters: 6, cluster_spread: 0.6}`
-  - [ ] `mountains: {total_area_pct: 8, perlin_scale: 0.01, peak_density: 0.2}`
-  - [ ] `swamp_desert: {swamp_pct: 3, desert_pct: 5, clumpiness: 0.5}`
-  - [ ] `obstacle_altitude_threshold: 0.75`  # mountains above this are impassable
+- [x] In world config under the `TerrainNode` or `war_world.config.terrain_params`:
+  - [x] `rivers: [{start:[x,y], end:[x,y], width_min:2, width_max:8, meander:0.3}]`
+  - [x] `lakes: [{center:[x,y], radius:60, irregularity:0.4}]`
+  - [x] `forests: {total_area_pct: 15, clusters: 6, cluster_spread: 0.6}`
+  - [x] `mountains: {total_area_pct: 8, perlin_scale: 0.01, peak_density: 0.2}`
+  - [x] `swamp_desert: {swamp_pct: 3, desert_pct: 5, clumpiness: 0.5}`
+  - [x] `obstacle_altitude_threshold: 0.75`  # mountains above this are impassable
 
 ---
 

@@ -18,6 +18,14 @@ from nodes.nation import NationNode
 from nodes.transform import TransformNode
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
+from tools.terrain_generators import (
+    carve_river,
+    generate_base,
+    place_forest,
+    place_lake,
+    place_mountains,
+    place_swamp_desert,
+)
 from systems.movement import MovementSystem
 from systems.logger import LoggingSystem
 from systems.pygame_viewer import PygameViewerSystem
@@ -60,6 +68,18 @@ load_plugins(
 config_file = sys.argv[1] if len(sys.argv) > 1 else "example/war_simulation_config.json"
 world = load_simulation_from_file(config_file)
 
+terrain_node = next((c for c in world.children if isinstance(c, TerrainNode)), None)
+if terrain_node is not None:
+    terrain_params = dict(getattr(terrain_node, "params", {}))
+else:
+    terrain_params = {}
+
+terrain_params.setdefault("forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5})
+terrain_params.setdefault("rivers", [])
+terrain_params.setdefault("lakes", [])
+terrain_params.setdefault("mountains", {"total_area_pct": 5, "perlin_scale": 0.01, "peak_density": 0.2})
+terrain_params.setdefault("swamp_desert", {"swamp_pct": 3, "desert_pct": 5, "clumpiness": 0.5})
+
 
 # Ensure logging and visualization systems are present
 if not any(isinstance(c, LoggingSystem) for c in world.children):
@@ -81,36 +101,89 @@ troops_per_nation = 5
 speed_variation = 0.2
 stat_variation = 0.2
 distribution_mode = "cluster"
-terrain_density = 0.1
+terrain_params = {}
 
 
-def _generate_terrain(world, density: float = 0.1) -> None:
+def _generate_terrain(world, params: dict) -> None:
+    """Regenerate terrain tiles according to *params*."""
+
     terrain = next((c for c in world.children if isinstance(c, TerrainNode)), None)
     if terrain is None:
         return
+
     width, height = int(world.width), int(world.height)
-    terrain.tiles = [["plain" for _ in range(width)] for _ in range(height)]
-    terrain.obstacles.clear()
-    terrain.speed_modifiers.update({
-        "water": 0.4,
-        "mountain": 0.6,
-        "swamp": 0.5,
-        "desert": 0.8,
-    })
-    terrain.combat_bonuses.update({
-        "water": -2,
-        "mountain": 3,
-        "swamp": -1,
-        "desert": 0,
-    })
-    types = ["forest", "hill", "water", "mountain", "swamp", "desert"]
-    for y in range(height):
-        for x in range(width):
-            if random.random() < density:
-                tile = random.choice(types)
-                terrain.tiles[y][x] = tile
-                if tile == "water":
-                    terrain.obstacles.add((x, y))
+    tiles = generate_base(width, height, fill="plain")
+    obstacles: set[tuple[int, int]] = set()
+    altitude_map = [[0.0 for _ in range(width)] for _ in range(height)]
+
+    for river in params.get("rivers", []):
+        tiles, obstacles = carve_river(
+            tiles,
+            start=river.get("start", (0, 0)),
+            end=river.get("end", (width - 1, height - 1)),
+            width_min=river.get("width_min", 2),
+            width_max=river.get("width_max", 5),
+            meander=river.get("meander", 0.3),
+            obstacles_set=obstacles,
+        )
+
+    for lake in params.get("lakes", []):
+        tiles, obstacles = place_lake(
+            tiles,
+            center=lake.get("center", (width // 2, height // 2)),
+            radius=lake.get("radius", 20),
+            irregularity=lake.get("irregularity", 0.4),
+            obstacles_set=obstacles,
+        )
+
+    forests = params.get("forests", {})
+    tiles, obstacles = place_forest(
+        tiles,
+        total_area_pct=forests.get("total_area_pct", 10),
+        clusters=forests.get("clusters", 5),
+        cluster_spread=forests.get("cluster_spread", 0.5),
+        obstacles_set=obstacles,
+    )
+
+    mountains = params.get("mountains", {})
+    tiles, obstacles = place_mountains(
+        tiles,
+        total_area_pct=mountains.get("total_area_pct", 5),
+        perlin_scale=mountains.get("perlin_scale", 0.01),
+        peak_density=mountains.get("peak_density", 0.2),
+        altitude_map_out=altitude_map,
+        obstacles_set=obstacles,
+        obstacle_threshold=params.get("obstacle_altitude_threshold", 0.75),
+    )
+
+    swamp_desert = params.get("swamp_desert", {})
+    tiles, obstacles = place_swamp_desert(
+        tiles,
+        swamp_pct=swamp_desert.get("swamp_pct", 3),
+        desert_pct=swamp_desert.get("desert_pct", 5),
+        clumpiness=swamp_desert.get("clumpiness", 0.5),
+        obstacles_set=obstacles,
+    )
+
+    terrain.tiles = tiles
+    terrain.obstacles = obstacles
+    terrain.altitude_map = altitude_map
+    terrain.speed_modifiers.update(
+        {
+            "water": 0.4,
+            "mountain": 0.6,
+            "swamp": 0.5,
+            "desert": 0.8,
+        }
+    )
+    terrain.combat_bonuses.update(
+        {
+            "water": -2,
+            "mountain": 3,
+            "swamp": -1,
+            "desert": 0,
+        }
+    )
 
 
 def _spawn_armies(
@@ -157,7 +230,7 @@ def _spawn_armies(
 
 
 def _reset() -> None:
-    _generate_terrain(world, terrain_density)
+    _generate_terrain(world, terrain_params)
     _spawn_armies(world, troops_per_nation, distribution_mode, speed_variation, stat_variation)
     if time_system is not None:
         time_system.current_time = config.START_TIME
@@ -230,11 +303,17 @@ while running and pygame.get_init():
                 elif event.key == pygame.K_u:
                     stat_variation += 0.1
                 elif event.key == pygame.K_f:
-                    terrain_density = max(0.0, terrain_density - 0.05)
-                    _generate_terrain(world, terrain_density)
+                    forests = terrain_params.setdefault(
+                        "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
+                    )
+                    forests["total_area_pct"] = max(0.0, forests.get("total_area_pct", 0) - 1)
+                    _generate_terrain(world, terrain_params)
                 elif event.key == pygame.K_g:
-                    terrain_density = min(1.0, terrain_density + 0.05)
-                    _generate_terrain(world, terrain_density)
+                    forests = terrain_params.setdefault(
+                        "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
+                    )
+                    forests["total_area_pct"] = min(100.0, forests.get("total_area_pct", 0) + 1)
+                    _generate_terrain(world, terrain_params)
                 elif event.key == pygame.K_d:
                     distribution_mode = "spread" if distribution_mode == "cluster" else "cluster"
     if viewer:
@@ -243,9 +322,9 @@ while running and pygame.get_init():
                 f"Troops/nation: {troops_per_nation}",
                 f"Speed var: {speed_variation:.2f}",
                 f"Stat var: {stat_variation:.2f}",
-                f"Terrain dens.: {terrain_density:.2f}",
+                f"Forest %: {terrain_params.get('forests', {}).get('total_area_pct', 0):.0f}",
                 f"Distribution: {distribution_mode}",
-                "A/Z: -/+ troops", "E/T: -/+ speed", "Y/U: -/+ stats", "F/G: -/+ terrain", "D: toggle dist", "R: reset",
+                "A/Z: -/+ troops", "E/T: -/+ speed", "Y/U: -/+ stats", "F/G: -/+ forest", "D: toggle dist", "R: reset",
             ]
         else:
             viewer.extra_info = []

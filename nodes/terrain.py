@@ -1,7 +1,7 @@
 """Terrain node defining map tiles and modifiers."""
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
@@ -34,6 +34,8 @@ class TerrainNode(SimNode):
         combat_bonuses: Optional[Dict[str, int]] | None = None,
         grid_type: str = "square",
         obstacles: Optional[List[List[int]]] | None = None,
+        altitude_map: Optional[List[List[float]]] | None = None,
+        terrain_params: Optional[Dict[str, Any]] | None = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -62,6 +64,8 @@ class TerrainNode(SimNode):
         if self.grid_type not in {"square", "hex"}:
             raise ValueError("grid_type must be 'square' or 'hex'")
         self.obstacles = {tuple(o) for o in (obstacles or [])}
+        self.altitude_map = altitude_map
+        self.params = terrain_params or {}
 
     # ------------------------------------------------------------------
     def get_tile(self, x: int, y: int) -> str | None:
@@ -94,6 +98,16 @@ class TerrainNode(SimNode):
         """Return ``True`` if ``(x, y)`` is marked as an obstacle."""
 
         return (x, y) in self.obstacles
+
+    # ------------------------------------------------------------------
+    def get_altitude(self, x: int, y: int) -> float | None:
+        """Return altitude value at ``(x, y)`` if an altitude map exists."""
+
+        if self.altitude_map is None:
+            return None
+        if 0 <= y < len(self.altitude_map) and 0 <= x < len(self.altitude_map[0]):
+            return self.altitude_map[y][x]
+        return None
 
     # ------------------------------------------------------------------
     def get_neighbors(self, x: int, y: int) -> List[Tuple[int, int]]:
