@@ -44,11 +44,19 @@ class TerrainNode(SimNode):
             "plain": 1.0,
             "forest": 0.7,
             "hill": 0.9,
+            "water": 0.4,
+            "mountain": 0.6,
+            "swamp": 0.5,
+            "desert": 0.8,
         }
         self.combat_bonuses = combat_bonuses or {
             "plain": 0,
             "forest": 1,
             "hill": 2,
+            "water": -2,
+            "mountain": 3,
+            "swamp": -1,
+            "desert": 0,
         }
         self.grid_type = grid_type
         if self.grid_type not in {"square", "hex"}:
