@@ -59,14 +59,14 @@
 ## 3) Army Hierarchy & Composition
 
 ### 3.1 New/Extended Nodes
-- [ ] **Add** `nodes/strategist.py` → `StrategistNode(SimNode)` (advises general; holds recon intel).
-- [ ] **Add** `nodes/officer.py` → `OfficerNode(SimNode)` (commands several units).
-- [ ] **Add** `nodes/bodyguard.py` → `BodyguardUnitNode(UnitNode)` (small elite protective unit; sticks to general).
-- [ ] **Extend** `GeneralNode`:
-  - [ ] attributes: `caution_level`, `intel_confidence` (0–1), `command_delay_s`
-  - [ ] API: `issue_orders(orders: list[dict])` that emits `order_issued` events down the tree.
+- [x] **Add** `nodes/strategist.py` → `StrategistNode(SimNode)` (advises general; holds recon intel).
+- [x] **Add** `nodes/officer.py` → `OfficerNode(SimNode)` (commands several units).
+- [x] **Add** `nodes/bodyguard.py` → `BodyguardUnitNode(UnitNode)` (small elite protective unit; sticks to general).
+- [x] **Extend** `GeneralNode`:
+  - [x] attributes: `caution_level`, `intel_confidence` (0–1), `command_delay_s`
+  - [x] API: `issue_orders(orders: list[dict])` that emits `order_issued` events down the tree.
   - [ ] Decision uses terrain intel & enemy sightings (see §5).
-- [ ] **ArmyNode** unchanged API; add `get_officers()` helper.
+- [x] **ArmyNode** unchanged API; add `get_officers()` helper.
 
 ### 3.2 Spawning Structure (per your spec)
 - [ ] In `_spawn_armies` (or a new `tools/army_builder.py`):

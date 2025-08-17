@@ -1,7 +1,7 @@
 """General node representing a military leader in the war simulation."""
 from __future__ import annotations
 
-from typing import List, Dict
+from typing import Dict, List
 import random
 
 from core.simnode import SimNode
@@ -9,7 +9,7 @@ from core.plugins import register_node_type
 
 
 class GeneralNode(SimNode):
-    """Represent a general with a tactical style and battlefield reports.
+    """Represent a general with tactical preferences and command helpers.
 
     Parameters
     ----------
@@ -18,12 +18,31 @@ class GeneralNode(SimNode):
         or ``"balanced"``.
     flank_success_chance:
         Probability in ``[0, 1]`` that a flanking manoeuvre succeeds.
+    caution_level:
+        Risk aversion in ``[0, 1]``; high values make the general more
+        conservative.
+    intel_confidence:
+        Confidence in reconnaissance intel in ``[0, 1]``.
+    command_delay_s:
+        Delay in seconds applied when issuing orders.
     """
 
-    def __init__(self, style: str, flank_success_chance: float = 0.25, **kwargs) -> None:
+    def __init__(
+        self,
+        style: str,
+        flank_success_chance: float = 0.25,
+        *,
+        caution_level: float = 0.5,
+        intel_confidence: float = 1.0,
+        command_delay_s: float = 0.0,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self.style = style
         self.flank_success_chance = flank_success_chance
+        self.caution_level = caution_level
+        self.intel_confidence = intel_confidence
+        self.command_delay_s = command_delay_s
         self.reports: List[Dict] = []
         self.on_event("battlefield_event", self._record_report)
 
@@ -102,6 +121,18 @@ class GeneralNode(SimNode):
                 army.change_goal(goal)
 
         self.reports.clear()
+
+    # ------------------------------------------------------------------
+    def issue_orders(self, orders: List[Dict]) -> None:
+        """Emit ``order_issued`` events for each order in *orders*.
+
+        Orders are propagated down the node tree so that subordinates can
+        react to them. The method does not implement any delay logic yet;
+        `command_delay_s` is stored for future use.
+        """
+
+        for order in orders:
+            self.emit("order_issued", order, direction="down")
 
 
 register_node_type("GeneralNode", GeneralNode)

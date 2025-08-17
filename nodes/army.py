@@ -54,5 +54,11 @@ class ArmyNode(SimNode):
 
         return [c for c in self.children if c.__class__.__name__ == "UnitNode"]
 
+    # ------------------------------------------------------------------
+    def get_officers(self) -> List[SimNode]:
+        """Return direct child nodes considered officers."""
+
+        return [c for c in self.children if c.__class__.__name__ == "OfficerNode"]
+
 
 register_node_type("ArmyNode", ArmyNode)
