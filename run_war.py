@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 import random
+import math
 
 import pygame
 
@@ -18,6 +19,9 @@ from nodes.nation import NationNode
 from nodes.transform import TransformNode
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
+from nodes.strategist import StrategistNode
+from nodes.officer import OfficerNode
+from nodes.bodyguard import BodyguardUnitNode
 from tools.terrain_generators import (
     carve_river,
     generate_base,
@@ -53,6 +57,9 @@ load_plugins(
         "nodes.unit",
         "nodes.terrain",
         "nodes.transform",
+        "nodes.strategist",
+        "nodes.officer",
+        "nodes.bodyguard",
         "systems.time",
         "systems.movement",
         "systems.combat",
@@ -97,11 +104,9 @@ FPS = config.FPS
 TIME_SCALE = config.TIME_SCALE
 
 # parameters adjustable via pause menu
-troops_per_nation = 5
-speed_variation = 0.2
-stat_variation = 0.2
-distribution_mode = "cluster"
-terrain_params = {}
+spawn_dispersion_radius = 200.0
+soldiers_per_dot = 5
+bodyguard_size = 5
 
 
 def _generate_terrain(world, params: dict) -> None:
@@ -188,50 +193,96 @@ def _generate_terrain(world, params: dict) -> None:
 
 def _spawn_armies(
     world,
-    per_nation: int,
-    distribution: str,
-    speed_var: float,
-    stat_var: float,
+    dispersion_radius: float,
+    soldiers_per_dot: int,
+    bodyguard_size: int,
 ) -> None:
+    """Spawn hierarchical armies for each nation.
+
+    Each nation receives a general already present in the configuration.
+    This helper populates the general with a strategist, bodyguards and a
+    single army composed of officers commanding small units. Positions are
+    dispersed around the nation's capital within ``dispersion_radius``.
+    ``UnitNode`` sizes are rounded to multiples of ``soldiers_per_dot`` so
+    the viewer can scale unit dots accordingly.
+    """
+
+    def _pos_around(cx: float, cy: float) -> list[float]:
+        if dispersion_radius <= 0:
+            return [cx, cy]
+        angle = random.uniform(0, 2 * math.pi)
+        r = random.uniform(0, dispersion_radius)
+        return [cx + math.cos(angle) * r, cy + math.sin(angle) * r]
+
+    def _round_size(size: int) -> int:
+        mul = max(1, soldiers_per_dot)
+        return max(mul, int(math.ceil(size / mul)) * mul)
+
     nations = [n for n in world.children if isinstance(n, NationNode)]
     width, height = world.width, world.height
-    for idx, nation in enumerate(nations):
+    for nation in nations:
         general = next((c for c in nation.children if isinstance(c, GeneralNode)), None)
         if general is None:
             continue
+
+        # keep transform, remove other subordinates before respawning
+        transform = next((c for c in general.children if isinstance(c, TransformNode)), None)
         for child in list(general.children):
-            if isinstance(child, ArmyNode):
+            if child is not transform:
                 general.remove_child(child)
-        start_x = 10 if idx % 2 == 0 else width - 10
-        for i in range(per_nation):
-            if distribution == "spread":
-                px = random.uniform(0, width)
-                py = random.uniform(0, height)
-            else:
-                px = start_x + random.uniform(-5, 5)
-                py = height / 2 + random.uniform(-5, 5)
-            army = ArmyNode(name=f"{nation.name}_army_{i+1}", goal="advance", size=1)
-            army.add_child(TransformNode(position=[px, py]))
-            size = int(100 * random.uniform(1 - stat_var, 1 + stat_var))
-            speed = 1.0 * random.uniform(1 - speed_var, 1 + speed_var)
-            enemies = [n for n in nations if n is not nation]
-            target_cap = enemies[0].capital_position if enemies else [width / 2, height / 2]
-            unit = UnitNode(
-                name=f"{nation.name}_unit_{i+1}",
+        if transform is None:
+            cap = getattr(nation, "capital_position", [width / 2, height / 2])
+            transform = TransformNode(position=list(cap))
+            general.add_child(transform)
+        center = transform.position
+
+        # strategist assisting the general
+        strategist = StrategistNode(name=f"{nation.name}_strategist")
+        general.add_child(strategist)
+
+        # bodyguards directly protecting the general
+        for i in range(5):
+            size = _round_size(bodyguard_size)
+            bg = BodyguardUnitNode(
+                name=f"{nation.name}_bodyguard_{i+1}",
                 size=size,
                 state="idle",
-                speed=speed,
+                speed=1.0,
                 morale=100,
-                target=list(target_cap),
             )
-            unit.add_child(TransformNode(position=[px, py]))
-            army.add_child(unit)
-            general.add_child(army)
+            bg.add_child(TransformNode(position=_pos_around(*center)))
+            general.add_child(bg)
+
+        # main army with officers and units
+        army = ArmyNode(name=f"{nation.name}_army", goal="advance", size=0)
+        army.add_child(TransformNode(position=list(center)))
+        total_units = 0
+        enemies = [n for n in nations if n is not nation]
+        target_cap = enemies[0].capital_position if enemies else [width / 2, height / 2]
+        unit_size = _round_size(5)
+        for i in range(5):
+            officer = OfficerNode(name=f"{nation.name}_officer_{i+1}")
+            officer.add_child(TransformNode(position=_pos_around(*center)))
+            for j in range(4):
+                unit = UnitNode(
+                    name=f"{nation.name}_unit_{i+1}_{j+1}",
+                    size=unit_size,
+                    state="idle",
+                    speed=1.0,
+                    morale=100,
+                    target=list(target_cap),
+                )
+                unit.add_child(TransformNode(position=_pos_around(*center)))
+                officer.add_child(unit)
+                total_units += 1
+            army.add_child(officer)
+        army.size = total_units
+        general.add_child(army)
 
 
 def _reset() -> None:
     _generate_terrain(world, terrain_params)
-    _spawn_armies(world, troops_per_nation, distribution_mode, speed_variation, stat_variation)
+    _spawn_armies(world, spawn_dispersion_radius, soldiers_per_dot, bodyguard_size)
     if time_system is not None:
         time_system.current_time = config.START_TIME
 
@@ -249,6 +300,7 @@ if viewer:
     viewer.scale = 10
     viewer.unit_radius = 10
     viewer.draw_capital = True
+    viewer.soldiers_per_dot = soldiers_per_dot
     viewer.offset_x = world.width / 2 - viewer.view_width / (2 * viewer.scale)
     viewer.offset_y = world.height / 2 - viewer.view_height / (2 * viewer.scale)
 paused = False
@@ -290,19 +342,7 @@ while running and pygame.get_init():
             elif viewer and event.key == pygame.K_k:
                 viewer.offset_y -= viewer.view_height * 0.1 / viewer.scale
             elif paused:
-                if event.key == pygame.K_a:
-                    troops_per_nation = max(1, troops_per_nation - 1)
-                elif event.key == pygame.K_z:
-                    troops_per_nation += 1
-                elif event.key == pygame.K_e:
-                    speed_variation = max(0.0, speed_variation - 0.1)
-                elif event.key == pygame.K_t:
-                    speed_variation += 0.1
-                elif event.key == pygame.K_y:
-                    stat_variation = max(0.0, stat_variation - 0.1)
-                elif event.key == pygame.K_u:
-                    stat_variation += 0.1
-                elif event.key == pygame.K_f:
+                if event.key == pygame.K_f:
                     forests = terrain_params.setdefault(
                         "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
                     )
@@ -314,17 +354,14 @@ while running and pygame.get_init():
                     )
                     forests["total_area_pct"] = min(100.0, forests.get("total_area_pct", 0) + 1)
                     _generate_terrain(world, terrain_params)
-                elif event.key == pygame.K_d:
-                    distribution_mode = "spread" if distribution_mode == "cluster" else "cluster"
     if viewer:
         if paused:
             viewer.extra_info = [
-                f"Troops/nation: {troops_per_nation}",
-                f"Speed var: {speed_variation:.2f}",
-                f"Stat var: {stat_variation:.2f}",
+                f"Dispersion R: {spawn_dispersion_radius:.0f} m",
+                f"Soldiers/dot: {soldiers_per_dot}",
+                f"Bodyguard size: {bodyguard_size}",
                 f"Forest %: {terrain_params.get('forests', {}).get('total_area_pct', 0):.0f}",
-                f"Distribution: {distribution_mode}",
-                "A/Z: -/+ troops", "E/T: -/+ speed", "Y/U: -/+ stats", "F/G: -/+ forest", "D: toggle dist", "R: reset",
+                "F/G: -/+ forest", "R: reset",
             ]
         else:
             viewer.extra_info = []

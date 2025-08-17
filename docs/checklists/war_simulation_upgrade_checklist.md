@@ -69,13 +69,13 @@
 - [x] **ArmyNode** unchanged API; add `get_officers()` helper.
 
 ### 3.2 Spawning Structure (per your spec)
-- [ ] In `_spawn_armies` (or a new `tools/army_builder.py`):
-  - [ ] For each nation:
-    - [ ] 1 `GeneralNode` + 1 `StrategistNode` + **5 `BodyguardUnitNode`** (size configurable, e.g. 5–10).
-    - [ ] **5 `OfficerNode`**; each officer commands **4 units** of **5 soldiers**.
-    - [ ] Total ≈ 100 soldiers per army (+ escorts).
-  - [ ] **Dispersion parameter**: `spawn_dispersion_radius` (meters) around HQ; used when placing `TransformNode`s.
-  - [ ] **Soldiers per point**: `soldiers_per_dot`; `UnitNode.size` is multiple of this for rendering.
+- [x] In `_spawn_armies` (or a new `tools/army_builder.py`):
+  - [x] For each nation:
+    - [x] 1 `GeneralNode` + 1 `StrategistNode` + **5 `BodyguardUnitNode`** (size configurable, e.g. 5–10).
+    - [x] **5 `OfficerNode`**; each officer commands **4 units** of **5 soldiers**.
+    - [x] Total ≈ 100 soldiers per army (+ escorts).
+  - [x] **Dispersion parameter**: `spawn_dispersion_radius` (meters) around HQ; used when placing `TransformNode`s.
+  - [x] **Soldiers per point**: `soldiers_per_dot`; `UnitNode.size` is multiple of this for rendering.
 
 ### 3.3 Viewer
 - [ ] In `systems/pygame_viewer.py`:
