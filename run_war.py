@@ -75,11 +75,9 @@ load_plugins(
 )
 
 
-# Basic logging configuration so heavy initialization steps can be timed.
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
+# Disable all logging to keep the console quiet
+logging.basicConfig(level=logging.CRITICAL)
+logging.disable(logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
 # Load the simulation from a JSON/YAML file
@@ -93,15 +91,16 @@ else:
     terrain_params = {}
 
 terrain_params.setdefault("forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5})
-terrain_params.setdefault("rivers", [])
-terrain_params.setdefault("lakes", [])
+terrain_params.pop("rivers", None)
+terrain_params.pop("lakes", None)
 terrain_params.setdefault("mountains", {"total_area_pct": 5, "perlin_scale": 0.01, "peak_density": 0.2})
 terrain_params.setdefault("swamp_desert", {"swamp_pct": 3, "desert_pct": 5, "clumpiness": 0.5})
 
 
-# Ensure logging and visualization systems are present
-if not any(isinstance(c, LoggingSystem) for c in world.children):
-    LoggingSystem(parent=world)
+# Remove any logging systems defined in the configuration
+for child in list(world.children):
+    if isinstance(child, LoggingSystem):
+        world.remove_child(child)
 
 if not any(isinstance(c, PygameViewerSystem) for c in world.children):
     PygameViewerSystem(parent=world)

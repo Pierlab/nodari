@@ -133,7 +133,7 @@ def place_forest(
         cx = random.randrange(width)
         cy = random.randrange(height)
         radius = int((tiles_per_cluster / 3.14) ** 0.5)
-        radius = max(1, int(radius * random.uniform(1 - cluster_spread, 1 + cluster_spread)))
+        radius = max(10, int(radius * random.uniform(1 - cluster_spread, 1 + cluster_spread)))
         for y in range(max(0, cy - radius), min(height, cy + radius + 1)):
             dy = y - cy
             dx = int((radius**2 - dy**2) ** 0.5)
@@ -177,7 +177,7 @@ def place_mountains(
         cx = random.randrange(width)
         cy = random.randrange(height)
         radius = int((tiles_per_cluster / 3.14) ** 0.5)
-        radius = max(1, radius)
+        radius = max(10, radius)
         for y in range(max(0, cy - radius), min(height, cy + radius + 1)):
             dy = y - cy
             dx = int((radius**2 - dy**2) ** 0.5)
@@ -219,7 +219,7 @@ def place_swamp_desert(
             cx = random.randrange(width)
             cy = random.randrange(height)
             radius = int((tiles_per_cluster / 3.14) ** 0.5)
-            radius = max(1, radius)
+            radius = max(10, radius)
             for y in range(max(0, cy - radius), min(height, cy + radius + 1)):
                 dy = y - cy
                 dx = int((radius**2 - dy**2) ** 0.5)
