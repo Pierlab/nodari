@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
+from core.terrain import TILE_CODES, TILE_NAMES
 
 
 class TerrainNode(SimNode):
@@ -29,7 +30,7 @@ class TerrainNode(SimNode):
 
     def __init__(
         self,
-        tiles: List[List[str]],
+        tiles: List[List[int]] | List[List[str]],
         speed_modifiers: Optional[Dict[str, float]] | None = None,
         combat_bonuses: Optional[Dict[str, int]] | None = None,
         grid_type: str = "square",
@@ -39,10 +40,16 @@ class TerrainNode(SimNode):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        self.tiles = tiles
-        self.height = len(tiles)
-        self.width = len(tiles[0]) if tiles else 0
-        self.speed_modifiers = speed_modifiers or {
+        # Convert any string based grid to byte codes
+        if tiles and isinstance(tiles[0][0], str):
+            self.tiles: List[bytearray] = [
+                bytearray(TILE_CODES[t] for t in row) for row in tiles
+            ]
+        else:
+            self.tiles = [bytearray(row) for row in tiles]
+        self.height = len(self.tiles)
+        self.width = len(self.tiles[0]) if self.tiles else 0
+        default_speed = {
             "plain": 1.0,
             "forest": 0.7,
             "hill": 0.9,
@@ -50,8 +57,9 @@ class TerrainNode(SimNode):
             "mountain": 0.6,
             "swamp": 0.5,
             "desert": 0.8,
+            "road": 1.0,
         }
-        self.combat_bonuses = combat_bonuses or {
+        default_combat = {
             "plain": 0,
             "forest": 1,
             "hill": 2,
@@ -59,7 +67,12 @@ class TerrainNode(SimNode):
             "mountain": 3,
             "swamp": -1,
             "desert": 0,
+            "road": 0,
         }
+        sm = speed_modifiers or default_speed
+        cb = combat_bonuses or default_combat
+        self.speed_modifiers = {TILE_CODES[k]: v for k, v in sm.items()}
+        self.combat_bonuses = {TILE_CODES[k]: v for k, v in cb.items()}
         self.grid_type = grid_type
         if self.grid_type not in {"square", "hex"}:
             raise ValueError("grid_type must be 'square' or 'hex'")
@@ -68,30 +81,39 @@ class TerrainNode(SimNode):
         self.params = terrain_params or {}
 
     # ------------------------------------------------------------------
-    def get_tile(self, x: int, y: int) -> str | None:
-        """Return the terrain type at ``(x, y)`` or ``None`` if out of bounds."""
+    def get_tile_code(self, x: int, y: int) -> int | None:
+        """Return the terrain code at ``(x, y)`` or ``None`` if out of bounds."""
 
         if 0 <= y < self.height and 0 <= x < self.width:
             return self.tiles[y][x]
         return None
 
     # ------------------------------------------------------------------
+    def get_tile(self, x: int, y: int) -> str | None:
+        """Return the terrain name at ``(x, y)`` or ``None`` if out of bounds."""
+
+        code = self.get_tile_code(x, y)
+        if code is None:
+            return None
+        return TILE_NAMES.get(code)
+
+    # ------------------------------------------------------------------
     def get_speed_modifier(self, x: int, y: int) -> float:
         """Return movement speed modifier for tile at ``(x, y)``."""
 
-        terrain = self.get_tile(x, y)
-        if terrain is None:
+        code = self.get_tile_code(x, y)
+        if code is None:
             return 1.0
-        return self.speed_modifiers.get(terrain, 1.0)
+        return self.speed_modifiers.get(code, 1.0)
 
     # ------------------------------------------------------------------
     def get_combat_bonus(self, x: int, y: int) -> int:
         """Return combat bonus for tile at ``(x, y)``."""
 
-        terrain = self.get_tile(x, y)
-        if terrain is None:
+        code = self.get_tile_code(x, y)
+        if code is None:
             return 0
-        return self.combat_bonuses.get(terrain, 0)
+        return self.combat_bonuses.get(code, 0)
 
     # ------------------------------------------------------------------
     def is_obstacle(self, x: int, y: int) -> bool:

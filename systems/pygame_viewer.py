@@ -24,6 +24,7 @@ from nodes.silo import SiloNode
 from nodes.pasture import PastureNode
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
+from core.terrain import TILE_CODES
 from nodes.nation import NationNode
 from nodes.general import GeneralNode
 from nodes.strategist import StrategistNode
@@ -51,14 +52,15 @@ WELL_RADIUS = 10
 CHAR_RADIUS = 5
 UNIT_RADIUS = 4
 
-TERRAIN_COLORS: dict[str, Tuple[int, int, int]] = {
-    "plain": (80, 160, 80),
-    "forest": (34, 139, 34),
-    "hill": (110, 110, 110),
-    "water": (0, 0, 200),
-    "mountain": (139, 137, 137),
-    "swamp": (47, 79, 47),
-    "desert": (210, 180, 140),
+TERRAIN_COLORS: dict[int, Tuple[int, int, int]] = {
+    TILE_CODES["plain"]: (80, 160, 80),
+    TILE_CODES["forest"]: (34, 139, 34),
+    TILE_CODES["hill"]: (110, 110, 110),
+    TILE_CODES["water"]: (0, 0, 200),
+    TILE_CODES["mountain"]: (139, 137, 137),
+    TILE_CODES["swamp"]: (47, 79, 47),
+    TILE_CODES["desert"]: (210, 180, 140),
+    TILE_CODES["road"]: (120, 120, 120),
 }
 ARROW_COLOR = (255, 255, 0)
 # Shorter arrows for unit targets

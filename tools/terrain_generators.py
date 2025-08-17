@@ -1,8 +1,10 @@
 """Procedural terrain generation helpers for war simulations.
 
-This module exposes pure functions operating on a two-dimensional list of
-terrain tiles. Every function returns both the mutated ``tiles`` structure and
-an ``obstacles`` set describing impassable coordinates. The implementation is
+This module exposes pure functions operating on a two-dimensional grid of
+terrain **codes**. Each tile is represented by a single byte instead of a
+Python string which drastically reduces memory requirements for large maps.
+Every function returns both the mutated ``tiles`` structure and an
+``obstacles`` set describing impassable coordinates. The implementation is
 light‑weight and intentionally simple; it aims to offer varied landscapes
 without adding heavy dependencies.
 """
@@ -12,17 +14,22 @@ from __future__ import annotations
 import random
 from typing import List, Sequence, Set, Tuple
 
-TileGrid = List[List[str]]
+from core.terrain import TILE_CODES
+
+TileGrid = List[bytearray]
 Coord = Tuple[int, int]
 
 
 # ---------------------------------------------------------------------------
 def generate_base(width: int, height: int, fill: str = "plain") -> TileGrid:
-    """Return a ``height``×``width`` grid filled with ``fill`` terrain."""
+    """Return a ``height``×``width`` grid filled with ``fill`` terrain.
 
-    # Using list multiplication for the inner rows keeps the operation in
-    # C‑code and avoids a costly Python loop for every column.
-    return [[fill] * width for _ in range(height)]
+    The grid is implemented as a list of ``bytearray`` rows to minimise memory
+    usage. ``fill`` may be any key from :data:`core.terrain.TILE_CODES`.
+    """
+
+    code = TILE_CODES.get(fill, TILE_CODES["plain"])
+    return [bytearray([code] * width) for _ in range(height)]
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +72,7 @@ def carve_river(
             for dy in range(-half, half + 1):
                 px, py = cx + dx, cy + dy
                 if 0 <= px < width and 0 <= py < height:
-                    tiles[py][px] = "water"
+                    tiles[py][px] = TILE_CODES["water"]
                     obstacles_set.add((px, py))
     return tiles, obstacles_set
 
@@ -90,7 +97,7 @@ def place_lake(
                 dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
                 jitter = random.uniform(-irregularity, irregularity) * radius
                 if dist <= radius + jitter:
-                    tiles[y][x] = "water"
+                    tiles[y][x] = TILE_CODES["water"]
                     obstacles_set.add((x, y))
     return tiles, obstacles_set
 
@@ -121,7 +128,7 @@ def place_forest(
     for _ in range(total):
         x = random.randrange(width)
         y = random.randrange(height)
-        tiles[y][x] = "forest"
+        tiles[y][x] = TILE_CODES["forest"]
 
     return tiles, obstacles_set
 
@@ -156,7 +163,7 @@ def place_mountains(
         alt = random.random()
         if altitude_map_out is not None:
             altitude_map_out[y][x] = alt
-        tiles[y][x] = "mountain"
+        tiles[y][x] = TILE_CODES["mountain"]
         if alt >= obstacle_threshold:
             obstacles_set.add((x, y))
 
@@ -178,12 +185,12 @@ def place_swamp_desert(
     height = len(tiles)
     total = width * height
 
-    def _scatter(tile: str, count: int) -> None:
+    def _scatter(tile: int, count: int) -> None:
         placed = 0
         while placed < count:
             x = random.randrange(width)
             y = random.randrange(height)
-            if tiles[y][x] == "plain":
+            if tiles[y][x] == TILE_CODES["plain"]:
                 tiles[y][x] = tile
                 placed += 1
             # expand around the tile to create clumps
@@ -191,12 +198,12 @@ def place_swamp_desert(
                 if placed >= count:
                     break
                 if 0 <= nx < width and 0 <= ny < height:
-                    if tiles[ny][nx] == "plain" and random.random() < clumpiness:
+                    if tiles[ny][nx] == TILE_CODES["plain"] and random.random() < clumpiness:
                         tiles[ny][nx] = tile
                         placed += 1
 
-    _scatter("swamp", int(total * swamp_pct / 100))
-    _scatter("desert", int(total * desert_pct / 100))
+    _scatter(TILE_CODES["swamp"], int(total * swamp_pct / 100))
+    _scatter(TILE_CODES["desert"], int(total * desert_pct / 100))
     return tiles, obstacles_set
 
 
