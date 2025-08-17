@@ -76,32 +76,41 @@ if time_system is not None:
 FPS = config.FPS
 TIME_SCALE = config.TIME_SCALE
 
-# global capital shared by all nations
-nations = [n for n in world.children if isinstance(n, NationNode)]
-GLOBAL_CAPITAL = [world.width / 2, world.height / 2]
-for n in nations:
-    n.capital_position = GLOBAL_CAPITAL
-
 # parameters adjustable via pause menu
 troops_per_nation = 5
 speed_variation = 0.2
 stat_variation = 0.2
 distribution_mode = "cluster"
+terrain_density = 0.1
 
 
-def _generate_obstacles(world, count: int = 20) -> None:
+def _generate_terrain(world, density: float = 0.1) -> None:
     terrain = next((c for c in world.children if isinstance(c, TerrainNode)), None)
     if terrain is None:
         return
+    width, height = int(world.width), int(world.height)
+    terrain.tiles = [["plain" for _ in range(width)] for _ in range(height)]
     terrain.obstacles.clear()
-    for _ in range(count):
-        w = random.randint(1, 4)
-        h = random.randint(1, 4)
-        x = random.randint(0, int(world.width - w))
-        y = random.randint(0, int(world.height - h))
-        for ix in range(x, x + w):
-            for iy in range(y, y + h):
-                terrain.obstacles.add((ix, iy))
+    terrain.speed_modifiers.update({
+        "water": 0.4,
+        "mountain": 0.6,
+        "swamp": 0.5,
+        "desert": 0.8,
+    })
+    terrain.combat_bonuses.update({
+        "water": -2,
+        "mountain": 3,
+        "swamp": -1,
+        "desert": 0,
+    })
+    types = ["forest", "hill", "water", "mountain", "swamp", "desert"]
+    for y in range(height):
+        for x in range(width):
+            if random.random() < density:
+                tile = random.choice(types)
+                terrain.tiles[y][x] = tile
+                if tile == "water":
+                    terrain.obstacles.add((x, y))
 
 
 def _spawn_armies(
@@ -132,13 +141,15 @@ def _spawn_armies(
             army.add_child(TransformNode(position=[px, py]))
             size = int(100 * random.uniform(1 - stat_var, 1 + stat_var))
             speed = 1.0 * random.uniform(1 - speed_var, 1 + speed_var)
+            enemies = [n for n in nations if n is not nation]
+            target_cap = enemies[0].capital_position if enemies else [width / 2, height / 2]
             unit = UnitNode(
                 name=f"{nation.name}_unit_{i+1}",
                 size=size,
                 state="idle",
                 speed=speed,
                 morale=100,
-                target=list(GLOBAL_CAPITAL),
+                target=list(target_cap),
             )
             unit.add_child(TransformNode(position=[px, py]))
             army.add_child(unit)
@@ -146,7 +157,7 @@ def _spawn_armies(
 
 
 def _reset() -> None:
-    _generate_obstacles(world)
+    _generate_terrain(world, terrain_density)
     _spawn_armies(world, troops_per_nation, distribution_mode, speed_variation, stat_variation)
     if time_system is not None:
         time_system.current_time = config.START_TIME
@@ -179,23 +190,29 @@ while running and pygame.get_init():
                 paused = not paused
             elif event.key == pygame.K_r:
                 _reset()
-            elif event.key in (pygame.K_MINUS, pygame.K_KP_MINUS):
+            elif event.key == pygame.K_s:
                 TIME_SCALE = max(0.1, TIME_SCALE / 2)
-            elif event.key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS):
+            elif event.key == pygame.K_x:
                 TIME_SCALE = min(100, TIME_SCALE * 2)
             elif paused:
-                if event.key == pygame.K_1:
+                if event.key == pygame.K_a:
                     troops_per_nation = max(1, troops_per_nation - 1)
-                elif event.key == pygame.K_2:
+                elif event.key == pygame.K_z:
                     troops_per_nation += 1
-                elif event.key == pygame.K_3:
+                elif event.key == pygame.K_e:
                     speed_variation = max(0.0, speed_variation - 0.1)
-                elif event.key == pygame.K_4:
+                elif event.key == pygame.K_t:
                     speed_variation += 0.1
-                elif event.key == pygame.K_5:
+                elif event.key == pygame.K_y:
                     stat_variation = max(0.0, stat_variation - 0.1)
-                elif event.key == pygame.K_6:
+                elif event.key == pygame.K_u:
                     stat_variation += 0.1
+                elif event.key == pygame.K_f:
+                    terrain_density = max(0.0, terrain_density - 0.05)
+                    _generate_terrain(world, terrain_density)
+                elif event.key == pygame.K_g:
+                    terrain_density = min(1.0, terrain_density + 0.05)
+                    _generate_terrain(world, terrain_density)
                 elif event.key == pygame.K_d:
                     distribution_mode = "spread" if distribution_mode == "cluster" else "cluster"
     if viewer:
@@ -204,8 +221,9 @@ while running and pygame.get_init():
                 f"Troops/nation: {troops_per_nation}",
                 f"Speed var: {speed_variation:.2f}",
                 f"Stat var: {stat_variation:.2f}",
+                f"Terrain dens.: {terrain_density:.2f}",
                 f"Distribution: {distribution_mode}",
-                "1/2: -/+ troops", "3/4: -/+ speed", "5/6: -/+ stats", "D: toggle dist", "R: reset",
+                "A/Z: -/+ troops", "E/T: -/+ speed", "Y/U: -/+ stats", "F/G: -/+ terrain", "D: toggle dist", "R: reset",
             ]
         else:
             viewer.extra_info = []

@@ -49,6 +49,10 @@ TERRAIN_COLORS: dict[str, Tuple[int, int, int]] = {
     "plain": (80, 160, 80),
     "forest": (34, 139, 34),
     "hill": (110, 110, 110),
+    "water": (0, 0, 200),
+    "mountain": (139, 137, 137),
+    "swamp": (47, 79, 47),
+    "desert": (210, 180, 140),
 }
 ARROW_COLOR = (255, 255, 0)
 # Shorter arrows for unit targets
@@ -263,13 +267,14 @@ class PygameViewerSystem(SystemNode):
         nations = [n for n in self._walk(root) if isinstance(n, NationNode)]
         nation_colors = {n: NATION_COLORS[i % len(NATION_COLORS)] for i, n in enumerate(nations)}
         if nations and self.draw_capital:
-            cap = getattr(nations[0], "capital_position", None)
-            if cap is not None:
-                cx = int((cap[0] - self.offset_x) * self.scale)
-                cy = int((cap[1] - self.offset_y) * self.scale)
-                size = int(self.unit_radius * 3)
-                rect = pygame.Rect(cx - size, cy - size, size * 2, size * 2)
-                pygame.draw.rect(self.screen, CAPITAL_COLOR, rect)
+            for n in nations:
+                cap = getattr(n, "capital_position", None)
+                if cap is not None:
+                    cx = int((cap[0] - self.offset_x) * self.scale)
+                    cy = int((cap[1] - self.offset_y) * self.scale)
+                    size = int(self.unit_radius * 3)
+                    rect = pygame.Rect(cx - size, cy - size, size * 2, size * 2)
+                    pygame.draw.rect(self.screen, CAPITAL_COLOR, rect)
 
         lines: List[str] = []
         time_sys: Optional[TimeSystem] = None
