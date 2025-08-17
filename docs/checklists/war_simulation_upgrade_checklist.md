@@ -87,12 +87,12 @@
 
 ## 4) Combat Blocking & Pathfinding
 
-- [ ] **Add** `systems/pathfinding.py` (A* on grid using `TerrainNode.get_neighbors`, speed modifiers as costs).
-- [ ] **MovementSystem**:
-  - [ ] When a unit enters `fighting` state, mark its tile **temporarily blocked** to others (except same stack/formation). 
-  - [ ] If `avoid_obstacles=True`, consult `PathfindingSystem` for detours when the next step is blocked.
-- [ ] **CombatSystem**:
-  - [ ] Already engages when two enemy units share a tile. Ensure units in `fighting` don’t “slide through” (freeze movement until resolved).
+- [x] **Add** `systems/pathfinding.py` (A* on grid using `TerrainNode.get_neighbors`, speed modifiers as costs).
+- [x] **MovementSystem**:
+  - [x] When a unit enters `fighting` state, mark its tile **temporarily blocked** to others (except same stack/formation).
+  - [x] If `avoid_obstacles=True`, consult `PathfindingSystem` for detours when the next step is blocked.
+- [x] **CombatSystem**:
+  - [x] Already engages when two enemy units share a tile. Ensure units in `fighting` don’t “slide through” (freeze movement until resolved).
 
 ---
 
