@@ -143,11 +143,11 @@
 
 ## 9) Documentation & Examples
 
-- [ ] **docs/checklists/** → add `war_simulation_upgrade.md` (this file).
-- [ ] **docs/guides/** → add guide “Keyboard control & parameters on-the-fly”.
-- [ ] **example/** → add `war_simulation_config_km.json` showcasing:
-  - [ ] 10 km distance, large river, two forests (bosquets vs grande forêt), massif montagneux.
-  - [ ] 2×100 soldats + hiérarchie complète, brouillard de guerre, C2 activés.
+- [x] **docs/checklists/** → add `war_simulation_upgrade.md` (this file).
+- [x] **docs/guides/** → add guide “Keyboard control & parameters on-the-fly”.
+- [x] **example/** → add `war_simulation_config_km.json` showcasing:
+  - [x] 10 km distance, large river, two forests (bosquets vs grande forêt), massif montagneux.
+  - [x] 2×100 soldats + hiérarchie complète, brouillard de guerre, C2 activés.
 
 ---
 

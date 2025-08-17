@@ -1,0 +1,37 @@
+{
+  "war_world": {
+    "type": "WorldNode",
+    "config": {
+      "width": 10000,
+      "height": 6000,
+      "seed": 2
+    },
+    "children": [
+      { "type": "TimeSystem", "id": "time", "config": { "time_scale": 10 } },
+      { "type": "MovementSystem", "id": "movement", "config": { "terrain": "terrain" } },
+      { "type": "CombatSystem", "id": "combat", "config": { "terrain": "terrain" } },
+      { "type": "MoralSystem", "id": "moral" },
+      { "type": "VisibilitySystem", "id": "visibility" },
+      { "type": "CommandSystem", "id": "command", "config": {
+          "base_delay_s": 1.0,
+          "distance_delay_factor": 0.001,
+          "reliability": 0.9
+        }
+      },
+      { "type": "TerrainNode", "id": "terrain", "config": {
+          "tiles": [["plain"]],
+          "terrain_params": {
+            "rivers": [
+              { "start": [0, 3000], "end": [10000, 3000], "width_min": 5, "width_max": 12, "meander": 0.3 }
+            ],
+            "forests": { "total_area_pct": 15, "clusters": 2, "cluster_spread": 0.4 },
+            "mountains": { "total_area_pct": 10, "perlin_scale": 0.008, "peak_density": 0.3 },
+            "swamp_desert": { "swamp_pct": 3, "desert_pct": 5, "clumpiness": 0.5 }
+          }
+        }
+      },
+      { "type": "NationNode", "id": "north", "config": { "capital_position": [1000, 3000], "morale": 100 } },
+      { "type": "NationNode", "id": "south", "config": { "capital_position": [9000, 3000], "morale": 100 } }
+    ]
+  }
+}
