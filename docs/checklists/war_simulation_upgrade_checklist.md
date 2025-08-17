@@ -130,14 +130,14 @@
 
 ## 8) Configuration Schema Additions
 
-- [ ] Add a `war` section (or extend existing nodes) in JSON:
-  - [ ] `army_composition`: numbers of officers, units per officer, soldiers per unit, bodyguards per general.
-  - [ ] `spawn_dispersion_radius_m`: e.g. `200`.
-  - [ ] `soldiers_per_dot`: affects rendering radius.
-  - [ ] `vision_radius_m` (defaults per role).
-  - [ ] `command_delay_s`, `order_reliability`.
-  - [ ] `terrain_params` (see §2.3).
-- [ ] **Validate** with permissive loader: ignore unknown keys; log warnings.
+- [x] Add a `war` section (or extend existing nodes) in JSON:
+  - [x] `army_composition`: numbers of officers, units per officer, soldiers per unit, bodyguards per general.
+  - [x] `spawn_dispersion_radius_m`: e.g. `200`.
+  - [x] `soldiers_per_dot`: affects rendering radius.
+  - [x] `vision_radius_m` (defaults per role).
+  - [x] `command_delay_s`, `order_reliability`.
+  - [x] `terrain_params` (see §2.3).
+- [x] **Validate** with permissive loader: ignore unknown keys; log warnings.
 
 ---
 

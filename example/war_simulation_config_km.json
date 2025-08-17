@@ -4,7 +4,20 @@
     "config": {
       "width": 10000,
       "height": 6000,
-      "seed": 2
+      "seed": 2,
+      "war": {
+        "army_composition": {
+          "officers_per_general": 5,
+          "units_per_officer": 4,
+          "soldiers_per_unit": 5,
+          "bodyguards_per_general": 5
+        },
+        "spawn_dispersion_radius_m": 200,
+        "soldiers_per_dot": 2,
+        "vision_radius_m": { "general": 500, "officer": 300, "soldier": 100 },
+        "command_delay_s": 1.0,
+        "order_reliability": 0.9
+      }
     },
     "children": [
       { "type": "TimeSystem", "id": "time", "config": { "time_scale": 10 } },

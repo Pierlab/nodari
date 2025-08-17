@@ -140,3 +140,40 @@ Un **bus d’événements** centralise les interactions (combats, mouvements, or
 - Terrain plat.
 - Objectif : atteindre le camp adverse.
 - Gestion des états : déplacement, combat, fuite.
+
+---
+
+## 9. Schéma de configuration JSON
+La simulation utilise le chargeur déclaratif du projet. Les fichiers peuvent
+inclure une section ``war`` sous ``WorldNode.config`` regroupant les paramètres
+globaux du scénario :
+
+```json
+{
+  "war_world": {
+    "type": "WorldNode",
+    "config": {
+      "width": 10000,
+      "height": 6000,
+      "war": {
+        "army_composition": {
+          "officers_per_general": 5,
+          "units_per_officer": 4,
+          "soldiers_per_unit": 5,
+          "bodyguards_per_general": 5
+        },
+        "spawn_dispersion_radius_m": 200,
+        "soldiers_per_dot": 2,
+        "vision_radius_m": { "general": 500, "officer": 300, "soldier": 100 },
+        "command_delay_s": 1.0,
+        "order_reliability": 0.9
+      }
+    }
+  }
+}
+```
+
+Les paramètres de terrain détaillés (rivières, forêts, montagnes, etc.)
+restent définis dans ``TerrainNode.config.terrain_params``. Le chargeur est
+tolérant : les clés inconnues sont ignorées avec un avertissement afin de
+préserver la compatibilité des anciens fichiers.

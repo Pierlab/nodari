@@ -128,6 +128,13 @@ world:
         - type: AIBehaviorNode
 ```
 
+Scenario files may embed **scenario-specific sections** under the root node's
+`config`. The war simulation, for example, introduces a `war` block grouping
+parameters such as `army_composition`, `spawn_dispersion_radius_m`,
+`soldiers_per_dot`, role-based `vision_radius_m`, `command_delay_s` and
+`order_reliability`. The declarative loader remains permissive: unknown keys are
+ignored and logged as warnings so that older configurations keep working.
+
 ## 4. Implementation Plan
 Steps must be completed in order, each with accompanying unit tests.
 
