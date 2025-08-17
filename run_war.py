@@ -6,6 +6,8 @@ import os
 import sys
 import random
 import math
+import time
+import logging
 
 import pygame
 
@@ -72,6 +74,13 @@ load_plugins(
     ]
 )
 
+
+# Basic logging configuration so heavy initialization steps can be timed.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # Load the simulation from a JSON/YAML file
 config_file = sys.argv[1] if len(sys.argv) > 1 else "example/war_simulation_config.json"
@@ -145,10 +154,15 @@ def terrain_regen(world, params: dict) -> None:
         return
 
     width, height = int(world.width), int(world.height)
-    tiles = generate_base(width, height, fill="plain")
-    obstacles: set[tuple[int, int]] = set()
-    altitude_map = [[0.0 for _ in range(width)] for _ in range(height)]
+    start_time = time.perf_counter()
 
+    tiles = generate_base(width, height, fill="plain")
+    logger.info("Base terrain generated in %.2fs", time.perf_counter() - start_time)
+
+    obstacles: set[tuple[int, int]] = set()
+    altitude_map: list[list[float]] | None = None
+
+    step_start = time.perf_counter()
     for river in params.get("rivers", []):
         tiles, obstacles = carve_river(
             tiles,
@@ -159,7 +173,9 @@ def terrain_regen(world, params: dict) -> None:
             meander=river.get("meander", 0.3),
             obstacles_set=obstacles,
         )
+    logger.info("Rivers carved in %.2fs", time.perf_counter() - step_start)
 
+    step_start = time.perf_counter()
     for lake in params.get("lakes", []):
         tiles, obstacles = place_lake(
             tiles,
@@ -168,8 +184,10 @@ def terrain_regen(world, params: dict) -> None:
             irregularity=lake.get("irregularity", 0.4),
             obstacles_set=obstacles,
         )
+    logger.info("Lakes placed in %.2fs", time.perf_counter() - step_start)
 
     forests = params.get("forests", {})
+    step_start = time.perf_counter()
     tiles, obstacles = place_forest(
         tiles,
         total_area_pct=forests.get("total_area_pct", 10),
@@ -177,19 +195,23 @@ def terrain_regen(world, params: dict) -> None:
         cluster_spread=forests.get("cluster_spread", 0.5),
         obstacles_set=obstacles,
     )
+    logger.info("Forests placed in %.2fs", time.perf_counter() - step_start)
 
     mountains = params.get("mountains", {})
+    step_start = time.perf_counter()
     tiles, obstacles = place_mountains(
         tiles,
         total_area_pct=mountains.get("total_area_pct", 5),
         perlin_scale=mountains.get("perlin_scale", 0.01),
         peak_density=mountains.get("peak_density", 0.2),
-        altitude_map_out=altitude_map,
+        altitude_map_out=None,
         obstacles_set=obstacles,
         obstacle_threshold=params.get("obstacle_altitude_threshold", 0.75),
     )
+    logger.info("Mountains generated in %.2fs", time.perf_counter() - step_start)
 
     swamp_desert = params.get("swamp_desert", {})
+    step_start = time.perf_counter()
     tiles, obstacles = place_swamp_desert(
         tiles,
         swamp_pct=swamp_desert.get("swamp_pct", 3),
@@ -197,6 +219,8 @@ def terrain_regen(world, params: dict) -> None:
         clumpiness=swamp_desert.get("clumpiness", 0.5),
         obstacles_set=obstacles,
     )
+    logger.info("Swamps and deserts placed in %.2fs", time.perf_counter() - step_start)
+    logger.info("Terrain regeneration finished in %.2fs", time.perf_counter() - start_time)
 
     terrain.tiles = tiles
     terrain.obstacles = obstacles
@@ -348,7 +372,10 @@ clock = pygame.time.Clock()
 viewer = next((c for c in world.children if isinstance(c, PygameViewerSystem)), None)
 # Center the view on the world by default
 if viewer:
-    viewer.scale = 10
+    # Scale the viewer so the whole world fits within the window.
+    scale_x = viewer.view_width / world.width
+    scale_y = viewer.view_height / world.height
+    viewer.scale = min(scale_x, scale_y)
     viewer.unit_radius = 10
     viewer.draw_capital = True
     viewer.offset_x = world.width / 2 - viewer.view_width / (2 * viewer.scale)

@@ -20,7 +20,9 @@ Coord = Tuple[int, int]
 def generate_base(width: int, height: int, fill: str = "plain") -> TileGrid:
     """Return a ``height``×``width`` grid filled with ``fill`` terrain."""
 
-    return [[fill for _ in range(width)] for _ in range(height)]
+    # Using list multiplication for the inner rows keeps the operation in
+    # C‑code and avoids a costly Python loop for every column.
+    return [[fill] * width for _ in range(height)]
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +104,13 @@ def place_forest(
     cluster_spread: float,
     obstacles_set: Set[Coord],
 ) -> Tuple[TileGrid, Set[Coord]]:
-    """Scatter forests across the map using a simple clustering approach."""
+    """Scatter forests across the map.
+
+    The original clustering algorithm became extremely slow on very large
+    maps. This simplified version merely scatters the required number of
+    forest tiles randomly, ignoring the clustering parameters but keeping the
+    same function signature for compatibility.
+    """
 
     width = len(tiles[0])
     height = len(tiles)
@@ -110,22 +118,11 @@ def place_forest(
     if total <= 0:
         return tiles, obstacles_set
 
-    placed = 0
-    for _ in range(clusters):
-        cx = random.randrange(width)
-        cy = random.randrange(height)
-        frontier = [(cx, cy)]
-        while frontier and placed < total:
-            x, y = frontier.pop()
-            if tiles[y][x] != "forest":
-                tiles[y][x] = "forest"
-                placed += 1
-            for nx, ny in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
-                if 0 <= nx < width and 0 <= ny < height:
-                    if random.random() < cluster_spread:
-                        frontier.append((nx, ny))
-            if placed >= total:
-                break
+    for _ in range(total):
+        x = random.randrange(width)
+        y = random.randrange(height)
+        tiles[y][x] = "forest"
+
     return tiles, obstacles_set
 
 
@@ -140,24 +137,28 @@ def place_mountains(
     obstacles_set: Set[Coord],
     obstacle_threshold: float = 0.75,
 ) -> Tuple[TileGrid, Set[Coord]]:
-    """Generate a basic altitude map and mark mountain tiles."""
+    """Scatter mountains randomly across the map.
+
+    The previous implementation generated a full ``width``×``height`` altitude
+    map which became prohibitively slow for large worlds. Instead we now sample
+    only the number of tiles required by ``total_area_pct`` and assign them a
+    random altitude. ``perlin_scale`` and ``peak_density`` are accepted for API
+    compatibility but are not used by this lightweight generator.
+    """
 
     width = len(tiles[0])
     height = len(tiles)
-    altitudes = [[random.random() for _ in range(width)] for _ in range(height)]
-    flat = sorted((val for row in altitudes for val in row), reverse=True)
-    cutoff_index = int(width * height * total_area_pct / 100)
-    cutoff = flat[cutoff_index] if flat else 1.0
+    total = int(width * height * total_area_pct / 100)
 
-    for y in range(height):
-        for x in range(width):
-            alt = altitudes[y][x]
-            if altitude_map_out is not None:
-                altitude_map_out[y][x] = alt
-            if alt >= cutoff:
-                tiles[y][x] = "mountain"
-                if alt >= obstacle_threshold:
-                    obstacles_set.add((x, y))
+    for _ in range(total):
+        x = random.randrange(width)
+        y = random.randrange(height)
+        alt = random.random()
+        if altitude_map_out is not None:
+            altitude_map_out[y][x] = alt
+        tiles[y][x] = "mountain"
+        if alt >= obstacle_threshold:
+            obstacles_set.add((x, y))
 
     return tiles, obstacles_set
 
