@@ -1,10 +1,11 @@
+from nodes.army import ArmyNode
+from nodes.unit import UnitNode
+from nodes.nation import NationNode
 from nodes.strategist import StrategistNode
 from nodes.officer import OfficerNode
 from nodes.bodyguard import BodyguardUnitNode
 from nodes.general import GeneralNode
-from nodes.army import ArmyNode
-from nodes.unit import UnitNode
-from nodes.nation import NationNode
+from systems.command import CommandSystem
 
 
 def test_strategist_collects_recent_intel():
@@ -29,12 +30,22 @@ def test_bodyguard_defaults_and_is_unit():
 
 
 def test_general_issue_orders_and_attributes():
-    general = GeneralNode(style="balanced")
+    root = NationNode(morale=100, capital_position=[0, 0])
+    cmd = CommandSystem(parent=root)
+    general = GeneralNode(style="balanced", parent=root)
     army = ArmyNode(parent=general, goal="advance", size=0)
-    orders: list[dict] = []
-    army.on_event("order_issued", lambda _o, _e, payload: orders.append(payload))
-    general.issue_orders([{ "cmd": "hold" }])
-    assert orders[0]["cmd"] == "hold"
+    officer = OfficerNode(parent=army)
+    unit = UnitNode(parent=officer)
+    general.issue_orders([
+        {
+            "order_type": "hold",
+            "priority": 1,
+            "recipient_group": "officers",
+        }
+    ])
+    cmd.update(0.0)
+    cmd.update(0.0)
+    assert unit.current_order and unit.current_order["order_type"] == "hold"
     assert general.caution_level == 0.5
     assert general.intel_confidence == 1.0
     assert general.command_delay_s == 0.0

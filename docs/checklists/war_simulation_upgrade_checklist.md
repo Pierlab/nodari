@@ -111,11 +111,11 @@
 
 ## 6) Command & Control (C2)
 
-- [ ] **Add** `systems/command.py`:
-  - [ ] Orders carry: `issuer_id`, `recipient_id/group`, `order_type` (`move`, `attack`, `hold`, `fallback`, `screen`, `probe`), `waypoints`, `time_issued`, `priority`.
-  - [ ] **Propagation with delays**: general → officers → units; delay = function(distance, terrain difficulty).
-  - [ ] **Reliability** parameter: chance orders are lost/delayed (optional noise).
-  - [ ] Units execute the **latest valid order**; report `order_ack`/`order_complete` upstream.
+- [x] **Add** `systems/command.py`:
+  - [x] Orders carry: `issuer_id`, `recipient_id/group`, `order_type` (`move`, `attack`, `hold`, `fallback`, `screen`, `probe`), `waypoints`, `time_issued`, `priority`.
+  - [x] **Propagation with delays**: general → officers → units; delay = function(distance, terrain difficulty).
+  - [x] **Reliability** parameter: chance orders are lost/delayed (optional noise).
+  - [x] Units execute the **latest valid order**; report `order_ack`/`order_complete` upstream.
 
 ---
 
