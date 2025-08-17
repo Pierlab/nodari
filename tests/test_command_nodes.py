@@ -4,12 +4,15 @@ from nodes.bodyguard import BodyguardUnitNode
 from nodes.general import GeneralNode
 from nodes.army import ArmyNode
 from nodes.unit import UnitNode
+from nodes.nation import NationNode
 
 
-def test_strategist_collects_intel():
+def test_strategist_collects_recent_intel():
     strategist = StrategistNode()
-    strategist.emit("intel_report", {"enemy": "north"})
-    assert strategist.get_intel()[0]["enemy"] == "north"
+    strategist.emit("enemy_spotted", {"enemy": "north", "timestamp": 0})
+    strategist.emit("enemy_spotted", {"enemy": "south"})
+    intel = strategist.get_enemy_estimates(max_age_s=60)
+    assert len(intel) == 1 and intel[0]["enemy"] == "south"
 
 
 def test_officer_lists_units():
@@ -35,6 +38,16 @@ def test_general_issue_orders_and_attributes():
     assert general.caution_level == 0.5
     assert general.intel_confidence == 1.0
     assert general.command_delay_s == 0.0
+
+
+def test_general_uses_strategist_intel():
+    root = NationNode(morale=100, capital_position=[0, 0])
+    gen = GeneralNode(style="aggressive", caution_level=0.1, parent=root)
+    strat = StrategistNode(parent=gen)
+    army = ArmyNode(parent=gen, goal="hold", size=0)
+    strat.emit("enemy_spotted", {"enemy": "x"})
+    gen._decide()
+    assert army.goal in {"advance", "flank"}
 
 
 def test_army_lists_officers():

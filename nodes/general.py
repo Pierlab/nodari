@@ -6,6 +6,7 @@ import random
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
+from nodes.strategist import StrategistNode
 
 
 class GeneralNode(SimNode):
@@ -80,41 +81,39 @@ class GeneralNode(SimNode):
         self._decide()
 
     # ------------------------------------------------------------------
+    def _score_action(self, action: str, terrain_bonus: float) -> float:
+        base = {"advance": 1.0, "flank": 0.9, "hold": 0.6, "retreat": 0.3}[action]
+        score = base * self.intel_confidence * (1 - self.caution_level)
+        score += terrain_bonus
+        if action == "retreat":
+            score += self.caution_level
+        elif action == "hold":
+            score += self.caution_level * 0.5
+        if self.style == "aggressive" and action in {"advance", "flank"}:
+            score += 0.1
+        if self.style == "defensive" and action in {"hold", "retreat"}:
+            score += 0.1
+        return score
+
+    # ------------------------------------------------------------------
     def _decide(self) -> None:
-        """Adjust armies' goals based on latest reports and nation morale.
+        """Adjust armies' goals based on strategist intel."""
 
-        The general uses only the most recent battlefield report to make a
-        decision. Thresholds depend on ``style``:
-
-        ``aggressive`` -> defend below 40 morale, retreat below 20.
-        ``balanced``   -> defend below 60 morale, retreat below 30.
-        ``defensive``  -> defend below 80 morale, retreat below 50.
-        """
-
-        if not self.reports:
+        strategist = next((c for c in self.children if isinstance(c, StrategistNode)), None)
+        if strategist is None:
             return
 
-        nation = self.parent if self.parent and self.parent.__class__.__name__ == "NationNode" else None
-        morale = getattr(nation, "morale", 0)
-        thresholds = {
-            "aggressive": {"defend": 40, "retreat": 20},
-            "balanced": {"defend": 60, "retreat": 30},
-            "defensive": {"defend": 80, "retreat": 50},
-        }.get(self.style, {"defend": 60, "retreat": 30})
+        intel = strategist.get_enemy_estimates()
+        if not intel:
+            return
 
-        last = self.reports[-1]
-        defend_th = thresholds["defend"]
-        retreat_th = thresholds["retreat"]
+        terrain_bonus = 0.0
+        if intel:
+            terrain_bonus = sum(r.get("terrain_bonus", 0.0) for r in intel) / len(intel)
 
-        if last.get("type") == "unit_routed":
-            goal = "retreat" if morale < retreat_th else "defend"
-        else:
-            if morale < retreat_th:
-                goal = "retreat"
-            elif morale < defend_th:
-                goal = "defend"
-            else:
-                goal = "advance"
+        actions = ["advance", "flank", "hold", "retreat"]
+        scores = {a: self._score_action(a, terrain_bonus) for a in actions}
+        goal = max(scores, key=scores.get)
 
         for army in self.get_armies():
             if getattr(army, "goal", None) != goal:
