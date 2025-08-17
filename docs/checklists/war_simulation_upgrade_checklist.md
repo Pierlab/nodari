@@ -156,35 +156,35 @@
 > Implement in `run_war.py` (event loop) + pass live parameters down to systems/viewer.
 
 - **Simulation/time**
-  - [ ] `SPACE` pause/continue (déjà en place).
-  - [ ] `S` / `X` : diminuer/augmenter `TIME_SCALE` (déjà en place).
-  - [ ] `[` / `]` : diminuer/augmenter `viewer.scale` (zoom).
-  - [ ] `H/J/K/L` : pan view (←/↓/↑/→) by 10% of view (vim-like).
+  - [x] `SPACE` pause/continue (déjà en place).
+  - [x] `S` / `X` : diminuer/augmenter `TIME_SCALE` (déjà en place).
+  - [x] `[` / `]` : diminuer/augmenter `viewer.scale` (zoom).
+  - [x] `H/J/K/L` : pan view (←/↓/↑/→) by 10% of view (vim-like).
 
 - **Terrain (while paused)**
-  - [ ] `F/G` : −/+ densité globale (déjà en place).
-  - [ ] `R` : regénérer *terrain pipeline* (REMPLACE l’actuel reset aléatoire).
-  - [ ] `W` : −/+ **river width** (toggle through presets) & re‑carve rivers.
-  - [ ] `M` : toggle *mountainousness* preset (low/med/high) → affects `total_area_pct` & obstacle threshold.
-  - [ ] `V` : cycle forest layout (*bosquets* ↔ *immense forêt*) by adjusting `{clusters, cluster_spread, total_area_pct}`.
+  - [x] `F/G` : −/+ densité globale (déjà en place).
+  - [x] `R` : regénérer *terrain pipeline* (REMPLACE l’actuel reset aléatoire).
+  - [x] `W` : −/+ **river width** (toggle through presets) & re‑carve rivers.
+  - [x] `M` : toggle *mountainousness* preset (low/med/high) → affects `total_area_pct` & obstacle threshold.
+  - [x] `V` : cycle forest layout (*bosquets* ↔ *immense forêt*) by adjusting `{clusters, cluster_spread, total_area_pct}`.
 
 - **Armées / déploiement (while paused)**
-  - [ ] `D` : *cluster* ↔ *spread* (déjà en place).
-  - [ ] `P` / `O` : −/+ `spawn_dispersion_radius_m`.
+  - [x] `D` : *cluster* ↔ *spread* (déjà en place).
+  - [x] `P` / `O` : −/+ `spawn_dispersion_radius_m`.
   - [ ] `Q` / `A` : −/+ **troops per nation** (déjà A/Z; garder alias Q/A en AZERTY).
   - [ ] `Y/U` : −/+ variation de stats (déjà en place).
   - [ ] `E/T` : −/+ variation de vitesse (déjà en place).
-  - [ ] `C` : cycle **soldiers_per_dot** (1, 2, 5, 10).
+  - [x] `C` : cycle **soldiers_per_dot** (1, 2, 5, 10).
 
 - **C2 / Intel**
-  - [ ] `I` : toggle **fog of war**.
-  - [ ] `;` : toggle **intel overlay** (dernier spot ennemi, cônes de vision).
-  - [ ] `,` / `.` : −/+ `command_delay_s`.
-  - [ ] `N` : order reliability preset (strict/reliable/flaky).
+  - [x] `I` : toggle **fog of war**.
+  - [x] `;` : toggle **intel overlay** (dernier spot ennemi, cônes de vision).
+  - [x] `,` / `.` : −/+ `command_delay_s`.
+  - [x] `N` : order reliability preset (strict/reliable/flaky).
 
 - **Affichage**
-  - [ ] `B` : toggle **role rings & legend**.
-  - [ ] `K` (already used for pan up per vim-like? If conflict, use `UP`/`DOWN` alt): ensure no numeric keys used.
+  - [x] `B` : toggle **role rings & legend**.
+  - [x] `K` (already used for pan up per vim-like? If conflict, use `UP`/`DOWN` alt): ensure no numeric keys used.
 
 > Keep an on‑screen **help panel** listing the active bindings when paused (extend `viewer.extra_info`).
 
