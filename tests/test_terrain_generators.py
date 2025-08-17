@@ -12,6 +12,7 @@ from tools.terrain_generators import (
     place_mountains,
     place_swamp_desert,
 )
+from core.terrain import TILE_CODES
 
 
 def test_generate_base_and_lake() -> None:
@@ -24,7 +25,7 @@ def test_generate_base_and_lake() -> None:
         irregularity=0.2,
         obstacles_set=set(),
     )
-    assert tiles[15][25] == "water"
+    assert tiles[15][25] == TILE_CODES["water"]
     assert obstacles, "lake should add obstacles"
 
 
@@ -40,7 +41,7 @@ def test_carve_river_creates_water_line() -> None:
         meander=0.0,
         obstacles_set=set(),
     )
-    assert all(tiles[10][x] == "water" for x in range(40))
+    assert all(tiles[10][x] == TILE_CODES["water"] for x in range(40))
     assert len(obstacles) > 0
 
 
@@ -54,7 +55,7 @@ def test_forest_and_mountains_generation() -> None:
         cluster_spread=0.8,
         obstacles_set=set(),
     )
-    assert any("forest" in row for row in tiles)
+    assert any(TILE_CODES["forest"] in row for row in tiles)
 
     altitude = [[0.0 for _ in range(30)] for _ in range(30)]
     tiles, obstacles = place_mountains(
@@ -65,7 +66,7 @@ def test_forest_and_mountains_generation() -> None:
         altitude_map_out=altitude,
         obstacles_set=obstacles,
     )
-    assert any("mountain" in row for row in tiles)
+    assert any(TILE_CODES["mountain"] in row for row in tiles)
     assert len(obstacles) > 0
     assert altitude[0][0] >= 0.0
 
@@ -81,7 +82,7 @@ def test_swamp_and_desert() -> None:
         obstacles_set=set(),
     )
     flat = [t for row in tiles for t in row]
-    assert "swamp" in flat
-    assert "desert" in flat
+    assert TILE_CODES["swamp"] in flat
+    assert TILE_CODES["desert"] in flat
     assert obstacles == set()
 
