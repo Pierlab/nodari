@@ -254,6 +254,7 @@
 | scale | float | 5.0 |  Scale applied to positions stored in :class:`TransformNode`s. |
 | panel_width | int | 320 |  Width of the information panel appended to the right of the view. |
 | font_size | int | 14 |  Font size used to render the panel text. |
+| max_terrain_resolution | int | 2000 |  Maximum width or height of the cached terrain surface in pixels. |
 | kwargs | _empty |  |  |
 
 ### SchedulerSystem

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from math import atan2, cos, sin, pi
+from math import atan2, cos, sin, pi, ceil
 from typing import Iterator, List, Optional, Tuple, Type
 
 import pygame
@@ -91,6 +91,8 @@ class PygameViewerSystem(SystemNode):
         Width of the information panel appended to the right of the view.
     font_size:
         Font size used to render the panel text.
+    max_terrain_resolution:
+        Maximum width or height of the cached terrain surface in pixels.
     """
 
     def __init__(
@@ -101,6 +103,7 @@ class PygameViewerSystem(SystemNode):
         panel_width: int = config.PANEL_WIDTH,
         font_size: int = config.FONT_SIZE,
         draw_capital: bool = False,
+        max_terrain_resolution: int = 2000,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -129,6 +132,8 @@ class PygameViewerSystem(SystemNode):
         self.extra_info: List[str] = []
         self._terrain_cache: pygame.Surface | None = None
         self._terrain_cache_scale = self.scale
+        self._terrain_cache_size: tuple[int, int] | None = None
+        self.max_terrain_resolution = max_terrain_resolution
 
     @property
     def scale(self) -> float:
@@ -316,25 +321,47 @@ class PygameViewerSystem(SystemNode):
         )
 
     def _terrain_surface(self, terrain: TerrainNode) -> pygame.Surface:
-        if self._terrain_cache is None or self._terrain_cache_scale != self.scale:
-            tile_size = max(1, int(self.scale))
-            step = 1
-            if self.scale < 1:
-                step = max(1, int(1 / self.scale))
-            rows = len(terrain.tiles)
-            cols = len(terrain.tiles[0])
-            width = (cols // step) * tile_size
-            height = (rows // step) * tile_size
-            surface = pygame.Surface((width, height))
-            for py, y in enumerate(range(0, rows // step * step, step)):
-                row = terrain.tiles[y]
-                for px, x in enumerate(range(0, cols // step * step, step)):
-                    tile = row[x]
-                    color = TERRAIN_COLORS.get(tile, (80, 80, 80))
-                    rect = pygame.Rect(px * tile_size, py * tile_size, tile_size, tile_size)
-                    pygame.draw.rect(surface, color, rect)
-            self._terrain_cache = surface
-            self._terrain_cache_scale = self.scale
+        rows = len(terrain.tiles)
+        cols = len(terrain.tiles[0])
+        if (
+            self._terrain_cache is None
+            or self._terrain_cache_scale != self.scale
+            or self._terrain_cache_size != (rows, cols)
+        ):
+            # Clamp desired scale to stay within maximum cached resolution
+            max_res = self.max_terrain_resolution
+            cache_scale = min(self.scale, max_res / rows, max_res / cols)
+            if cache_scale != self._scale:
+                self._scale = cache_scale
+
+            # Downsample tiles to a manageable surface
+            step = max(1, ceil(max(rows, cols) / max_res))
+            raw_w = ceil(cols / step)
+            raw_h = ceil(rows / step)
+            raw_surface = pygame.Surface((raw_w, raw_h))
+            for py, y in enumerate(range(0, rows, step)):
+                y1 = min(y + step, rows)
+                for px, x in enumerate(range(0, cols, step)):
+                    x1 = min(x + step, cols)
+                    r = g = b = 0
+                    count = 0
+                    for ty in range(y, y1):
+                        row = terrain.tiles[ty]
+                        for tx in range(x, x1):
+                            cr, cg, cb = TERRAIN_COLORS.get(row[tx], (80, 80, 80))
+                            r += cr
+                            g += cg
+                            b += cb
+                            count += 1
+                    raw_surface.set_at((px, py), (r // count, g // count, b // count))
+
+            final_width = int(cols * cache_scale)
+            final_height = int(rows * cache_scale)
+            self._terrain_cache = pygame.transform.smoothscale(
+                raw_surface, (final_width, final_height)
+            )
+            self._terrain_cache_scale = cache_scale
+            self._terrain_cache_size = (rows, cols)
         return self._terrain_cache
 
     def _draw_terrain(self, terrain: TerrainNode) -> None:
