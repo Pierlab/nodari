@@ -219,11 +219,11 @@
 
 ## 13) Minimal Code Changes (pointers)
 
-- [ ] `run_war.py`: replace `_generate_terrain` with pipeline call; add `SimParams`, richer `_spawn_armies` (or move to `tools/army_builder.py`), extend event loop.
-- [ ] `systems/pygame_viewer.py`: role rings, dynamic scale bar using `WORLD_SCALE_M`, extra help panel, smooth zoom/pan.
-- [ ] `nodes/*`: add Strategist/Officer/Bodyguard; extend General with C2 fields.
-- [ ] `systems/*`: add `visibility.py`, `command.py`, `pathfinding.py`, `logistics.py` (optional), update `movement.py` and `combat.py` for blocking & pathfinding integration.
-- [ ] `docs/*` & `example/*`: new example + user guide.
+- [x] `run_war.py`: replace `_generate_terrain` with pipeline call; add `SimParams`, richer `_spawn_armies` (or move to `tools/army_builder.py`), extend event loop.
+- [x] `systems/pygame_viewer.py`: role rings, dynamic scale bar using `WORLD_SCALE_M`, extra help panel, smooth zoom/pan.
+- [x] `nodes/*`: add Strategist/Officer/Bodyguard; extend General with C2 fields.
+- [x] `systems/*`: add `visibility.py`, `command.py`, `pathfinding.py`, `logistics.py` (optional), update `movement.py` and `combat.py` for blocking & pathfinding integration.
+- [x] `docs/*` & `example/*`: new example + user guide.
 
 ---
 
