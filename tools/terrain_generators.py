@@ -111,12 +111,13 @@ def place_forest(
     cluster_spread: float,
     obstacles_set: Set[Coord],
 ) -> Tuple[TileGrid, Set[Coord]]:
-    """Scatter forests across the map.
+    """Place groups of forest tiles forming contiguous patches.
 
-    The original clustering algorithm became extremely slow on very large
-    maps. This simplified version merely scatters the required number of
-    forest tiles randomly, ignoring the clustering parameters but keeping the
-    same function signature for compatibility.
+    The previous implementation scattered individual forest tiles which
+    produced very noisy maps and was surprisingly slow for large worlds.  The
+    new approach creates a handful of circular clusters which is both visually
+    pleasing and executes in linear time with respect to the number of forest
+    tiles requested.
     """
 
     width = len(tiles[0])
@@ -125,10 +126,20 @@ def place_forest(
     if total <= 0:
         return tiles, obstacles_set
 
-    for _ in range(total):
-        x = random.randrange(width)
-        y = random.randrange(height)
-        tiles[y][x] = TILE_CODES["forest"]
+    cluster_count = max(1, int(clusters))
+    tiles_per_cluster = max(1, total // cluster_count)
+    code = TILE_CODES["forest"]
+    for _ in range(cluster_count):
+        cx = random.randrange(width)
+        cy = random.randrange(height)
+        radius = int((tiles_per_cluster / 3.14) ** 0.5)
+        radius = max(1, int(radius * random.uniform(1 - cluster_spread, 1 + cluster_spread)))
+        for y in range(max(0, cy - radius), min(height, cy + radius + 1)):
+            dy = y - cy
+            dx = int((radius**2 - dy**2) ** 0.5)
+            start = max(0, cx - dx)
+            end = min(width, cx + dx + 1)
+            tiles[y][start:end] = bytearray([code]) * (end - start)
 
     return tiles, obstacles_set
 
@@ -144,28 +155,41 @@ def place_mountains(
     obstacles_set: Set[Coord],
     obstacle_threshold: float = 0.75,
 ) -> Tuple[TileGrid, Set[Coord]]:
-    """Scatter mountains randomly across the map.
+    """Create simple mountain clusters quickly.
 
-    The previous implementation generated a full ``width``×``height`` altitude
-    map which became prohibitively slow for large worlds. Instead we now sample
-    only the number of tiles required by ``total_area_pct`` and assign them a
-    random altitude. ``perlin_scale`` and ``peak_density`` are accepted for API
-    compatibility but are not used by this lightweight generator.
+    ``perlin_scale`` and ``peak_density`` parameters are kept for API
+    compatibility but are not used.  Instead of sampling a full altitude map we
+    simply paint a number of circular clusters and optionally record a random
+    altitude for each affected tile.  Tiles with altitude greater than
+    ``obstacle_threshold`` are marked as obstacles.
     """
 
     width = len(tiles[0])
     height = len(tiles)
     total = int(width * height * total_area_pct / 100)
+    if total <= 0:
+        return tiles, obstacles_set
 
-    for _ in range(total):
-        x = random.randrange(width)
-        y = random.randrange(height)
-        alt = random.random()
-        if altitude_map_out is not None:
-            altitude_map_out[y][x] = alt
-        tiles[y][x] = TILE_CODES["mountain"]
-        if alt >= obstacle_threshold:
-            obstacles_set.add((x, y))
+    cluster_count = max(1, int(peak_density * 10))
+    tiles_per_cluster = max(1, total // cluster_count)
+    code = TILE_CODES["mountain"]
+    for _ in range(cluster_count):
+        cx = random.randrange(width)
+        cy = random.randrange(height)
+        radius = int((tiles_per_cluster / 3.14) ** 0.5)
+        radius = max(1, radius)
+        for y in range(max(0, cy - radius), min(height, cy + radius + 1)):
+            dy = y - cy
+            dx = int((radius**2 - dy**2) ** 0.5)
+            start = max(0, cx - dx)
+            end = min(width, cx + dx + 1)
+            tiles[y][start:end] = bytearray([code]) * (end - start)
+            for x in range(start, end):
+                alt = random.random()
+                if altitude_map_out is not None:
+                    altitude_map_out[y][x] = alt
+                if alt >= obstacle_threshold:
+                    obstacles_set.add((x, y))
 
     return tiles, obstacles_set
 
@@ -185,25 +209,28 @@ def place_swamp_desert(
     height = len(tiles)
     total = width * height
 
-    def _scatter(tile: int, count: int) -> None:
-        placed = 0
-        while placed < count:
-            x = random.randrange(width)
-            y = random.randrange(height)
-            if tiles[y][x] == TILE_CODES["plain"]:
-                tiles[y][x] = tile
-                placed += 1
-            # expand around the tile to create clumps
-            for nx, ny in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
-                if placed >= count:
-                    break
-                if 0 <= nx < width and 0 <= ny < height:
-                    if tiles[ny][nx] == TILE_CODES["plain"] and random.random() < clumpiness:
-                        tiles[ny][nx] = tile
-                        placed += 1
+    def _clusters(tile: int, pct: float) -> None:
+        count = int(total * pct / 100)
+        if count <= 0:
+            return
+        cluster_count = max(1, int((1 - clumpiness) * 5) + 1)
+        tiles_per_cluster = max(1, count // cluster_count)
+        for _ in range(cluster_count):
+            cx = random.randrange(width)
+            cy = random.randrange(height)
+            radius = int((tiles_per_cluster / 3.14) ** 0.5)
+            radius = max(1, radius)
+            for y in range(max(0, cy - radius), min(height, cy + radius + 1)):
+                dy = y - cy
+                dx = int((radius**2 - dy**2) ** 0.5)
+                start = max(0, cx - dx)
+                end = min(width, cx + dx + 1)
+                for x in range(start, end):
+                    if tiles[y][x] == TILE_CODES["plain"]:
+                        tiles[y][x] = tile
 
-    _scatter(TILE_CODES["swamp"], int(total * swamp_pct / 100))
-    _scatter(TILE_CODES["desert"], int(total * desert_pct / 100))
+    _clusters(TILE_CODES["swamp"], swamp_pct)
+    _clusters(TILE_CODES["desert"], desert_pct)
     return tiles, obstacles_set
 
 
