@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import os
+import time
+import logging
 from math import atan2, cos, sin, pi, ceil
 from typing import Iterator, List, Optional, Tuple, Type
 
@@ -134,6 +136,9 @@ class PygameViewerSystem(SystemNode):
         self._terrain_cache_scale = self.scale
         self._terrain_cache_size: tuple[int, int] | None = None
         self.max_terrain_resolution = max_terrain_resolution
+        self._frame_count = 0
+        self._log_frame_interval = 60
+        self._verbose_frame_logging = False
 
     @property
     def scale(self) -> float:
@@ -193,6 +198,9 @@ class PygameViewerSystem(SystemNode):
                 cy = self.offset_y + self.view_height / (2 * prev_scale)
                 self.offset_x = cx - self.view_width / (2 * self.scale)
                 self.offset_y = cy - self.view_height / (2 * self.scale)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_v:
+                    self._verbose_frame_logging = not self._verbose_frame_logging
 
     def _node_at_pixel(self, pos) -> Optional[SimNode]:
         """Return the topmost node at the given pixel position."""
@@ -373,6 +381,7 @@ class PygameViewerSystem(SystemNode):
 
     def update(self, dt: float) -> None:  # noqa: D401 - inherit docstring
         """Update the window and render state."""
+        start_time = time.perf_counter()
         self.screen.fill((30, 30, 30))
 
         root = self._root()
@@ -522,6 +531,7 @@ class PygameViewerSystem(SystemNode):
         lines.append(" +/- : change speed")
         lines.append(" [: zoom out, ]: zoom in")
         lines.append(" H/J/K/L: pan view")
+        lines.append(" V: toggle frame logging")
         lines.extend(self.extra_info)
 
         line_height = self.font.get_linesize()
@@ -556,6 +566,15 @@ class PygameViewerSystem(SystemNode):
                 text_y += line_height
 
         pygame.display.flip()
+        end_time = time.perf_counter()
+        if self._verbose_frame_logging:
+            self._frame_count += 1
+            if self._frame_count % self._log_frame_interval == 0:
+                logging.debug(
+                    "PygameViewerSystem frame %d took %.3f ms",
+                    self._frame_count,
+                    (end_time - start_time) * 1000,
+                )
         super().update(dt)
 
 
