@@ -331,7 +331,8 @@ class PygameViewerSystem(SystemNode):
                 time_sys = node
 
         # draw a scale bar representing 100 meters
-        scale_length = int(100 * self.scale)
+        grid_units_for_100m = 100 / config.WORLD_SCALE_M
+        scale_length = int(grid_units_for_100m * self.scale)
         bar_y = self.view_height - 20
         pygame.draw.line(self.screen, (255, 255, 255), (10, bar_y), (10 + scale_length, bar_y), 2)
         label = self.font.render("100 m", True, (255, 255, 255))
@@ -359,6 +360,8 @@ class PygameViewerSystem(SystemNode):
         lines.append("Controls:")
         lines.append(" Space: pause/resume")
         lines.append(" +/- : change speed")
+        lines.append(" [: zoom out, ]: zoom in")
+        lines.append(" H/J/K/L: pan view")
         lines.extend(self.extra_info)
 
         line_height = self.font.get_linesize()

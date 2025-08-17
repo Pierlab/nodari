@@ -13,6 +13,11 @@ WORLD_WIDTH = 240
 WORLD_HEIGHT = 144
 BUILDING_SIZE = 10  # in world units
 
+# World scaling (meters per grid unit and default war map size)
+WORLD_SCALE_M = 1.0  # meters per grid unit
+DEFAULT_WORLD_W = 1000  # default world width in grid units
+DEFAULT_WORLD_H = 600   # default world height in grid units
+
 # Simulation timing
 # Use a modest simulation acceleration to keep troop movement visible
 FPS = 24
