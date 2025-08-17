@@ -78,10 +78,10 @@
   - [x] **Soldiers per point**: `soldiers_per_dot`; `UnitNode.size` is multiple of this for rendering.
 
 ### 3.3 Viewer
-- [ ] In `systems/pygame_viewer.py`:
-  - [ ] Draw **role rings** (outline color/style per role): general, strategist, officer, bodyguard, soldier.
-  - [ ] Map size → radius: `radius = f(size, soldiers_per_dot)`.
-  - [ ] Add legend in side panel.
+- [x] In `systems/pygame_viewer.py`:
+  - [x] Draw **role rings** (outline color/style per role): general, strategist, officer, bodyguard, soldier.
+  - [x] Map size → radius: `radius = f(size, soldiers_per_dot)`.
+  - [x] Add legend in side panel.
 
 ---
 
