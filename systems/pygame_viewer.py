@@ -114,7 +114,7 @@ class PygameViewerSystem(SystemNode):
         self.screen = pygame.display.set_mode((width + self.panel_width, height))
         pygame.display.set_caption(self.name)
         self.font = pygame.font.Font(None, font_size)
-        self.scale = scale
+        self._scale = scale
         self.offset_x = 0.0
         self.offset_y = 0.0
         self.selected: Optional[SimNode] = None
@@ -129,6 +129,16 @@ class PygameViewerSystem(SystemNode):
         self.extra_info: List[str] = []
         self._terrain_cache: pygame.Surface | None = None
         self._terrain_cache_scale = self.scale
+
+    @property
+    def scale(self) -> float:
+        return self._scale
+
+    @scale.setter
+    def scale(self, value: float) -> None:
+        if value != self._scale:
+            self._scale = value
+            self._terrain_cache = None
 
     # ------------------------------------------------------------------
     # Helpers
@@ -178,7 +188,6 @@ class PygameViewerSystem(SystemNode):
                 cy = self.offset_y + self.view_height / (2 * prev_scale)
                 self.offset_x = cx - self.view_width / (2 * self.scale)
                 self.offset_y = cy - self.view_height / (2 * self.scale)
-                self._terrain_cache = None
 
     def _node_at_pixel(self, pos) -> Optional[SimNode]:
         """Return the topmost node at the given pixel position."""
@@ -308,15 +317,21 @@ class PygameViewerSystem(SystemNode):
 
     def _terrain_surface(self, terrain: TerrainNode) -> pygame.Surface:
         if self._terrain_cache is None or self._terrain_cache_scale != self.scale:
-            width = int(len(terrain.tiles[0]) * self.scale)
-            height = int(len(terrain.tiles) * self.scale)
+            tile_size = max(1, int(self.scale))
+            step = 1
+            if self.scale < 1:
+                step = max(1, int(1 / self.scale))
+            rows = len(terrain.tiles)
+            cols = len(terrain.tiles[0])
+            width = (cols // step) * tile_size
+            height = (rows // step) * tile_size
             surface = pygame.Surface((width, height))
-            for y, row in enumerate(terrain.tiles):
-                for x, tile in enumerate(row):
+            for py, y in enumerate(range(0, rows // step * step, step)):
+                row = terrain.tiles[y]
+                for px, x in enumerate(range(0, cols // step * step, step)):
+                    tile = row[x]
                     color = TERRAIN_COLORS.get(tile, (80, 80, 80))
-                    rect = pygame.Rect(
-                        int(x * self.scale), int(y * self.scale), int(self.scale), int(self.scale)
-                    )
+                    rect = pygame.Rect(px * tile_size, py * tile_size, tile_size, tile_size)
                     pygame.draw.rect(surface, color, rect)
             self._terrain_cache = surface
             self._terrain_cache_scale = self.scale
