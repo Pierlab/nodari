@@ -1,6 +1,7 @@
 from nodes.general import GeneralNode
 from nodes.army import ArmyNode
 from nodes.nation import NationNode
+from nodes.strategist import StrategistNode
 
 
 def test_general_records_style_and_reports():
@@ -15,26 +16,21 @@ def test_general_records_style_and_reports():
     assert general.get_armies() == [army]
 
 
-def test_general_ai_changes_army_goal_based_on_morale_and_reports():
+def test_general_ai_changes_army_goal_based_on_intel():
     nation = NationNode(name="nation", morale=100, capital_position=[0, 0])
-    general = GeneralNode(parent=nation, style="balanced")
-    army = ArmyNode(parent=general, goal="advance", size=1)
+    general = GeneralNode(parent=nation, style="aggressive", caution_level=0.1)
+    strategist = StrategistNode(parent=general)
+    army = ArmyNode(parent=general, goal="hold", size=1)
 
-    # High morale with no reports keeps goal
+    strategist.emit("enemy_spotted", {"enemy": "x"})
     general.update(0)
-    assert army.goal == "advance"
+    assert army.goal in {"advance", "flank"}
 
-    # Unit engaged while morale drops -> defend
-    nation.morale = 50
-    army.emit("battlefield_event", {"type": "unit_engaged"})
+    general.caution_level = 0.9
+    general.intel_confidence = 0.2
+    strategist.emit("enemy_spotted", {"enemy": "y"})
     general.update(0)
-    assert army.goal == "defend"
-
-    # Unit routed and very low morale -> retreat
-    nation.morale = 20
-    army.emit("battlefield_event", {"type": "unit_routed"})
-    general.update(0)
-    assert army.goal == "retreat"
+    assert army.goal in {"hold", "retreat"}
 
 
 def test_general_attempts_flank_with_probability():

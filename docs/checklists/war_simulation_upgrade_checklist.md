@@ -98,14 +98,14 @@
 
 ## 5) Fog of War, Recon & Intel
 
-- [ ] **Add** `systems/visibility.py`:
-  - [ ] Per unit: `vision_radius_m` (converted using `WORLD_SCALE_M`).
-  - [ ] Maintain **visible tiles per nation**; publish `enemy_spotted` events with timestamp & confidence.
-- [ ] **StrategistNode**:
-  - [ ] Subscribes to intel events, aggregates & filters by recency; exposes `get_enemy_estimates()`.
-- [ ] **GeneralNode._decide()**:
-  - [ ] Use `intel_confidence`, `caution_level` and terrain features to choose: `advance`, `flank`, `hold`, `retreat`.
-  - [ ] Integrate simple **course-of-action scorer** (terrain bonuses, numbers ratio, known enemy positions).
+- [x] **Add** `systems/visibility.py`:
+  - [x] Per unit: `vision_radius_m` (converted using `WORLD_SCALE_M`).
+  - [x] Maintain **visible tiles per nation**; publish `enemy_spotted` events with timestamp & confidence.
+- [x] **StrategistNode**:
+  - [x] Subscribes to intel events, aggregates & filters by recency; exposes `get_enemy_estimates()`.
+- [x] **GeneralNode._decide()**:
+  - [x] Use `intel_confidence`, `caution_level` and terrain features to choose: `advance`, `flank`, `hold`, `retreat`.
+  - [x] Integrate simple **course-of-action scorer** (terrain bonuses, numbers ratio, known enemy positions).
 
 ---
 

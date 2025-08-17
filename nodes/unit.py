@@ -23,6 +23,8 @@ class UnitNode(SimNode):
     retreat_threshold:
         Morale value below which the unit will retreat toward its nation's
         capital.
+    vision_radius_m:
+        Vision radius in meters used by the visibility system.
     """
 
     def __init__(
@@ -33,6 +35,7 @@ class UnitNode(SimNode):
         morale: int = 100,
         target: list[int] | None = None,
         retreat_threshold: int = 30,
+        vision_radius_m: float = 100.0,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -42,6 +45,7 @@ class UnitNode(SimNode):
         self.morale = morale
         self.target = target
         self.retreat_threshold = retreat_threshold
+        self.vision_radius_m = vision_radius_m
 
     # ------------------------------------------------------------------
     def engage(self, enemy: str | SimNode | None = None) -> None:
