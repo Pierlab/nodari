@@ -206,14 +206,14 @@
 
 ## 12) Tests & Validation
 
-- [ ] **Unit tests** for:
-  - [ ] Terrain carving functions (rivers contiguous, obstacle integrity).
-  - [ ] Pathfinding cost monotonicity and obstacle avoidance.
-  - [ ] Fog of war visibility masks.
-  - [ ] Command delay & delivery order (FIFO per chain).
-  - [ ] Combat blocking: no pass-through during `fighting`.
-- [ ] **Smoke test script** `tools/build_scenario.py --preset war_km` producing a runnable world JSON.
-- [ ] **Performance**: profile with 2×100 soldiers (and scalable to thousands). Optimize viewer draws (tile blitting cache).
+- [x] **Unit tests** for:
+  - [x] Terrain carving functions (rivers contiguous, obstacle integrity).
+  - [x] Pathfinding cost monotonicity and obstacle avoidance.
+  - [x] Fog of war visibility masks.
+  - [x] Command delay & delivery order (FIFO per chain).
+  - [x] Combat blocking: no pass-through during `fighting`.
+- [x] **Smoke test script** `tools/build_scenario.py --preset war_km` producing a runnable world JSON.
+- [x] **Performance**: profile with 2×100 soldiers (and scalable to thousands). Optimize viewer draws (tile blitting cache).
 
 ---
 

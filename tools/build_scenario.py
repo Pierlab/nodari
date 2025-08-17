@@ -36,6 +36,21 @@ SCENARIOS: Dict[str, ScenarioProfile] = {
             {"type": "DistanceSystem"},
             {"type": "PygameViewerSystem"},
         ],
+    ),
+    "war_km": ScenarioProfile(
+        inventory_buildings=set(),
+        system_nodes=[
+            {"type": "TimeSystem"},
+            {"type": "MovementSystem"},
+            {"type": "CombatSystem"},
+            {"type": "MoralSystem"},
+            {"type": "VictorySystem"},
+            {"type": "CommandSystem"},
+            {"type": "VisibilitySystem"},
+            {"type": "PathfindingSystem"},
+            {"type": "LoggingSystem"},
+            {"type": "PygameViewerSystem"},
+        ],
     )
 }
 

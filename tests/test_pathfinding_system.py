@@ -19,3 +19,16 @@ def test_pathfinder_respects_blocked_tiles():
     pf = PathfindingSystem(terrain=terrain)
     path = pf.find_path((0, 0), (2, 0), blocked={(1, 0)})
     assert (1, 0) not in path
+
+
+def test_pathfinder_cost_monotonic() -> None:
+    tiles = [["road", "plain", "plain"]]
+    terrain = TerrainNode(tiles=tiles, speed_modifiers={"road": 2.0, "plain": 1.0})
+    pf = PathfindingSystem(terrain=terrain)
+    path = pf.find_path((0, 0), (2, 0))
+    cumulative = 0.0
+    costs: list[float] = []
+    for x, y in path[1:]:
+        cumulative += 1.0 / terrain.get_speed_modifier(x, y)
+        costs.append(cumulative)
+    assert costs == sorted(costs)
