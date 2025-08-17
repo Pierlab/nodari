@@ -42,6 +42,13 @@ python run_war.py example/war_simulation_config.json
 
 Pause the simulation with the space bar and close the window or press the close button to exit.
 
+The war prototype now includes:
+
+- Randomised terrain with forests, hills, water and other tiles that affect movement and combat.
+- Capitals for each nation that must be defended or captured to win.
+- Dynamic armies spawned per nation with adjustable size and statistics.
+- Runtime controls to tweak the scenario: press `S`/`X` to slow down or speed up time and, while paused, use `A/Z` to change troop counts, `E/T` for speed variation, `Y/U` for stat variation, `F/G` for terrain density and `D` to toggle clustered or spread deployment. `R` resets the battlefield.
+
 ## Map editor
 
 An interactive map editor is provided in `tools/map_editor.py` to create
