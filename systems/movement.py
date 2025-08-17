@@ -35,6 +35,7 @@ class MovementSystem(SystemNode):
         obstacles: Optional[List[List[int]]] | None = None,
         direction_noise: float = 0.0,
         avoid_obstacles: bool = False,
+        blocking: bool = True,
         pathfinder: PathfindingSystem | str | None = None,
         **kwargs,
     ) -> None:
@@ -44,6 +45,7 @@ class MovementSystem(SystemNode):
         self.obstacles = {tuple(o) for o in (obstacles or [])}
         self.direction_noise = direction_noise
         self.avoid_obstacles = avoid_obstacles
+        self.blocking = blocking
         self._pathfinder_ref = pathfinder
         self.pathfinder: PathfindingSystem | None = (
             pathfinder if isinstance(pathfinder, PathfindingSystem) else None
@@ -108,11 +110,12 @@ class MovementSystem(SystemNode):
         self._resolve_terrain()
         self._resolve_pathfinder()
         blocked_tiles = set(self.obstacles)
-        for other in self._iter_units(self.parent or self):
-            if getattr(other, "state", "") == "fighting":
-                tr = self._get_transform(other)
-                if tr is not None:
-                    blocked_tiles.add((int(round(tr.position[0])), int(round(tr.position[1]))))
+        if self.blocking:
+            for other in self._iter_units(self.parent or self):
+                if getattr(other, "state", "") == "fighting":
+                    tr = self._get_transform(other)
+                    if tr is not None:
+                        blocked_tiles.add((int(round(tr.position[0])), int(round(tr.position[1]))))
         for unit in self._iter_units(self.parent or self):
             if getattr(unit, "state", "") == "fighting":
                 continue
@@ -174,6 +177,12 @@ class MovementSystem(SystemNode):
                 direction="up",
             )
         super().update(dt)
+
+    # ------------------------------------------------------------------
+    def set_blocking(self, enabled: bool) -> None:
+        """Toggle combat-based movement blocking."""
+
+        self.blocking = enabled
 
 
 register_node_type("MovementSystem", MovementSystem)

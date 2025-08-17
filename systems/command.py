@@ -42,6 +42,12 @@ class CommandSystem(SystemNode):
         self.on_event("order_issued", self._on_order_issued)
 
     # ------------------------------------------------------------------
+    def set_delay(self, delay_s: float) -> None:
+        """Adjust the base command delay in seconds."""
+
+        self.base_delay_s = delay_s
+
+    # ------------------------------------------------------------------
     def _on_order_issued(self, origin: SimNode, _event: str, order: Dict) -> None:
         recipients = self._resolve_recipients(origin, order)
         if not recipients:

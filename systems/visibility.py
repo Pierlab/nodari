@@ -22,6 +22,12 @@ class VisibilitySystem(SystemNode):
         self.enabled = True
 
     # ------------------------------------------------------------------
+    def set_enabled(self, enabled: bool) -> None:
+        """Enable or disable fog of war processing."""
+
+        self.enabled = enabled
+
+    # ------------------------------------------------------------------
     def _iter_units(self, node: SimNode) -> Iterable[UnitNode]:
         for child in node.children:
             if isinstance(child, UnitNode):
