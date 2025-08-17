@@ -191,7 +191,7 @@ while running and pygame.get_init():
             elif event.key == pygame.K_r:
                 _reset()
             elif event.key == pygame.K_s:
-                TIME_SCALE = max(0.1, TIME_SCALE / 2)
+                TIME_SCALE = max(0.01, TIME_SCALE / 2)
             elif event.key == pygame.K_x:
                 TIME_SCALE = min(100, TIME_SCALE * 2)
             elif paused:
