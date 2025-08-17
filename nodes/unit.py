@@ -1,6 +1,8 @@
 """Unit node representing a group of soldiers."""
 from __future__ import annotations
 
+from typing import Dict
+
 from core.simnode import SimNode
 from core.plugins import register_node_type
 
@@ -46,6 +48,8 @@ class UnitNode(SimNode):
         self.target = target
         self.retreat_threshold = retreat_threshold
         self.vision_radius_m = vision_radius_m
+        self.current_order: Dict | None = None
+        self.on_event("order_received", self._on_order_received)
 
     # ------------------------------------------------------------------
     def engage(self, enemy: str | SimNode | None = None) -> None:
@@ -64,6 +68,25 @@ class UnitNode(SimNode):
         if home is not None:
             self.target = list(home)
         self.emit("unit_routed", {"loss": loss}, direction="up")
+
+    # ------------------------------------------------------------------
+    def _on_order_received(self, _origin: SimNode, _event: str, payload: Dict) -> None:
+        """Store new orders and acknowledge them upward."""
+
+        current_prio = self.current_order.get("priority", 0) if self.current_order else -1
+        new_prio = payload.get("priority", 0)
+        current_time = self.current_order.get("time_issued", 0) if self.current_order else 0
+        if self.current_order is None or new_prio > current_prio or payload.get("time_issued", 0) >= current_time:
+            self.current_order = payload
+            self.emit("order_ack", {"order": payload}, direction="up")
+
+    # ------------------------------------------------------------------
+    def complete_order(self) -> None:
+        """Emit ``order_complete`` and clear the current order."""
+
+        if self.current_order is not None:
+            self.emit("order_complete", {"order": self.current_order}, direction="up")
+            self.current_order = None
 
     # ------------------------------------------------------------------
     def _get_home_position(self) -> list[int] | None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Dict, List
 import random
+import time
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
@@ -123,15 +124,18 @@ class GeneralNode(SimNode):
 
     # ------------------------------------------------------------------
     def issue_orders(self, orders: List[Dict]) -> None:
-        """Emit ``order_issued`` events for each order in *orders*.
+        """Emit ``order_issued`` events for each dict in *orders*.
 
-        Orders are propagated down the node tree so that subordinates can
-        react to them. The method does not implement any delay logic yet;
-        `command_delay_s` is stored for future use.
+        The payload is enriched with ``issuer_id`` and ``time_issued`` then
+        bubbled upward so that the :class:`~systems.command.CommandSystem`
+        can dispatch it with the appropriate delay and reliability.
         """
 
+        now = time.time()
         for order in orders:
-            self.emit("order_issued", order, direction="down")
+            order.setdefault("issuer_id", id(self))
+            order.setdefault("time_issued", now)
+            self.emit("order_issued", order, direction="up")
 
 
 register_node_type("GeneralNode", GeneralNode)
