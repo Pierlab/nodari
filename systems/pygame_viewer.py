@@ -24,7 +24,7 @@ from nodes.silo import SiloNode
 from nodes.pasture import PastureNode
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
-from core.terrain import TILE_CODES
+from core.terrain import TILE_CODES, TILE_NAMES
 from nodes.nation import NationNode
 from nodes.general import GeneralNode
 from nodes.strategist import StrategistNode
@@ -367,7 +367,7 @@ class PygameViewerSystem(SystemNode):
 
             final_width = int(cols * cache_scale)
             final_height = int(rows * cache_scale)
-            self._terrain_cache = pygame.transform.smoothscale(
+            self._terrain_cache = pygame.transform.scale(
                 raw_surface, (final_width, final_height)
             )
             self._terrain_cache_scale = cache_scale
@@ -501,15 +501,24 @@ class PygameViewerSystem(SystemNode):
         if self.show_intel_overlay:
             self._draw_intel_overlay()
 
-        # draw a scale bar representing 100 meters
-        grid_units_for_100m = 100 / config.WORLD_SCALE_M
-        scale_length = int(grid_units_for_100m * self.scale)
+        # draw a scale bar representing 1 kilometre
+        grid_units_for_1km = 1000 / config.WORLD_SCALE_M
+        scale_length = int(grid_units_for_1km * self.scale)
         bar_y = self.view_height - 20
         pygame.draw.line(self.screen, (255, 255, 255), (10, bar_y), (10 + scale_length, bar_y), 2)
-        label = self.font.render("100 m", True, (255, 255, 255))
+        label = self.font.render("1 km", True, (255, 255, 255))
         label_rect = label.get_rect()
         label_rect.center = (10 + scale_length / 2, bar_y + label_rect.height / 2 + 2)
         self.screen.blit(label, label_rect)
+
+        # terrain legend next to the scale bar
+        line_height = self.font.get_linesize()
+        legend_y = bar_y - line_height * len(TERRAIN_COLORS) - 5
+        for idx, (code, color) in enumerate(TERRAIN_COLORS.items()):
+            y = legend_y + idx * line_height
+            pygame.draw.rect(self.screen, color, pygame.Rect(10, y, 12, 12))
+            name = self.font.render(TILE_NAMES.get(code, ""), True, (255, 255, 255))
+            self.screen.blit(name, (26, y - 2))
 
         panel_rect = pygame.Rect(self.view_width, 0, self.panel_width, self.view_height)
         pygame.draw.rect(self.screen, (50, 50, 50), panel_rect)
