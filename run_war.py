@@ -34,6 +34,8 @@ from systems.movement import MovementSystem
 from systems.logger import LoggingSystem
 from systems.pygame_viewer import PygameViewerSystem
 from systems.time import TimeSystem
+from systems.command import CommandSystem
+from systems.visibility import VisibilitySystem
 
 
 # Ensure pygame can be used even when no display is available
@@ -107,6 +109,24 @@ TIME_SCALE = config.TIME_SCALE
 spawn_dispersion_radius = 200.0
 soldiers_per_dot = 5
 bodyguard_size = 5
+
+river_width_presets = [(2, 5), (4, 8), (8, 14)]
+river_width_index = 0
+mountain_presets = [
+    {"total_area_pct": 5, "threshold": 0.75},
+    {"total_area_pct": 10, "threshold": 0.65},
+    {"total_area_pct": 20, "threshold": 0.55},
+]
+mountain_preset_index = 0
+forest_layouts = [
+    {"total_area_pct": 10, "clusters": 6, "cluster_spread": 0.6},
+    {"total_area_pct": 30, "clusters": 2, "cluster_spread": 0.2},
+]
+forest_layout_index = 0
+visibility_enabled = True
+reliability_presets = [1.0, 0.8, 0.5]
+reliability_index = 0
+viewer: PygameViewerSystem | None = None
 
 
 def _generate_terrain(world, params: dict) -> None:
@@ -285,6 +305,8 @@ def _reset() -> None:
     _spawn_armies(world, spawn_dispersion_radius, soldiers_per_dot, bodyguard_size)
     if time_system is not None:
         time_system.current_time = config.START_TIME
+    if viewer:
+        viewer.soldiers_per_dot = soldiers_per_dot
 
 
 _reset()
@@ -292,6 +314,11 @@ movement_system = next((c for c in world.children if isinstance(c, MovementSyste
 if movement_system:
     movement_system.direction_noise = 0.2
     movement_system.avoid_obstacles = True
+
+command_system = next((c for c in world.children if isinstance(c, CommandSystem)), None)
+visibility_system = next((c for c in world.children if isinstance(c, VisibilitySystem)), None)
+if visibility_system:
+    visibility_system.enabled = visibility_enabled
 
 clock = pygame.time.Clock()
 viewer = next((c for c in world.children if isinstance(c, PygameViewerSystem)), None)
@@ -341,6 +368,20 @@ while running and pygame.get_init():
                 viewer.offset_y += viewer.view_height * 0.1 / viewer.scale
             elif viewer and event.key == pygame.K_k:
                 viewer.offset_y -= viewer.view_height * 0.1 / viewer.scale
+            elif viewer and event.key == pygame.K_b:
+                viewer.show_role_rings = not viewer.show_role_rings
+            elif event.key == pygame.K_i and visibility_system:
+                visibility_enabled = not visibility_enabled
+                visibility_system.enabled = visibility_enabled
+            elif viewer and event.key == pygame.K_SEMICOLON:
+                viewer.show_intel_overlay = not viewer.show_intel_overlay
+            elif event.key == pygame.K_COMMA and command_system:
+                command_system.base_delay_s = max(0.0, command_system.base_delay_s - 0.5)
+            elif event.key == pygame.K_PERIOD and command_system:
+                command_system.base_delay_s += 0.5
+            elif event.key == pygame.K_n and command_system:
+                reliability_index = (reliability_index + 1) % len(reliability_presets)
+                command_system.reliability = reliability_presets[reliability_index]
             elif paused:
                 if event.key == pygame.K_f:
                     forests = terrain_params.setdefault(
@@ -354,15 +395,55 @@ while running and pygame.get_init():
                     )
                     forests["total_area_pct"] = min(100.0, forests.get("total_area_pct", 0) + 1)
                     _generate_terrain(world, terrain_params)
+                elif event.key == pygame.K_w and terrain_params.get("rivers"):
+                    river_width_index = (river_width_index + 1) % len(river_width_presets)
+                    wmin, wmax = river_width_presets[river_width_index]
+                    for river in terrain_params.get("rivers", []):
+                        river["width_min"], river["width_max"] = wmin, wmax
+                    _generate_terrain(world, terrain_params)
+                elif event.key == pygame.K_m:
+                    mountain_preset_index = (mountain_preset_index + 1) % len(mountain_presets)
+                    preset = mountain_presets[mountain_preset_index]
+                    mountains = terrain_params.setdefault("mountains", {})
+                    mountains["total_area_pct"] = preset["total_area_pct"]
+                    terrain_params["obstacle_altitude_threshold"] = preset["threshold"]
+                    _generate_terrain(world, terrain_params)
+                elif event.key == pygame.K_v:
+                    forest_layout_index = (forest_layout_index + 1) % len(forest_layouts)
+                    terrain_params["forests"] = dict(forest_layouts[forest_layout_index])
+                    _generate_terrain(world, terrain_params)
+                elif event.key == pygame.K_d:
+                    spawn_dispersion_radius = 0.0 if spawn_dispersion_radius > 0 else 200.0
+                    _reset()
+                elif event.key == pygame.K_p:
+                    spawn_dispersion_radius = max(0.0, spawn_dispersion_radius - 10.0)
+                    _reset()
+                elif event.key == pygame.K_o:
+                    spawn_dispersion_radius += 10.0
+                    _reset()
+                elif event.key == pygame.K_c:
+                    cycle = [1, 2, 5, 10]
+                    idx = cycle.index(soldiers_per_dot)
+                    soldiers_per_dot = cycle[(idx + 1) % len(cycle)]
+                    if viewer:
+                        viewer.soldiers_per_dot = soldiers_per_dot
+                    _reset()
     if viewer:
         if paused:
-            viewer.extra_info = [
+            info = [
                 f"Dispersion R: {spawn_dispersion_radius:.0f} m",
                 f"Soldiers/dot: {soldiers_per_dot}",
-                f"Bodyguard size: {bodyguard_size}",
                 f"Forest %: {terrain_params.get('forests', {}).get('total_area_pct', 0):.0f}",
-                "F/G: -/+ forest", "R: reset",
+                f"FoW: {'ON' if visibility_enabled else 'OFF'}",
+                f"Intel overlay: {'ON' if viewer.show_intel_overlay else 'OFF'}",
+                "F/G: -/+ forest, W: river width, M: mountains, V: forest layout",
+                "P/O: -/+ dispersion, D: cluster toggle, C: cycle dot scale",
+                "B: rings, I: fog, ;: intel, ,/.: cmd delay, N: reliability, R: reset",
             ]
+            if command_system:
+                info.insert(3, f"Cmd delay: {command_system.base_delay_s:.1f}s")
+                info.insert(4, f"Reliability: {command_system.reliability:.2f}")
+            viewer.extra_info = info
         else:
             viewer.extra_info = []
         viewer.process_events(events)

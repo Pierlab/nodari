@@ -122,6 +122,9 @@ class PygameViewerSystem(SystemNode):
         # number of soldiers represented by a single dot
         self.soldiers_per_dot = 1
         self.draw_capital = draw_capital
+        # Toggle display options
+        self.show_role_rings = True
+        self.show_intel_overlay = False
         # Extra informational lines injected by external code (e.g. pause menu)
         self.extra_info: List[str] = []
 
@@ -202,6 +205,29 @@ class PygameViewerSystem(SystemNode):
                 w, h = DEFAULT_BUILDING_SIZES.get(type(node), (0, 0))
             return pygame.Rect(0, 0, int(w), int(h))
         return None
+
+    def _draw_intel_overlay(self) -> None:
+        root = self._root()
+        for node in self._walk(root):
+            for child in node.children:
+                if isinstance(child, TransformNode) and isinstance(child.parent, UnitNode):
+                    px, py = child.position
+                    radius = int(
+                        getattr(child.parent, "vision_radius_m", 0.0)
+                        / config.WORLD_SCALE_M
+                        * self.scale
+                    )
+                    if radius > 0:
+                        sx = int((px - self.offset_x) * self.scale)
+                        sy = int((py - self.offset_y) * self.scale)
+                        pygame.draw.circle(self.screen, (255, 255, 255), (sx, sy), radius, 1)
+            if isinstance(node, StrategistNode):
+                for report in node.get_enemy_estimates():
+                    x, y = report.get("position", [0, 0])
+                    sx = int((x - self.offset_x) * self.scale)
+                    sy = int((y - self.offset_y) * self.scale)
+                    pygame.draw.line(self.screen, (255, 0, 0), (sx - 4, sy - 4), (sx + 4, sy + 4), 2)
+                    pygame.draw.line(self.screen, (255, 0, 0), (sx - 4, sy + 4), (sx + 4, sy - 4), 2)
 
     def _info_lines(self, node: SimNode) -> List[str]:
         """Return a list of human-readable attributes for ``node``."""
@@ -331,27 +357,37 @@ class PygameViewerSystem(SystemNode):
                         self._draw_cross(pos, radius)
                     else:
                         pygame.draw.circle(self.screen, col, pos, radius)
-                        ring = (
-                            ROLE_RING_COLORS["bodyguard"]
-                            if isinstance(parent, BodyguardUnitNode)
-                            else ROLE_RING_COLORS["soldier"]
-                        )
-                        pygame.draw.circle(self.screen, ring, pos, radius, 2)
+                        if self.show_role_rings:
+                            ring = (
+                                ROLE_RING_COLORS["bodyguard"]
+                                if isinstance(parent, BodyguardUnitNode)
+                                else ROLE_RING_COLORS["soldier"]
+                            )
+                            pygame.draw.circle(self.screen, ring, pos, radius, 2)
                 elif isinstance(parent, GeneralNode):
                     col = nation_colors.get(self._nation_of(parent), (200, 200, 200))
                     radius = int(self.unit_radius * 1.3)
                     pygame.draw.circle(self.screen, col, pos, radius)
-                    pygame.draw.circle(self.screen, ROLE_RING_COLORS["general"], pos, radius, 2)
+                    if self.show_role_rings:
+                        pygame.draw.circle(
+                            self.screen, ROLE_RING_COLORS["general"], pos, radius, 2
+                        )
                 elif isinstance(parent, StrategistNode):
                     col = nation_colors.get(self._nation_of(parent), (200, 200, 200))
                     radius = int(self.unit_radius)
                     pygame.draw.circle(self.screen, col, pos, radius)
-                    pygame.draw.circle(self.screen, ROLE_RING_COLORS["strategist"], pos, radius, 2)
+                    if self.show_role_rings:
+                        pygame.draw.circle(
+                            self.screen, ROLE_RING_COLORS["strategist"], pos, radius, 2
+                        )
                 elif isinstance(parent, OfficerNode):
                     col = nation_colors.get(self._nation_of(parent), (200, 200, 200))
                     radius = int(self.unit_radius)
                     pygame.draw.circle(self.screen, col, pos, radius)
-                    pygame.draw.circle(self.screen, ROLE_RING_COLORS["officer"], pos, radius, 2)
+                    if self.show_role_rings:
+                        pygame.draw.circle(
+                            self.screen, ROLE_RING_COLORS["officer"], pos, radius, 2
+                        )
                 elif isinstance(parent, CharacterNode):
                     color = (50, 150, 255) if getattr(parent, "gender", "male") == "male" else (255, 105, 180)
                     pygame.draw.circle(self.screen, color, pos, CHAR_RADIUS)
@@ -375,6 +411,9 @@ class PygameViewerSystem(SystemNode):
                         pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):
                 time_sys = node
+
+        if self.show_intel_overlay:
+            self._draw_intel_overlay()
 
         # draw a scale bar representing 100 meters
         grid_units_for_100m = 100 / config.WORLD_SCALE_M
@@ -417,28 +456,29 @@ class PygameViewerSystem(SystemNode):
             self.screen.blit(surf, (panel_rect.x + 10, text_y))
             text_y += line_height
 
-        # Draw legend for role rings
-        text_y += line_height
-        legend_title = self.font.render("Legend:", True, (255, 255, 255))
-        self.screen.blit(legend_title, (panel_rect.x + 10, text_y))
-        text_y += line_height
-        for label, key in [
-            ("General", "general"),
-            ("Strategist", "strategist"),
-            ("Officer", "officer"),
-            ("Bodyguard", "bodyguard"),
-            ("Soldier", "soldier"),
-        ]:
-            pygame.draw.circle(
-                self.screen,
-                ROLE_RING_COLORS[key],
-                (panel_rect.x + 15, text_y + line_height // 2),
-                5,
-                2,
-            )
-            surf = self.font.render(label, True, (255, 255, 255))
-            self.screen.blit(surf, (panel_rect.x + 25, text_y))
+        if self.show_role_rings:
+            # Draw legend for role rings
             text_y += line_height
+            legend_title = self.font.render("Legend:", True, (255, 255, 255))
+            self.screen.blit(legend_title, (panel_rect.x + 10, text_y))
+            text_y += line_height
+            for label, key in [
+                ("General", "general"),
+                ("Strategist", "strategist"),
+                ("Officer", "officer"),
+                ("Bodyguard", "bodyguard"),
+                ("Soldier", "soldier"),
+            ]:
+                pygame.draw.circle(
+                    self.screen,
+                    ROLE_RING_COLORS[key],
+                    (panel_rect.x + 15, text_y + line_height // 2),
+                    5,
+                    2,
+                )
+                surf = self.font.render(label, True, (255, 255, 255))
+                self.screen.blit(surf, (panel_rect.x + 25, text_y))
+                text_y += line_height
 
         pygame.display.flip()
         super().update(dt)

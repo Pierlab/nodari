@@ -19,6 +19,7 @@ class VisibilitySystem(SystemNode):
         # Mapping of nation id to set of visible tile coordinates
         self.visible_tiles: Dict[int, Set[Tuple[int, int]]] = {}
         self._time = 0.0
+        self.enabled = True
 
     # ------------------------------------------------------------------
     def _iter_units(self, node: SimNode) -> Iterable[UnitNode]:
@@ -50,6 +51,9 @@ class VisibilitySystem(SystemNode):
         """Recompute visibility and publish spotting events."""
 
         super().update(dt)
+        if not self.enabled:
+            return
+
         self._time += dt
         self.visible_tiles.clear()
 
