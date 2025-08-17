@@ -42,3 +42,26 @@ def test_command_reliability_drop():
     cmd.update(1.0)
     cmd.update(1.0)
     assert unit.current_order is None
+
+
+def test_command_delay_fifo() -> None:
+    root = NationNode(morale=100, capital_position=[0, 0])
+    cmd = CommandSystem(parent=root, base_delay_s=1.0)
+    gen = GeneralNode(style="balanced", parent=root)
+    officer = OfficerNode(parent=ArmyNode(parent=gen, goal="advance", size=0))
+    TransformNode(position=[0.0, 0.0], parent=gen)
+    TransformNode(position=[0.0, 0.0], parent=officer)
+    received: list[str] = []
+    officer.on_event(
+        "order_received", lambda _o, _e, p: received.append(p["order_type"])
+    )
+    gen.issue_orders(
+        [
+            {"order_type": "move", "recipient": officer},
+            {"order_type": "hold", "recipient": officer},
+        ]
+    )
+    cmd.update(0.5)
+    assert not received
+    cmd.update(0.6)
+    assert received == ["move", "hold"]

@@ -127,6 +127,8 @@ class PygameViewerSystem(SystemNode):
         self.show_intel_overlay = False
         # Extra informational lines injected by external code (e.g. pause menu)
         self.extra_info: List[str] = []
+        self._terrain_cache: pygame.Surface | None = None
+        self._terrain_cache_scale = self.scale
 
     # ------------------------------------------------------------------
     # Helpers
@@ -176,6 +178,7 @@ class PygameViewerSystem(SystemNode):
                 cy = self.offset_y + self.view_height / (2 * prev_scale)
                 self.offset_x = cx - self.view_width / (2 * self.scale)
                 self.offset_y = cy - self.view_height / (2 * self.scale)
+                self._terrain_cache = None
 
     def _node_at_pixel(self, pos) -> Optional[SimNode]:
         """Return the topmost node at the given pixel position."""
@@ -303,14 +306,28 @@ class PygameViewerSystem(SystemNode):
             self.screen, (255, 0, 0), (x - size, y + size), (x + size, y - size), 2
         )
 
+    def _terrain_surface(self, terrain: TerrainNode) -> pygame.Surface:
+        if self._terrain_cache is None or self._terrain_cache_scale != self.scale:
+            width = int(len(terrain.tiles[0]) * self.scale)
+            height = int(len(terrain.tiles) * self.scale)
+            surface = pygame.Surface((width, height))
+            for y, row in enumerate(terrain.tiles):
+                for x, tile in enumerate(row):
+                    color = TERRAIN_COLORS.get(tile, (80, 80, 80))
+                    rect = pygame.Rect(
+                        int(x * self.scale), int(y * self.scale), int(self.scale), int(self.scale)
+                    )
+                    pygame.draw.rect(surface, color, rect)
+            self._terrain_cache = surface
+            self._terrain_cache_scale = self.scale
+        return self._terrain_cache
+
     def _draw_terrain(self, terrain: TerrainNode) -> None:
-        for y, row in enumerate(terrain.tiles):
-            for x, tile in enumerate(row):
-                color = TERRAIN_COLORS.get(tile, (80, 80, 80))
-                px = int((x - self.offset_x) * self.scale)
-                py = int((y - self.offset_y) * self.scale)
-                rect = pygame.Rect(px, py, int(self.scale), int(self.scale))
-                pygame.draw.rect(self.screen, color, rect)
+        surface = self._terrain_surface(terrain)
+        self.screen.blit(
+            surface,
+            (-int(self.offset_x * self.scale), -int(self.offset_y * self.scale)),
+        )
 
     def update(self, dt: float) -> None:  # noqa: D401 - inherit docstring
         """Update the window and render state."""
