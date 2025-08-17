@@ -107,6 +107,8 @@ class PygameViewerSystem(SystemNode):
         self.offset_y = 0.0
         self.selected: Optional[SimNode] = None
         self.unit_radius = UNIT_RADIUS
+        # number of soldiers represented by a single dot
+        self.soldiers_per_dot = 1
         self.draw_capital = draw_capital
         # Extra informational lines injected by external code (e.g. pause menu)
         self.extra_info: List[str] = []
@@ -301,7 +303,18 @@ class PygameViewerSystem(SystemNode):
                             int((target[1] - self.offset_y) * self.scale),
                         )
                         self._draw_arrow(pos, end, ARROW_COLOR)
-                    radius = int(self.unit_radius * max(0.5, (parent.size / 100) ** 0.5))
+                    radius = int(
+                        self.unit_radius
+                        * max(
+                            0.5,
+                            (
+                                parent.size
+                                / max(1, self.soldiers_per_dot)
+                                / 100
+                            )
+                            ** 0.5,
+                        )
+                    )
                     if parent.state == "defeated":
                         self._draw_cross(pos, radius)
                     else:
