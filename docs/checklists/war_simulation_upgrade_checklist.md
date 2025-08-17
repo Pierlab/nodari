@@ -193,14 +193,14 @@
 ## 11) Systems Wiring & Runtime Parameters
 
 - [ ] In `run_war.py`:
-  - [ ] Maintain a central **`SimParams`** dict (current values: dispersion, soldiers_per_dot, terrain presets, foW on/off, command delay…).
-  - [ ] On key events, update `SimParams` and notify systems via method calls or events:
-    - [ ] `viewer.set_render_params(...)`
-    - [ ] `movement.set_blocking(True/False)`
-    - [ ] `visibility.set_enabled(True/False)`
-    - [ ] `command.set_delay(delay_s)`
-    - [ ] `terrain_regen(params)` → rebuild tiles/obstacles in-place.
-- [ ] Ensure all systems are discoverable as today (`load_plugins` + `core.loader`).
+  - [x] Maintain a central **`SimParams`** dict (current values: dispersion, soldiers_per_dot, terrain presets, foW on/off, command delay…).
+  - [x] On key events, update `SimParams` and notify systems via method calls or events:
+    - [x] `viewer.set_render_params(...)`
+    - [x] `movement.set_blocking(True/False)`
+    - [x] `visibility.set_enabled(True/False)`
+    - [x] `command.set_delay(delay_s)`
+    - [x] `terrain_regen(params)` → rebuild tiles/obstacles in-place.
+- [x] Ensure all systems are discoverable as today (`load_plugins` + `core.loader`).
 
 ---
 

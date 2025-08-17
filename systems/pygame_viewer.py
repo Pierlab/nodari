@@ -145,6 +145,22 @@ class PygameViewerSystem(SystemNode):
     # ------------------------------------------------------------------
     # Simulation API
     # ------------------------------------------------------------------
+    def set_render_params(
+        self,
+        *,
+        soldiers_per_dot: int | None = None,
+        show_role_rings: bool | None = None,
+        show_intel_overlay: bool | None = None,
+    ) -> None:
+        """Update runtime rendering parameters."""
+
+        if soldiers_per_dot is not None:
+            self.soldiers_per_dot = soldiers_per_dot
+        if show_role_rings is not None:
+            self.show_role_rings = show_role_rings
+        if show_intel_overlay is not None:
+            self.show_intel_overlay = show_intel_overlay
+
     def process_events(self, events: List[pygame.event.Event]) -> None:
         """Handle external Pygame events."""
         for event in events:

@@ -105,10 +105,16 @@ if time_system is not None:
 FPS = config.FPS
 TIME_SCALE = config.TIME_SCALE
 
-# parameters adjustable via pause menu
-spawn_dispersion_radius = 200.0
-soldiers_per_dot = 5
-bodyguard_size = 5
+# parameters adjustable via keyboard
+sim_params = {
+    "dispersion": 200.0,
+    "soldiers_per_dot": 5,
+    "bodyguard_size": 5,
+    "terrain": terrain_params,
+    "visibility": True,
+    "command_delay": 0.0,
+    "movement_blocking": True,
+}
 
 river_width_presets = [(2, 5), (4, 8), (8, 14)]
 river_width_index = 0
@@ -123,13 +129,15 @@ forest_layouts = [
     {"total_area_pct": 30, "clusters": 2, "cluster_spread": 0.2},
 ]
 forest_layout_index = 0
-visibility_enabled = True
 reliability_presets = [1.0, 0.8, 0.5]
 reliability_index = 0
 viewer: PygameViewerSystem | None = None
+movement_system: MovementSystem | None = None
+command_system: CommandSystem | None = None
+visibility_system: VisibilitySystem | None = None
 
 
-def _generate_terrain(world, params: dict) -> None:
+def terrain_regen(world, params: dict) -> None:
     """Regenerate terrain tiles according to *params*."""
 
     terrain = next((c for c in world.children if isinstance(c, TerrainNode)), None)
@@ -300,16 +308,30 @@ def _spawn_armies(
         general.add_child(army)
 
 
+def apply_sim_params() -> None:
+    """Propagate *sim_params* values to systems."""
+
+    if viewer:
+        viewer.set_render_params(soldiers_per_dot=sim_params["soldiers_per_dot"])
+    if movement_system:
+        movement_system.set_blocking(sim_params.get("movement_blocking", True))
+    if visibility_system:
+        visibility_system.set_enabled(sim_params["visibility"])
+    if command_system:
+        command_system.set_delay(sim_params["command_delay"])
+
+
 def _reset() -> None:
-    _generate_terrain(world, terrain_params)
-    _spawn_armies(world, spawn_dispersion_radius, soldiers_per_dot, bodyguard_size)
+    terrain_regen(world, sim_params["terrain"])
+    _spawn_armies(world, sim_params["dispersion"], sim_params["soldiers_per_dot"], sim_params["bodyguard_size"])
     if time_system is not None:
         time_system.current_time = config.START_TIME
-    if viewer:
-        viewer.soldiers_per_dot = soldiers_per_dot
+    apply_sim_params()
 
 
+# initial world setup
 _reset()
+
 movement_system = next((c for c in world.children if isinstance(c, MovementSystem)), None)
 if movement_system:
     movement_system.direction_noise = 0.2
@@ -317,8 +339,10 @@ if movement_system:
 
 command_system = next((c for c in world.children if isinstance(c, CommandSystem)), None)
 visibility_system = next((c for c in world.children if isinstance(c, VisibilitySystem)), None)
+if command_system:
+    sim_params["command_delay"] = command_system.base_delay_s
 if visibility_system:
-    visibility_system.enabled = visibility_enabled
+    sim_params["visibility"] = visibility_system.enabled
 
 clock = pygame.time.Clock()
 viewer = next((c for c in world.children if isinstance(c, PygameViewerSystem)), None)
@@ -327,9 +351,10 @@ if viewer:
     viewer.scale = 10
     viewer.unit_radius = 10
     viewer.draw_capital = True
-    viewer.soldiers_per_dot = soldiers_per_dot
     viewer.offset_x = world.width / 2 - viewer.view_width / (2 * viewer.scale)
     viewer.offset_y = world.height / 2 - viewer.view_height / (2 * viewer.scale)
+
+apply_sim_params()
 paused = False
 running = True
 while running and pygame.get_init():
@@ -369,72 +394,72 @@ while running and pygame.get_init():
             elif viewer and event.key == pygame.K_k:
                 viewer.offset_y -= viewer.view_height * 0.1 / viewer.scale
             elif viewer and event.key == pygame.K_b:
-                viewer.show_role_rings = not viewer.show_role_rings
+                viewer.set_render_params(show_role_rings=not viewer.show_role_rings)
             elif event.key == pygame.K_i and visibility_system:
-                visibility_enabled = not visibility_enabled
-                visibility_system.enabled = visibility_enabled
+                sim_params["visibility"] = not sim_params["visibility"]
+                apply_sim_params()
             elif viewer and event.key == pygame.K_SEMICOLON:
-                viewer.show_intel_overlay = not viewer.show_intel_overlay
+                viewer.set_render_params(show_intel_overlay=not viewer.show_intel_overlay)
             elif event.key == pygame.K_COMMA and command_system:
-                command_system.base_delay_s = max(0.0, command_system.base_delay_s - 0.5)
+                sim_params["command_delay"] = max(0.0, sim_params["command_delay"] - 0.5)
+                apply_sim_params()
             elif event.key == pygame.K_PERIOD and command_system:
-                command_system.base_delay_s += 0.5
+                sim_params["command_delay"] += 0.5
+                apply_sim_params()
             elif event.key == pygame.K_n and command_system:
                 reliability_index = (reliability_index + 1) % len(reliability_presets)
                 command_system.reliability = reliability_presets[reliability_index]
             elif paused:
                 if event.key == pygame.K_f:
-                    forests = terrain_params.setdefault(
+                    forests = sim_params["terrain"].setdefault(
                         "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
                     )
                     forests["total_area_pct"] = max(0.0, forests.get("total_area_pct", 0) - 1)
-                    _generate_terrain(world, terrain_params)
+                    terrain_regen(world, sim_params["terrain"])
                 elif event.key == pygame.K_g:
-                    forests = terrain_params.setdefault(
+                    forests = sim_params["terrain"].setdefault(
                         "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
                     )
                     forests["total_area_pct"] = min(100.0, forests.get("total_area_pct", 0) + 1)
-                    _generate_terrain(world, terrain_params)
-                elif event.key == pygame.K_w and terrain_params.get("rivers"):
+                    terrain_regen(world, sim_params["terrain"])
+                elif event.key == pygame.K_w and sim_params["terrain"].get("rivers"):
                     river_width_index = (river_width_index + 1) % len(river_width_presets)
                     wmin, wmax = river_width_presets[river_width_index]
-                    for river in terrain_params.get("rivers", []):
+                    for river in sim_params["terrain"].get("rivers", []):
                         river["width_min"], river["width_max"] = wmin, wmax
-                    _generate_terrain(world, terrain_params)
+                    terrain_regen(world, sim_params["terrain"])
                 elif event.key == pygame.K_m:
                     mountain_preset_index = (mountain_preset_index + 1) % len(mountain_presets)
                     preset = mountain_presets[mountain_preset_index]
-                    mountains = terrain_params.setdefault("mountains", {})
+                    mountains = sim_params["terrain"].setdefault("mountains", {})
                     mountains["total_area_pct"] = preset["total_area_pct"]
-                    terrain_params["obstacle_altitude_threshold"] = preset["threshold"]
-                    _generate_terrain(world, terrain_params)
+                    sim_params["terrain"]["obstacle_altitude_threshold"] = preset["threshold"]
+                    terrain_regen(world, sim_params["terrain"])
                 elif event.key == pygame.K_v:
                     forest_layout_index = (forest_layout_index + 1) % len(forest_layouts)
-                    terrain_params["forests"] = dict(forest_layouts[forest_layout_index])
-                    _generate_terrain(world, terrain_params)
+                    sim_params["terrain"]["forests"] = dict(forest_layouts[forest_layout_index])
+                    terrain_regen(world, sim_params["terrain"])
                 elif event.key == pygame.K_d:
-                    spawn_dispersion_radius = 0.0 if spawn_dispersion_radius > 0 else 200.0
+                    sim_params["dispersion"] = 0.0 if sim_params["dispersion"] > 0 else 200.0
                     _reset()
                 elif event.key == pygame.K_p:
-                    spawn_dispersion_radius = max(0.0, spawn_dispersion_radius - 10.0)
+                    sim_params["dispersion"] = max(0.0, sim_params["dispersion"] - 10.0)
                     _reset()
                 elif event.key == pygame.K_o:
-                    spawn_dispersion_radius += 10.0
+                    sim_params["dispersion"] += 10.0
                     _reset()
                 elif event.key == pygame.K_c:
                     cycle = [1, 2, 5, 10]
-                    idx = cycle.index(soldiers_per_dot)
-                    soldiers_per_dot = cycle[(idx + 1) % len(cycle)]
-                    if viewer:
-                        viewer.soldiers_per_dot = soldiers_per_dot
+                    idx = cycle.index(sim_params["soldiers_per_dot"])
+                    sim_params["soldiers_per_dot"] = cycle[(idx + 1) % len(cycle)]
                     _reset()
     if viewer:
         if paused:
             info = [
-                f"Dispersion R: {spawn_dispersion_radius:.0f} m",
-                f"Soldiers/dot: {soldiers_per_dot}",
-                f"Forest %: {terrain_params.get('forests', {}).get('total_area_pct', 0):.0f}",
-                f"FoW: {'ON' if visibility_enabled else 'OFF'}",
+                f"Dispersion R: {sim_params['dispersion']:.0f} m",
+                f"Soldiers/dot: {sim_params['soldiers_per_dot']}",
+                f"Forest %: {sim_params['terrain'].get('forests', {}).get('total_area_pct', 0):.0f}",
+                f"FoW: {'ON' if sim_params['visibility'] else 'OFF'}",
                 f"Intel overlay: {'ON' if viewer.show_intel_overlay else 'OFF'}",
                 "F/G: -/+ forest, W: river width, M: mountains, V: forest layout",
                 "P/O: -/+ dispersion, D: cluster toggle, C: cycle dot scale",
