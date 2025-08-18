@@ -162,6 +162,7 @@ class MovementSystem(SystemNode):
                     continue
                 unit.state = "idle"
                 tile_units.setdefault((sx, sy), []).append(unit)
+                unit.emit("unit_idle", {}, direction="up")
                 continue
             speed = unit.speed
             terrain = self.terrain
