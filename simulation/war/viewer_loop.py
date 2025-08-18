@@ -95,7 +95,7 @@ def run(viewer: str = "pygame") -> None:
                     paused = not paused
                 elif event.key == pygame.K_r:
                     _reset()
-                elif event.key == pygame.K_s:
+                elif event.key == pygame.K_c:
                     TIME_SCALE = max(0.01, TIME_SCALE / 2)
                 elif event.key == pygame.K_x:
                     TIME_SCALE = min(100, TIME_SCALE * 2)
@@ -154,11 +154,7 @@ def run(viewer: str = "pygame") -> None:
                         _dispersion_minus()
                     elif event.key == pygame.K_o:
                         _dispersion_plus()
-                    elif event.key == pygame.K_c:
-                        cycle = [1, 2, 5, 10]
-                        idx = cycle.index(sim_params["soldiers_per_dot"])
-                        sim_params["soldiers_per_dot"] = cycle[(idx + 1) % len(cycle)]
-                        _reset()
+
         if paused:
             forest_pct = sim_params["terrain"].get("forests", {}).get("total_area_pct", 0)
             menu_items = [
