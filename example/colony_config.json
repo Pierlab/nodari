@@ -7,12 +7,12 @@
       "seed": 1
     },
     "children": [
-      { "type": "TimeSystem", "id": "time", "config": { "time_scale": 48 } },
+      { "type": "TimeSystem", "id": "time", "config": { "time_scale": 10 } },
       { "type": "MovementSystem", "id": "movement", "config": { "terrain": "terrain" } },
       { "type": "VisibilitySystem", "id": "visibility" },
       { "type": "SchedulerSystem", "id": "scheduler" },
       { "type": "PathfindingSystem", "id": "pathfinder", "config": { "terrain": "terrain" } },
-      { "type": "AISystem", "id": "ai", "config": { "exploration_radius": 10, "capital_min_radius": 50 } },
+      { "type": "AISystem", "id": "ai", "config": { "exploration_radius": 60, "capital_min_radius": 50 } },
       {
         "type": "TerrainNode",
         "id": "terrain",
