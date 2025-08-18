@@ -123,11 +123,17 @@ if not RUN_WAR_IMPORT_ONLY:
     else:
         terrain_params = {}
 
-    terrain_params.setdefault("forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5})
-    terrain_params.pop("rivers", None)
-    terrain_params.pop("lakes", None)
-    terrain_params.setdefault("mountains", {"total_area_pct": 5, "perlin_scale": 0.01, "peak_density": 0.2})
-    terrain_params.setdefault("swamp_desert", {"swamp_pct": 3, "desert_pct": 5, "clumpiness": 0.5})
+    terrain_params.setdefault(
+        "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
+    )
+    terrain_params.setdefault("mountains", {
+        "total_area_pct": 5,
+        "perlin_scale": 0.01,
+        "peak_density": 0.2,
+    })
+    terrain_params.setdefault(
+        "swamp_desert", {"swamp_pct": 3, "desert_pct": 5, "clumpiness": 0.5}
+    )
 
     # Remove any logging systems defined in the configuration
     for child in list(world.children):
