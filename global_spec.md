@@ -76,8 +76,9 @@ Les nœuds représentent toutes les entités du monde (unités, bâtiments, stoc
 | Attribut      | Description                               |
 |---------------|-------------------------------------------|
 | `type`        | Type de bâtiment (ferme, tour, entrepôt). |
-| `capacity`    | Quantité maximale d'unités ou de ressources.
+| `capacity`    | Quantité maximale d'unités ou de ressources. |
 | `hit_points`  | Points de vie pour les combats.           |
+| `strategic`   | Sa destruction peut entraîner la défaite. |
 
 ### `ResourceNode`
 | Attribut        | Description                                          |
@@ -139,6 +140,10 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
 - Garantissent la cohérence des unités de temps et d'espace.
 - Conversions explicites entre mètres et tuiles.
 
+### `VictorySystem`
+- Détecte la capture de la capitale et l'effondrement moral.
+- Écoute `building_destroyed` pour déclarer la défaite lorsqu'un bâtiment stratégique est perdu.
+
 ---
 
 ## Événements principaux
@@ -151,6 +156,7 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
 | `resource_consumed`    | Consommation de ressource.                             |
 | `unit_move`            | Déplacement d'une unité vers une cible.                |
 | `attack_building`      | Cible un bâtiment; peut mener à `building_destroyed`.  |
+| `building_destroyed`   | Bâtiment détruit, potentielle condition de défaite.   |
 
 ---
 

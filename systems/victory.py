@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""System monitoring victory conditions such as capital capture."""
+"""System monitoring victory conditions such as capital capture or building loss."""
 
 from typing import Iterable
 
@@ -9,6 +9,7 @@ from core.plugins import register_node_type
 from nodes.nation import NationNode
 from nodes.unit import UnitNode
 from nodes.transform import TransformNode
+from nodes.building import BuildingNode
 
 
 class VictorySystem(SystemNode):
@@ -25,7 +26,9 @@ class VictorySystem(SystemNode):
         self.capture_unit_threshold = capture_unit_threshold
         self._captured: set[NationNode] = set()
         self._collapsed: set[NationNode] = set()
+        self._lost_strategic: set[NationNode] = set()
         self.on_event("nation_collapsed", self._on_nation_collapsed)
+        self.on_event("building_destroyed", self._on_building_destroyed)
 
     # ------------------------------------------------------------------
     def _iter_nations(self, node: SimNode) -> Iterable[NationNode]:
@@ -49,6 +52,23 @@ class VictorySystem(SystemNode):
             if isinstance(child, TransformNode):
                 return child
         return None
+
+    # ------------------------------------------------------------------
+    def _on_building_destroyed(self, origin: SimNode, _event: str, payload: dict) -> None:
+        if not isinstance(origin, BuildingNode) or not getattr(origin, "strategic", False):
+            return
+        nation = self._find_nation(origin)
+        if nation is None or nation in self._lost_strategic:
+            return
+        nation.emit(
+            "nation_defeated",
+            {
+                "reason": "strategic_building_destroyed",
+                "building": getattr(origin, "type", None),
+            },
+            direction="down",
+        )
+        self._lost_strategic.add(nation)
 
     # ------------------------------------------------------------------
     def _find_nation(self, node: SimNode) -> NationNode | None:
