@@ -116,7 +116,7 @@
         "id": "north",
         "config": {
           "capital_position": [
-            1000,
+            5000,
             3000
           ],
           "morale": 100
@@ -134,7 +134,7 @@
                 "type": "TransformNode",
                 "config": {
                   "position": [
-                    1000,
+                    5000,
                     3000
                   ]
                 }
@@ -151,7 +151,7 @@
                     "type": "TransformNode",
                     "config": {
                       "position": [
-                        1000,
+                        5000,
                         3000
                       ]
                     }
@@ -174,7 +174,7 @@
                         "type": "TransformNode",
                         "config": {
                           "position": [
-                            1000,
+                            5000,
                             3000
                           ]
                         }
