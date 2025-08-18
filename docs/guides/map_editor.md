@@ -22,13 +22,3 @@ python tools/map_editor.py [output.json] [keymap.json] [existing_map.json]
 
 Passing a previous map as `existing_map.json` loads its contents for further
 editing.
-
-To transform the exported layout into a runnable scenario use
-`tools/build_scenario.py`:
-
-```
-python tools/build_scenario.py custom_map.json scenario.json [profile]
-```
-
-This adds basic inventories and core systems (time, economy, viewer…) based on
-the chosen `profile` (default: `farm`).

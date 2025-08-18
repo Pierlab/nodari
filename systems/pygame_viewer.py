@@ -5,7 +5,7 @@ import os
 import time
 import logging
 from math import atan2, cos, sin, pi, ceil
-from typing import Callable, Iterator, List, Optional, Tuple, Type
+from typing import Callable, Iterator, List, Optional, Tuple
 
 import pygame
 
