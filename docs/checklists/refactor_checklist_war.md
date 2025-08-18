@@ -21,18 +21,18 @@ Cette checklist décrit les actions à réaliser pour supprimer la simulation de
 
 ## 2. Recentralisation sur la simulation de guerre
 
-- [ ] Adapter `run_war.py` :
+- [x] Adapter `run_war.py` :
   - Supprimer le chargement des modules agricoles dans `load_plugins()`.
   - Découper le fichier trop volumineux en sous-modules :
     - `war_loader.py` (chargement des paramètres et du monde).
     - `terrain_setup.py` (génération et placement des terrains).
     - `viewer_loop.py` (gestion de la boucle d’affichage Pygame).
     - `presets.py` (configurations de terrain, unités, etc.).
-- [ ] Créer un package dédié (par ex. `simulation/war/`) regroupant :
+- [x] Créer un package dédié (par ex. `simulation/war/`) regroupant :
   - `nodes/` (armée, général, nation, unité, etc.).
   - `systems/` (combat, mouvement, moral, victoire, pathfinding, visibilité).
   - `terrain/` et `ui/` pour une séparation claire.
-- [ ] Maintenir uniquement les systèmes militaires (combat, moral, mouvement, pathfinding, victoire).
+- [x] Maintenir uniquement les systèmes militaires (combat, moral, mouvement, pathfinding, victoire).
 
 ---
 
