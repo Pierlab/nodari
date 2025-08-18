@@ -59,6 +59,7 @@ nodari/
 │   └── scheduler.py
 ├── docs/
 │   ├── global_spec.md ← ce document
+│   ├── viewers.md
 │   └── workers.md
 └── tests/
     ├── test_ai.py
@@ -132,6 +133,7 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
   - `pygame_viewer.py` : backend existant.
   - `moderngl_viewer.py` : backend OpenGL pour de meilleures performances.
 - `run_war.py` accepte `--viewer` pour choisir l'implémentation.
+- Voir `docs/viewers.md` pour une comparaison de performances.
 
 ### `MovementSystem` et `TimeSystem`
 - Garantissent la cohérence des unités de temps et d'espace.

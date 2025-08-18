@@ -1,8 +1,9 @@
 """Entry point for the war simulation viewer with optional terrain caching."""
 from __future__ import annotations
 
+import argparse
 import os
-from typing import Any
+from typing import Any, List
 
 __all__ = ["load_sim_params", "_spawn_armies", "sim_params", "run"]
 
@@ -39,12 +40,23 @@ class _SimParamsProxy(dict):
         return repr(self._data())
 
 sim_params = _SimParamsProxy()
-def run() -> None:  # pragma: no cover - manual launch
+
+
+def run(argv: List[str] | None = None) -> None:  # pragma: no cover - manual launch
+    parser = argparse.ArgumentParser(description="War simulation viewer")
+    parser.add_argument(
+        "--viewer",
+        choices=["pygame", "moderngl"],
+        default="pygame",
+        help="Backend graphique à utiliser",
+    )
+    args = parser.parse_args(argv)
+
     cache_path = os.path.join(os.path.dirname(__file__), "terrain_cache.pkl")
     if os.path.exists(cache_path):
         os.environ.setdefault("WAR_TERRAIN_CACHE", cache_path)
     from simulation.war.viewer_loop import run as viewer_run
-    viewer_run()
+    viewer_run(viewer=args.viewer)
 
 if __name__ == "__main__":  # pragma: no cover - manual launch
     run()
