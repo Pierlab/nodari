@@ -17,6 +17,8 @@ class BuilderNode(WorkerNode):
         self,
         position: Iterable[int] | tuple[int, int],
         last_infrastructure: SimNode,
+        *,
+        emit_idle: bool = True,
     ) -> BuildingNode | None:
         """Create a city at ``position`` and link it to ``last_infrastructure``.
 
@@ -64,6 +66,10 @@ class BuilderNode(WorkerNode):
         # Return to exploration after construction so the builder may seek
         # the next expansion target.
         self.state = "exploring"
+        if emit_idle:
+            # Notify systems that the builder finished its task so it can be
+            # assigned a new one by emitting ``unit_idle``.
+            self.emit("unit_idle", {}, direction="up")
         return city
 
     # ------------------------------------------------------------------
@@ -111,7 +117,7 @@ class BuilderNode(WorkerNode):
             prospective = set(path or [goal])
             if max_coverage is not None and len(covered | prospective) > max_coverage:
                 break
-            city = self.build_city(goal, current)
+            city = self.build_city(goal, current, emit_idle=False)
             if city is None:
                 break
             built.append(city)

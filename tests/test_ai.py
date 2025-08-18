@@ -1,3 +1,4 @@
+from core.simnode import SimNode
 from nodes.world import WorldNode
 from nodes.worker import WorkerNode
 from nodes.builder import BuilderNode
@@ -57,6 +58,21 @@ def test_builder_constructs_city_when_idle_far_from_last():
                 positions.append(child.position)
     assert [3, 0] in positions
     assert builder.state == "moving"
+
+
+def test_build_city_resets_state_and_emits_idle():
+    world = WorldNode(width=10, height=10)
+    builder = BuilderNode(parent=world, state="building")
+    last = BuildingNode(parent=world, type="city")
+    TransformNode(parent=last, position=[0, 0])
+
+    events: list[SimNode] = []
+    world.on_event("unit_idle", lambda origin, _e, _p: events.append(origin))
+
+    builder.build_city([1, 0], last)
+
+    assert builder.state == "exploring"
+    assert builder in events
 
 
 def test_ai_initializes_last_city_with_capital():
