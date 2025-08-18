@@ -1,0 +1,22 @@
+{
+  "parameters": {
+    "dispersion": 200.0,
+    "unit_size": 5,
+    "soldiers_per_dot": 5,
+    "bodyguard_size": 5,
+    "vision_radius_m": 100.0,
+    "visibility": true,
+    "command_delay": 0.0,
+    "movement_blocking": true
+  },
+  "descriptions": {
+    "dispersion": "Max distance from the nation's capital when spawning units (meters)",
+    "unit_size": "Base number of soldiers per unit before rounding to soldiers_per_dot",
+    "soldiers_per_dot": "Number of soldiers represented by a single dot in the viewer",
+    "bodyguard_size": "Number of soldiers in each bodyguard unit protecting the general",
+    "vision_radius_m": "Unit vision radius in meters for fog of war calculations",
+    "visibility": "Enable fog of war via the VisibilitySystem",
+    "command_delay": "Base seconds commands are delayed before reaching units",
+    "movement_blocking": "Whether units block each other during movement"
+  }
+}
