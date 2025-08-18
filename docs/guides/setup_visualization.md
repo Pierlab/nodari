@@ -43,7 +43,7 @@ python - <<'PY'
 from core.loader import load_simulation_from_file
 from systems.pygame_viewer import PygameViewerSystem
 
-world = load_simulation_from_file("example_farm.json")
+world = load_simulation_from_file("example/war_simulation_config.json")
 viewer = PygameViewerSystem(parent=world)
 for _ in range(1000):
     world.update(0.016)

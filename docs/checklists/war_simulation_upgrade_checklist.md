@@ -212,7 +212,7 @@
   - [x] Fog of war visibility masks.
   - [x] Command delay & delivery order (FIFO per chain).
   - [x] Combat blocking: no pass-through during `fighting`.
-- [x] **Smoke test script** `tools/build_scenario.py --preset war_km` producing a runnable world JSON.
+- [x] **Smoke test** `python run_war.py example/war_simulation_config.json` produces a runnable world.
 - [x] **Performance**: profile with 2×100 soldiers (and scalable to thousands). Optimize viewer draws (tile blitting cache).
 
 ---

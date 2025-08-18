@@ -33,7 +33,7 @@ This checklist gathers outstanding tasks from the project specification and main
 
 ### Map Editor & Scenario Builder
 - [ ] Clarify documentation: editor handles spatial layout while scenarios add behaviour and systems.
-- [ ] Generic scenario builder supporting multiple profiles (farm, quest, battle…).
+- [ ] Generic scenario builder supporting multiple profiles (quest, battle…).
 - [ ] Load and edit existing maps or scenarios from JSON.
 - [ ] In-editor property panel to configure node attributes.
 - [ ] Visual linking tool to define dependencies between nodes.
@@ -44,7 +44,7 @@ This checklist gathers outstanding tasks from the project specification and main
 - [ ] Dynamic form generation for node-specific properties.
 - [ ] Graphical module to manage and display links between nodes.
 - [ ] Round-trip tests and CLI to combine map layouts with scenario profiles.
-- [ ] Documentation and examples for non-farm scenarios.
+- [ ] Documentation and examples for additional scenarios.
 
 ## Visualization and Rendering
 - [ ] **Medium** Extend the Pygame viewer with camera controls, zoom and overlays.
