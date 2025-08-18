@@ -19,10 +19,10 @@ architecture as described in `docs/specs/project_spec.md`.
 - [x] Write tests for basic exploration logic.
 
 ## 3. Central Simulation Parameters
-- [ ] Introduce a dedicated settings file with a `parameters` section collecting
+- [x] Introduce a dedicated settings file with a `parameters` section collecting
   key simulation values (e.g., unit sizes, vision radius, AI flags).
-- [ ] Load these parameters in `run_war.py` and expose them to systems via `SimParams`.
-- [ ] Document parameter meanings in the file and in `docs/parameter_inventory.md`.
+- [x] Load these parameters in `run_war.py` and expose them to systems via `SimParams`.
+- [x] Document parameter meanings in the file and in `docs/parameter_inventory.md`.
 
 ## 4. Menu Buttons for Live Parameters
 - [ ] In the viewer menu, add +/- buttons next to parameters that already have

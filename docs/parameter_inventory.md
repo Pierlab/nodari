@@ -1,5 +1,18 @@
 # Parameter inventory
 
+## Simulation Parameters
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| dispersion | float | 200.0 | Maximum radius around a nation's capital used when spawning armies. |
+| unit_size | int | 5 | Base number of soldiers per unit before rounding to multiples of `soldiers_per_dot`. |
+| soldiers_per_dot | int | 5 | Number of soldiers represented by a single viewer dot. |
+| bodyguard_size | int | 5 | Number of soldiers in each bodyguard unit. |
+| vision_radius_m | float | 100.0 | Vision radius in meters for units, used by the visibility system. |
+| visibility | bool | True | Enable fog of war processing. |
+| command_delay | float | 0.0 | Base delay in seconds before commands reach units. |
+| movement_blocking | bool | True | Whether units block each other's movement. |
+
 ## Nodes
 
 ### AIBehaviorNode

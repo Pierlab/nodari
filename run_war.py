@@ -8,6 +8,7 @@ import random
 import math
 import time
 import logging
+import json
 
 import pygame
 
@@ -39,6 +40,36 @@ from systems.time import TimeSystem
 from systems.command import CommandSystem
 from systems.visibility import VisibilitySystem
 from systems.pathfinding import PathfindingSystem
+
+
+DEFAULT_SIM_PARAMS = {
+    "dispersion": 200.0,
+    "unit_size": 5,
+    "soldiers_per_dot": 5,
+    "bodyguard_size": 5,
+    "vision_radius_m": 100.0,
+    "visibility": True,
+    "command_delay": 0.0,
+    "movement_blocking": True,
+}
+
+
+def load_sim_params(path: str) -> dict:
+    """Load simulation parameters from *path*.
+
+    The file is expected to contain a top-level ``parameters`` mapping. Values
+    are merged with :data:`DEFAULT_SIM_PARAMS` so missing entries fall back to
+    sensible defaults.
+    """
+
+    params = dict(DEFAULT_SIM_PARAMS)
+    try:
+        with open(path, "r", encoding="utf8") as fh:
+            data = json.load(fh)
+        params.update(data.get("parameters", {}))
+    except FileNotFoundError:
+        pass
+    return params
 
 
 RUN_WAR_IMPORT_ONLY = os.environ.get("RUN_WAR_IMPORT_ONLY") == "1"
@@ -116,15 +147,9 @@ if not RUN_WAR_IMPORT_ONLY:
 
     FPS = config.FPS
     TIME_SCALE = config.TIME_SCALE
-    sim_params = {
-        "dispersion": 200.0,
-        "soldiers_per_dot": 5,
-        "bodyguard_size": 5,
-        "terrain": terrain_params,
-        "visibility": True,
-        "command_delay": 0.0,
-        "movement_blocking": True,
-    }
+    settings_file = sys.argv[2] if len(sys.argv) > 2 else "example/war_settings.json"
+    sim_params = load_sim_params(settings_file)
+    sim_params["terrain"] = terrain_params
 else:
     logger = logging.getLogger(__name__)
     world = None
@@ -134,18 +159,8 @@ else:
     time_system = None
     FPS = config.FPS
     TIME_SCALE = config.TIME_SCALE
-    sim_params: dict = {}
-
-# parameters adjustable via keyboard
-sim_params = {
-    "dispersion": 200.0,
-    "soldiers_per_dot": 5,
-    "bodyguard_size": 5,
-    "terrain": terrain_params,
-    "visibility": True,
-    "command_delay": 0.0,
-    "movement_blocking": True,
-}
+    sim_params = dict(DEFAULT_SIM_PARAMS)
+    sim_params["terrain"] = terrain_params
 
 river_width_presets = [(2, 5), (4, 8), (8, 14)]
 river_width_index = 0
@@ -327,6 +342,7 @@ def _spawn_armies(
                 state="idle",
                 speed=1.0,
                 morale=100,
+                vision_radius_m=sim_params.get("vision_radius_m", 100.0),
             )
             bg.add_child(TransformNode(position=_pos_around(*center)))
             general.add_child(bg)
@@ -337,7 +353,7 @@ def _spawn_armies(
         total_units = 0
         enemies = [n for n in nations if n is not nation]
         target_cap = enemies[0].capital_position if enemies else [width / 2, height / 2]
-        unit_size = _round_size(5)
+        unit_size = _round_size(sim_params.get("unit_size", 5))
         for i in range(5):
             officer = OfficerNode(name=f"{nation.name}_officer_{i+1}")
             officer.add_child(TransformNode(position=_pos_around(*center)))
@@ -350,6 +366,7 @@ def _spawn_armies(
                     speed=1.0,
                     morale=100,
                     target=unit_target,
+                    vision_radius_m=sim_params.get("vision_radius_m", 100.0),
                 )
                 pos = _pos_around(*center)
                 unit.add_child(TransformNode(position=pos))
