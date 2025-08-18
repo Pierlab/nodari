@@ -7,6 +7,8 @@
       "seed": 1
     },
     "children": [
+      { "type": "TimeSystem", "id": "time", "config": { "time_scale": 48 } },
+      { "type": "MovementSystem", "id": "movement", "config": { "terrain": "terrain" } },
       {
         "type": "TerrainNode",
         "id": "terrain",
@@ -27,7 +29,7 @@
       {
         "type": "NationNode",
         "id": "north",
-        "config": { "capital_position": [500, 500] },
+        "config": { "capital_position": [500, 500], "morale": 100 },
         "children": [
           {
             "type": "GeneralNode",
