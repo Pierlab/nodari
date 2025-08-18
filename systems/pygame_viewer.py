@@ -65,8 +65,13 @@ class Viewer(Protocol):
     def update(self, dt: float) -> None:
         """Mettre à jour l'état interne sans effectuer de rendu."""
 
-    def render(self) -> None:
-        """Dessiner l'état courant à l'écran."""
+    def render(self, dt: float = 0.0) -> None:
+        """Dessiner l'état courant à l'écran.
+
+        Le paramètre ``dt`` représente le temps simulé écoulé depuis le
+        précédent rendu et est fourni pour assurer la cohérence de
+        l'interface entre les différents moteurs d'affichage.
+        """
 
 
 class PygameViewerSystem(SystemNode, Viewer):
@@ -371,8 +376,14 @@ class PygameViewerSystem(SystemNode, Viewer):
         """Mettre à jour l'état interne sans rendu."""
         pass
 
-    def render(self) -> None:
-        """Render the current simulation state."""
+    def render(self, dt: float = 0.0) -> None:
+        """Render the current simulation state.
+
+        Parameters
+        ----------
+        dt:
+            Simulation time elapsed since the previous frame.
+        """
         start_time = time.perf_counter()
         self.screen.fill((30, 30, 30))
 
@@ -498,9 +509,12 @@ class PygameViewerSystem(SystemNode, Viewer):
             hours = int(time_sys.current_time // 3600) % 24
             minutes = int((time_sys.current_time % 3600) // 60)
             time_text = f"{hours:02d}:{minutes:02d}"
+            day = int(
+                time_sys.current_tick * time_sys.tick_duration // time_sys.day_length
+            ) + 1
             lines.insert(0, f"Phase: {time_sys.phase}")
             lines.insert(0, f"Tick: {time_sys.current_tick}")
-            lines.insert(0, time_text)
+            lines.insert(0, f"Day: {day} {time_text}")
         lines.insert(0, f"Units: {unit_count}")
 
         line_height = self.font.get_linesize()
@@ -545,7 +559,7 @@ class PygameViewerSystem(SystemNode, Viewer):
             " Space: pause/resume",
             " +/- : change speed",
             " [: zoom out, ]: zoom in",
-            " H/J/K/L: pan view",
+            " Z/Q/S/D: pan view",
             " V: toggle frame logging",
         ]
         controls.extend(self.extra_info)

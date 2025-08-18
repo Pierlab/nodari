@@ -44,8 +44,12 @@ class ModernGLViewerSystem(SystemNode, Viewer):
         """Update internal state (no-op for this simple viewer)."""
         pass
 
-    def render(self) -> None:  # pragma: no cover - requires OpenGL context
-        """Clear the screen using ModernGL and swap buffers."""
+    def render(self, dt: float = 0.0) -> None:  # pragma: no cover - requires OpenGL context
+        """Clear the screen using ModernGL and swap buffers.
+
+        The ``dt`` parameter is accepted for API compatibility with
+        :class:`pygame_viewer.PygameViewerSystem`.
+        """
         self.ctx.clear(0.1, 0.1, 0.1)
         pygame.display.flip()
 

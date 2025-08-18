@@ -113,13 +113,13 @@ def run(viewer: str = "pygame") -> None:
                     cy = viewer.offset_y + viewer.view_height / (2 * prev)
                     viewer.offset_x = cx - viewer.view_width / (2 * viewer.scale)
                     viewer.offset_y = cy - viewer.view_height / (2 * viewer.scale)
-                elif event.key == pygame.K_h:
+                elif event.key == pygame.K_q:
                     viewer.offset_x -= viewer.view_width * 0.1 / viewer.scale
-                elif event.key == pygame.K_l:
+                elif event.key == pygame.K_d:
                     viewer.offset_x += viewer.view_width * 0.1 / viewer.scale
-                elif event.key == pygame.K_j:
+                elif event.key == pygame.K_s:
                     viewer.offset_y += viewer.view_height * 0.1 / viewer.scale
-                elif event.key == pygame.K_k:
+                elif event.key == pygame.K_z:
                     viewer.offset_y -= viewer.view_height * 0.1 / viewer.scale
                 elif event.key == pygame.K_b:
                     viewer.set_render_params(show_role_rings=not viewer.show_role_rings)
@@ -188,6 +188,6 @@ def run(viewer: str = "pygame") -> None:
         viewer.process_events(events)
         dt = clock.tick(FPS) / 1000.0
         world.update(0 if paused else dt * TIME_SCALE)
-        viewer.render()
+        viewer.render(dt)
 
     pygame.quit()
