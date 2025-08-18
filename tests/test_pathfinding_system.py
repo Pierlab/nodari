@@ -1,5 +1,6 @@
 from nodes.terrain import TerrainNode
 from systems.pathfinding import PathfindingSystem
+from nodes.world import WorldNode
 
 
 def test_pathfinder_avoids_slow_tiles():
@@ -32,3 +33,12 @@ def test_pathfinder_cost_monotonic() -> None:
         cumulative += 1.0 / terrain.get_speed_modifier(x, y)
         costs.append(cumulative)
     assert costs == sorted(costs)
+
+
+def test_resolves_terrain_by_name():
+    world = WorldNode()
+    terrain = TerrainNode(parent=world, name="map", tiles=[["plain", "plain"]])
+    pf = PathfindingSystem(parent=world, terrain="map")
+    path = pf.find_path((0, 0), (1, 0))
+    assert pf.terrain is terrain
+    assert path == [(0, 0), (1, 0)]

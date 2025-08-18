@@ -31,3 +31,23 @@ def test_combat_routes_losing_unit_and_reduces_morale():
     assert n_unit.state == "fleeing"
     assert s_unit.state == "fighting"
     assert north.morale < 100
+
+
+def test_combat_system_resolves_terrain_by_name():
+    world = WorldNode()
+    terrain = TerrainNode(parent=world, name="map", tiles=[["plain"]])
+    cs = CombatSystem(parent=world, terrain="map")
+
+    north = NationNode(parent=world, morale=100, capital_position=[0, 0])
+    south = NationNode(parent=world, morale=100, capital_position=[0, 0])
+    n_army = ArmyNode(parent=north, goal="defend", size=1)
+    s_army = ArmyNode(parent=south, goal="advance", size=1)
+    n_unit = UnitNode(parent=n_army, size=10)
+    s_unit = UnitNode(parent=s_army, size=5)
+    TransformNode(parent=n_unit, position=[0, 0])
+    TransformNode(parent=s_unit, position=[0, 0])
+
+    world.update(1.0)
+
+    assert cs.terrain is terrain
+    assert s_unit.state == "fleeing"
