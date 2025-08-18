@@ -19,7 +19,6 @@ from simulation.war.nodes import (
     TransformNode,
 )
 from nodes.builder import BuilderNode
-from nodes.worker import WorkerNode
 from systems.ai import AISystem
 from simulation.war.presets import DEFAULT_SIM_PARAMS
 from simulation.war.systems import MovementSystem, PathfindingSystem
@@ -111,9 +110,6 @@ def _spawn_armies(
     nations = [n for n in world.children if isinstance(n, NationNode)]
     width, height = world.width, world.height
     for nation in nations:
-        for child in list(nation.children):
-            if isinstance(child, WorkerNode):
-                nation.remove_child(child)
         general = next((c for c in nation.children if isinstance(c, GeneralNode)), None)
         if general is None:
             continue
