@@ -38,12 +38,12 @@ Cette checklist décrit les actions à réaliser pour supprimer la simulation de
 
 ## 3. Optimisation de la rapidité
 
-- [ ] Mettre en place un **cache de terrain** :
+- [x] Mettre en place un **cache de terrain** :
   - Créer un script `tools/precompute_map.py` pour générer un terrain et le sauvegarder.
   - Modifier `run_war.py` pour charger directement ce cache si disponible.
-- [ ] Réduire les importations lourdes au démarrage :
+- [x] Réduire les importations lourdes au démarrage :
   - Importer certains modules (ex. Pygame, terrain) seulement au moment de leur utilisation.
-- [ ] Profiler et optimiser `systems/movement.py`, `systems/pathfinding.py`, `systems/visibility.py` :
+- [x] Profiler et optimiser `systems/movement.py`, `systems/pathfinding.py`, `systems/visibility.py` :
   - Utiliser des structures de données plus efficaces si nécessaire (numpy, graphes optimisés).
   - Réduire la fréquence des calculs et logs.
 - [ ] Vérifier `pygame_viewer.py` :

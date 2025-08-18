@@ -115,34 +115,33 @@ class MovementSystem(SystemNode):
             cur = cur.parent
         return None
 
-    # ------------------------------------------------------------------
     def update(self, dt: float) -> None:
         self._resolve_terrain()
         self._resolve_pathfinder()
         blocked_tiles = set(self.obstacles)
         tile_units: Dict[Tuple[int, int], list[UnitNode]] = {}
-        for other in self._iter_units(self.parent or self):
-            tr = self._get_transform(other)
-            if tr is None:
-                continue
-            pos = (int(round(tr.position[0])), int(round(tr.position[1])))
-            tile_units.setdefault(pos, []).append(other)
-            if self.blocking and getattr(other, "state", "") == "fighting":
-                blocked_tiles.add(pos)
-
+        units: list[tuple[UnitNode, TransformNode]] = []
+        nations: Dict[UnitNode, NationNode | None] = {}
         for unit in self._iter_units(self.parent or self):
+            transform = self._get_transform(unit)
+            if transform is None:
+                continue
+            units.append((unit, transform))
+            pos = (int(round(transform.position[0])), int(round(transform.position[1])))
+            tile_units.setdefault(pos, []).append(unit)
+            if self.blocking and getattr(unit, "state", "") == "fighting":
+                blocked_tiles.add(pos)
+            nations[unit] = self._get_nation(unit)
+        for unit, transform in units:
             if getattr(unit, "state", "") == "fighting":
                 continue
             if not hasattr(unit, "target") or unit.target is None:
                 continue
-            transform = self._get_transform(unit)
-            if transform is None:
-                continue
             tx, ty = transform.position
             sx, sy = int(round(tx)), int(round(ty))
-            tile_units[sx, sy].remove(unit)
-            if not tile_units[sx, sy]:
-                del tile_units[sx, sy]
+            tile_units[(sx, sy)].remove(unit)
+            if not tile_units.get((sx, sy)):
+                tile_units.pop((sx, sy), None)
             if hasattr(unit, "_path") and unit._path:
                 gx, gy = unit._path[0]
             else:
@@ -152,15 +151,19 @@ class MovementSystem(SystemNode):
             if dist == 0:
                 if hasattr(unit, "_path") and unit._path:
                     unit._path.pop(0)
+                    tile_units.setdefault((sx, sy), []).append(unit)
                     continue
                 unit.state = "idle"
+                tile_units.setdefault((sx, sy), []).append(unit)
                 continue
             speed = unit.speed
-            if self.terrain is not None:
-                speed *= self.terrain.get_speed_modifier(int(tx), int(ty))
+            terrain = self.terrain
+            if terrain is not None:
+                speed *= terrain.get_speed_modifier(int(tx), int(ty))
             speed *= max(unit.morale, 0) / 100.0
             step = speed * dt
             if step <= 0:
+                tile_units.setdefault((sx, sy), []).append(unit)
                 continue
             if step >= dist:
                 new_x, new_y = gx, gy
@@ -168,15 +171,11 @@ class MovementSystem(SystemNode):
                 angle = atan2(dy, dx)
                 if self.direction_noise > 0:
                     angle += random.uniform(-self.direction_noise, self.direction_noise)
-                nx = tx + cos(angle) * step
-                ny = ty + sin(angle) * step
-                new_x, new_y = nx, ny
+                new_x = tx + cos(angle) * step
+                new_y = ty + sin(angle) * step
             ix, iy = int(round(new_x)), int(round(new_y))
             occupants = tile_units.get((ix, iy), [])
-            enemy = next(
-                (o for o in occupants if self._get_nation(o) != self._get_nation(unit)),
-                None,
-            )
+            enemy = next((o for o in occupants if nations.get(o) != nations.get(unit)), None)
             if enemy is not None:
                 transform.position[0] = float(ix)
                 transform.position[1] = float(iy)
@@ -187,7 +186,7 @@ class MovementSystem(SystemNode):
                 blocked_tiles.add((ix, iy))
                 continue
             blocked = (ix, iy) in blocked_tiles or (
-                self.terrain is not None and self.terrain.is_obstacle(ix, iy)
+                terrain is not None and terrain.is_obstacle(ix, iy)
             )
             if blocked:
                 tile_units.setdefault((sx, sy), []).append(unit)
