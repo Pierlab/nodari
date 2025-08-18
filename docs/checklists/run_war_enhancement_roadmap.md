@@ -25,10 +25,10 @@ architecture as described in `docs/specs/project_spec.md`.
 - [x] Document parameter meanings in the file and in `docs/parameter_inventory.md`.
 
 ## 4. Menu Buttons for Live Parameters
-- [ ] In the viewer menu, add +/- buttons next to parameters that already have
+- [x] In the viewer menu, add +/- buttons next to parameters that already have
   keyboard bindings.
-- [ ] Buttons trigger the same handlers as keyboard shortcuts for consistency.
-- [ ] Update on-screen help panel to show both keyboard and button controls.
+- [x] Buttons trigger the same handlers as keyboard shortcuts for consistency.
+- [x] Update on-screen help panel to show both keyboard and button controls.
 
 ## 5. Terrain Generation (Checklist §2)
 

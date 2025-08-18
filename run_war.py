@@ -427,6 +427,40 @@ if __name__ == "__main__":
     if visibility_system:
         sim_params["visibility"] = visibility_system.enabled
 
+    def _forest_minus() -> None:
+        forests = sim_params["terrain"].setdefault(
+            "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
+        )
+        forests["total_area_pct"] = max(0.0, forests.get("total_area_pct", 0) - 1)
+        terrain_regen(world, sim_params["terrain"])
+
+    def _forest_plus() -> None:
+        forests = sim_params["terrain"].setdefault(
+            "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
+        )
+        forests["total_area_pct"] = min(100.0, forests.get("total_area_pct", 0) + 1)
+        terrain_regen(world, sim_params["terrain"])
+
+    def _dispersion_minus() -> None:
+        sim_params["dispersion"] = max(0.0, sim_params["dispersion"] - 10.0)
+        _reset()
+
+    def _dispersion_plus() -> None:
+        sim_params["dispersion"] += 10.0
+        _reset()
+
+    def _cmd_delay_minus() -> None:
+        if command_system:
+            sim_params["command_delay"] = max(
+                0.0, sim_params["command_delay"] - 0.5
+            )
+            apply_sim_params()
+
+    def _cmd_delay_plus() -> None:
+        if command_system:
+            sim_params["command_delay"] += 0.5
+            apply_sim_params()
+
     clock = pygame.time.Clock()
     viewer = next((c for c in world.children if isinstance(c, PygameViewerSystem)), None)
     # Center the view on the world by default
@@ -487,27 +521,17 @@ if __name__ == "__main__":
                 elif viewer and event.key == pygame.K_SEMICOLON:
                     viewer.set_render_params(show_intel_overlay=not viewer.show_intel_overlay)
                 elif event.key == pygame.K_COMMA and command_system:
-                    sim_params["command_delay"] = max(0.0, sim_params["command_delay"] - 0.5)
-                    apply_sim_params()
+                    _cmd_delay_minus()
                 elif event.key == pygame.K_PERIOD and command_system:
-                    sim_params["command_delay"] += 0.5
-                    apply_sim_params()
+                    _cmd_delay_plus()
                 elif event.key == pygame.K_n and command_system:
                     reliability_index = (reliability_index + 1) % len(reliability_presets)
                     command_system.reliability = reliability_presets[reliability_index]
                 elif paused:
                     if event.key == pygame.K_f:
-                        forests = sim_params["terrain"].setdefault(
-                            "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
-                        )
-                        forests["total_area_pct"] = max(0.0, forests.get("total_area_pct", 0) - 1)
-                        terrain_regen(world, sim_params["terrain"])
+                        _forest_minus()
                     elif event.key == pygame.K_g:
-                        forests = sim_params["terrain"].setdefault(
-                            "forests", {"total_area_pct": 10, "clusters": 5, "cluster_spread": 0.5}
-                        )
-                        forests["total_area_pct"] = min(100.0, forests.get("total_area_pct", 0) + 1)
-                        terrain_regen(world, sim_params["terrain"])
+                        _forest_plus()
                     elif event.key == pygame.K_w and sim_params["terrain"].get("rivers"):
                         river_width_index = (river_width_index + 1) % len(river_width_presets)
                         wmin, wmax = river_width_presets[river_width_index]
@@ -529,11 +553,9 @@ if __name__ == "__main__":
                         sim_params["dispersion"] = 0.0 if sim_params["dispersion"] > 0 else 200.0
                         _reset()
                     elif event.key == pygame.K_p:
-                        sim_params["dispersion"] = max(0.0, sim_params["dispersion"] - 10.0)
-                        _reset()
+                        _dispersion_minus()
                     elif event.key == pygame.K_o:
-                        sim_params["dispersion"] += 10.0
-                        _reset()
+                        _dispersion_plus()
                     elif event.key == pygame.K_c:
                         cycle = [1, 2, 5, 10]
                         idx = cycle.index(sim_params["soldiers_per_dot"])
@@ -541,21 +563,44 @@ if __name__ == "__main__":
                         _reset()
         if viewer:
             if paused:
-                info = [
-                    f"Dispersion R: {sim_params['dispersion']:.0f} m",
-                    f"Soldiers/dot: {sim_params['soldiers_per_dot']}",
-                    f"Forest %: {sim_params['terrain'].get('forests', {}).get('total_area_pct', 0):.0f}",
-                    f"FoW: {'ON' if sim_params['visibility'] else 'OFF'}",
-                    f"Intel overlay: {'ON' if viewer.show_intel_overlay else 'OFF'}",
-                    "F/G: -/+ forest, W: river width, M: mountains, V: forest layout",
-                    "P/O: -/+ dispersion, D: cluster toggle, C: cycle dot scale",
-                    "B: rings, I: fog, ;: intel, ,/.: cmd delay, N: reliability, R: reset",
+                forest_pct = sim_params["terrain"].get("forests", {}).get(
+                    "total_area_pct", 0
+                )
+                menu_items = [
+                    {
+                        "label": f"Dispersion R: {sim_params['dispersion']:.0f} m",
+                        "minus": _dispersion_minus,
+                        "plus": _dispersion_plus,
+                    },
+                    {
+                        "label": f"Forest %: {forest_pct:.0f}",
+                        "minus": _forest_minus,
+                        "plus": _forest_plus,
+                    },
                 ]
                 if command_system:
-                    info.insert(3, f"Cmd delay: {command_system.base_delay_s:.1f}s")
-                    info.insert(4, f"Reliability: {command_system.reliability:.2f}")
+                    menu_items.insert(
+                        1,
+                        {
+                            "label": f"Cmd delay: {command_system.base_delay_s:.1f}s",
+                            "minus": _cmd_delay_minus,
+                            "plus": _cmd_delay_plus,
+                        },
+                    )
+                viewer.set_menu_items(menu_items)
+                info = [
+                    f"Soldiers/dot: {sim_params['soldiers_per_dot']}",
+                    f"FoW: {'ON' if sim_params['visibility'] else 'OFF'}",
+                    f"Intel overlay: {'ON' if viewer.show_intel_overlay else 'OFF'}",
+                    "F/G or buttons: -/+ forest, W: river width, M: mountains, V: forest layout",
+                    "P/O or buttons: -/+ dispersion, D: cluster toggle, C: cycle dot scale",
+                    ",/. or buttons: cmd delay, B: rings, I: fog, ;: intel, N: reliability, R: reset",
+                ]
+                if command_system:
+                    info.insert(0, f"Reliability: {command_system.reliability:.2f}")
                 viewer.extra_info = info
             else:
+                viewer.set_menu_items([])
                 viewer.extra_info = []
             viewer.process_events(events)
         dt = clock.tick(FPS) / 1000.0
