@@ -61,7 +61,64 @@ class BuilderNode(WorkerNode):
                 road = BuildingNode(parent=root, type="road")
                 TransformNode(parent=road, position=[x, y])
 
+        # Return to exploration after construction so the builder may seek
+        # the next expansion target.
+        self.state = "exploring"
         return city
+
+    # ------------------------------------------------------------------
+    def build_cities(
+        self,
+        positions: Iterable[Iterable[int] | tuple[int, int]],
+        last_infrastructure: SimNode,
+        max_cities: int | None = None,
+        max_coverage: int | None = None,
+    ) -> list[BuildingNode]:
+        """Construct multiple cities sequentially.
+
+        Each city is linked by roads to the previously built infrastructure.
+        After every construction the builder returns to the ``exploring``
+        state. Building stops once ``max_cities`` is reached or the number of
+        unique tiles covered by roads and cities meets ``max_coverage``.
+        """
+
+        built: list[BuildingNode] = []
+        covered: set[tuple[int, int]] = set()
+        current = last_infrastructure
+        pathfinder = self._find_pathfinder()
+
+        start_tr = self._get_transform(last_infrastructure)
+        if start_tr is not None:
+            covered.add(
+                (int(round(start_tr.position[0])), int(round(start_tr.position[1])))
+            )
+
+        for pos in positions:
+            if max_cities is not None and len(built) >= max_cities:
+                break
+
+            goal = (int(round(pos[0])), int(round(pos[1])))
+            path: list[tuple[int, int]] = []
+            if pathfinder is not None:
+                start_tr = self._get_transform(current)
+                if start_tr is None:
+                    break
+                start = (
+                    int(round(start_tr.position[0])),
+                    int(round(start_tr.position[1])),
+                )
+                path = pathfinder.find_path(start, goal)
+            prospective = set(path or [goal])
+            if max_coverage is not None and len(covered | prospective) > max_coverage:
+                break
+            city = self.build_city(goal, current)
+            if city is None:
+                break
+            built.append(city)
+            covered.update(prospective)
+            current = city
+
+        return built
 
 
 register_node_type("BuilderNode", BuilderNode)
