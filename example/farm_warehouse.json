@@ -1,0 +1,32 @@
+{
+  "world": {
+    "type": "WorldNode",
+    "config": {"width": 100, "height": 100, "seed": 1},
+    "children": [
+      {
+        "type": "BuildingNode",
+        "id": "farm",
+        "config": {"type": "farm", "capacity": 5, "hit_points": 100},
+        "children": [
+          {
+            "type": "ResourceNode",
+            "id": "grain_stock",
+            "config": {"kind": "grain", "quantity": 20, "max_quantity": 100}
+          }
+        ]
+      },
+      {
+        "type": "BuildingNode",
+        "id": "warehouse",
+        "config": {"type": "warehouse", "capacity": 200, "hit_points": 250},
+        "children": [
+          {
+            "type": "ResourceNode",
+            "id": "wood_stock",
+            "config": {"kind": "wood", "quantity": 50, "max_quantity": 500}
+          }
+        ]
+      }
+    ]
+  }
+}
