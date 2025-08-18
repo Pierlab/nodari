@@ -81,7 +81,8 @@ class PygameViewerSystem(SystemNode):
         panel_width: int = config.PANEL_WIDTH,
         font_size: int = config.FONT_SIZE,
         draw_capital: bool = False,
-        max_terrain_resolution: int = 2000,
+        # Cache terrain at a modest resolution to avoid long pre-render times
+        max_terrain_resolution: int = 1024,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -100,11 +101,11 @@ class PygameViewerSystem(SystemNode):
         self.offset_y = 0.0
         self.selected: Optional[SimNode] = None
         self.unit_radius = UNIT_RADIUS
-        # number of soldiers represented by a single dot
-        self.soldiers_per_dot = 1
+        # number of soldiers represented by a single dot – coarser by default for speed
+        self.soldiers_per_dot = 10
         self.draw_capital = draw_capital
-        # Toggle display options
-        self.show_role_rings = True
+        # Toggle display options (disabled overlays yield a faster startup)
+        self.show_role_rings = False
         self.show_intel_overlay = False
         # Extra informational lines injected by external code (e.g. pause menu)
         self.extra_info: List[str] = []
