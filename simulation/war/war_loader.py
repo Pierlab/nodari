@@ -54,6 +54,8 @@ def load_plugins_for_war() -> None:
             "systems.moral",
             "systems.pathfinding",
             "systems.victory",
+            "systems.time",
+            "systems.logger",
         ]
     )
 
