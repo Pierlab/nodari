@@ -29,6 +29,21 @@ class AISystem(SystemNode):
         self.capital_min_radius = capital_min_radius
         self.on_event("unit_idle", self._on_unit_idle)
         self._last_city: dict[int, SimNode] = {}
+        self._init_last_cities()
+
+    # ------------------------------------------------------------------
+    def _init_last_cities(self) -> None:
+        """Seed ``_last_city`` with each nation's capital."""
+        root = self
+        while root.parent is not None:
+            root = root.parent
+        for nation in self._iter_nations(root):
+            key = id(nation)
+            if key in self._last_city:
+                continue
+            city = BuildingNode(parent=root, type="city")
+            TransformNode(parent=city, position=list(nation.capital_position))
+            self._last_city[key] = city
 
     # ------------------------------------------------------------------
     def _on_unit_idle(self, origin: SimNode, _event: str, _payload: dict) -> None:
@@ -144,6 +159,13 @@ class AISystem(SystemNode):
             if isinstance(child, UnitNode):
                 yield child
             yield from self._iter_units(child)
+
+    # ------------------------------------------------------------------
+    def _iter_nations(self, node: SimNode):
+        for child in node.children:
+            if isinstance(child, NationNode):
+                yield child
+            yield from self._iter_nations(child)
 
     # ------------------------------------------------------------------
     def _find_terrain(self) -> TerrainNode | None:
