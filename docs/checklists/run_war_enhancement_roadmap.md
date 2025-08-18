@@ -43,10 +43,10 @@ architecture as described in `docs/specs/project_spec.md`.
   - [x] Each function returns updated `tiles` and an `obstacles_set`.
 
 ### 5.2 Integration
-- [ ] Extend `nodes/terrain.py` with optional `altitude_map` and `get_altitude` helper.
-- [ ] Replace `_generate_terrain()` in `run_war.py` with a pipeline using the new
+- [x] Extend `nodes/terrain.py` with optional `altitude_map` and `get_altitude` helper.
+- [x] Replace `_generate_terrain()` in `run_war.py` with a pipeline using the new
   generator functions. Respect existing speed modifiers and combat bonuses.
-- [ ] Wire terrain parameters through `SimParams` and keyboard/menu controls.
+- [x] Wire terrain parameters through `SimParams` and keyboard/menu controls.
 
 ### 5.3 Config Keys
 - [ ] Allow terrain features to be configured in world JSON (optional keys):
