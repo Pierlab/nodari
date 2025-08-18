@@ -12,11 +12,11 @@ architecture as described in `docs/specs/project_spec.md`.
 - [x] Add regression test verifying units no longer pass through each other.
 
 ## 2. Army AI and Movement
-- [ ] Implement cautious advance behaviour for generals and subordinate units:
-  - [ ] Determine general direction of enemy capital but explore terrain step by step.
-  - [ ] Use pathfinding and terrain awareness rather than straight-line movement.
-- [ ] Allow non-frontline troops to remain at capital unless commanded.
-- [ ] Write tests for basic exploration logic.
+- [x] Implement cautious advance behaviour for generals and subordinate units:
+  - [x] Determine general direction of enemy capital but explore terrain step by step.
+  - [x] Use pathfinding and terrain awareness rather than straight-line movement.
+- [x] Allow non-frontline troops to remain at capital unless commanded.
+- [x] Write tests for basic exploration logic.
 
 ## 3. Central Simulation Parameters
 - [ ] Introduce a dedicated settings file with a `parameters` section collecting
