@@ -14,14 +14,6 @@ import config
 from core.simnode import SimNode, SystemNode
 from core.plugins import register_node_type
 from nodes.transform import TransformNode
-from nodes.character import CharacterNode
-from nodes.farm import FarmNode
-from nodes.house import HouseNode
-from nodes.well import WellNode
-from nodes.warehouse import WarehouseNode
-from nodes.barn import BarnNode
-from nodes.silo import SiloNode
-from nodes.pasture import PastureNode
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
 from core.terrain import TILE_CODES, TILE_NAMES
@@ -32,24 +24,6 @@ from nodes.officer import OfficerNode
 from nodes.bodyguard import BodyguardUnitNode
 from systems.time import TimeSystem
 
-DEFAULT_BUILDING_SIZES: dict[Type[SimNode], Tuple[int, int]] = {
-    FarmNode: (60, 40),
-    HouseNode: (40, 40),
-    WarehouseNode: (50, 30),
-    BarnNode: (60, 30),
-    SiloNode: (20, 40),
-    PastureNode: (80, 80),
-}
-BUILDING_COLORS: dict[Type[SimNode], Tuple[int, int, int]] = {
-    FarmNode: (150, 100, 50),
-    HouseNode: (50, 100, 200),
-    WarehouseNode: (150, 150, 150),
-    BarnNode: (139, 69, 19),
-    SiloNode: (200, 200, 50),
-    PastureNode: (34, 139, 34),
-}
-WELL_RADIUS = 10
-CHAR_RADIUS = 5
 UNIT_RADIUS = 4
 
 TERRAIN_COLORS: dict[int, Tuple[int, int, int]] = {
@@ -233,21 +207,9 @@ class PygameViewerSystem(SystemNode):
                     parent = child.parent
                     sx = (px - self.offset_x) * self.scale
                     sy = (py - self.offset_y) * self.scale
-                    if isinstance(parent, CharacterNode):
-                        if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= CHAR_RADIUS ** 2:
-                            selected = parent
-                    elif isinstance(parent, UnitNode):
+                    if isinstance(parent, UnitNode):
                         if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= self.unit_radius ** 2:
                             selected = parent
-                    elif isinstance(parent, WellNode):
-                        if (sx - pos[0]) ** 2 + (sy - pos[1]) ** 2 <= WELL_RADIUS ** 2:
-                            selected = parent
-                    else:
-                        rect = self._building_rect(parent)
-                        if rect is not None:
-                            rect.center = (int(sx), int(sy))
-                            if rect.collidepoint(pos):
-                                selected = parent
         return selected
 
     def _center_on(self, node: SimNode) -> None:
@@ -258,15 +220,6 @@ class PygameViewerSystem(SystemNode):
                 self.offset_x = x - self.view_width / (2 * self.scale)
                 self.offset_y = y - self.view_height / (2 * self.scale)
                 break
-
-    def _building_rect(self, node: SimNode) -> Optional[pygame.Rect]:
-        if isinstance(node, (FarmNode, HouseNode, WarehouseNode, BarnNode, SiloNode, PastureNode)):
-            w = getattr(node, "width", None)
-            h = getattr(node, "height", None)
-            if w is None or h is None:
-                w, h = DEFAULT_BUILDING_SIZES.get(type(node), (0, 0))
-            return pygame.Rect(0, 0, int(w), int(h))
-        return None
 
     def _draw_intel_overlay(self) -> None:
         root = self._root()
@@ -423,11 +376,8 @@ class PygameViewerSystem(SystemNode):
 
         lines: List[str] = []
         time_sys: Optional[TimeSystem] = None
-        character_count = 0
         unit_count = 0
         for node in self._walk(root):
-            if isinstance(node, CharacterNode):
-                character_count += 1
             if isinstance(node, UnitNode):
                 unit_count += 1
             if isinstance(node, TransformNode):
@@ -493,27 +443,8 @@ class PygameViewerSystem(SystemNode):
                         pygame.draw.circle(
                             self.screen, ROLE_RING_COLORS["officer"], pos, radius, 2
                         )
-                elif isinstance(parent, CharacterNode):
-                    color = (50, 150, 255) if getattr(parent, "gender", "male") == "male" else (255, 105, 180)
-                    pygame.draw.circle(self.screen, color, pos, CHAR_RADIUS)
-                elif isinstance(parent, WellNode):
-                    pygame.draw.circle(self.screen, (0, 100, 200), pos, WELL_RADIUS)
-                    name = self.font.render(parent.name, True, (255, 255, 255))
-                    name_rect = name.get_rect()
-                    name_rect.center = (pos[0], pos[1] + WELL_RADIUS + name_rect.height // 2 + 2)
-                    self.screen.blit(name, name_rect)
                 else:
-                    rect = self._building_rect(parent)
-                    if rect is not None:
-                        rect.center = pos
-                        color = BUILDING_COLORS.get(type(parent), (200, 200, 200))
-                        pygame.draw.rect(self.screen, color, rect)
-                        name = self.font.render(parent.name, True, (255, 255, 255))
-                        name_rect = name.get_rect()
-                        name_rect.center = (pos[0], pos[1] + rect.height // 2 + name_rect.height // 2 + 2)
-                        self.screen.blit(name, name_rect)
-                    else:
-                        pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
+                    pygame.draw.circle(self.screen, (200, 200, 200), pos, 3)
             if isinstance(node, TimeSystem):
                 time_sys = node
 
@@ -552,7 +483,6 @@ class PygameViewerSystem(SystemNode):
             lines.insert(0, f"Phase: {time_sys.phase}")
             lines.insert(0, f"Tick: {time_sys.current_tick}")
             lines.insert(0, time_text)
-        lines.insert(0, f"Characters: {character_count}")
         lines.insert(0, f"Units: {unit_count}")
 
         line_height = self.font.get_linesize()

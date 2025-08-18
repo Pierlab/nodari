@@ -6,11 +6,11 @@ Cette checklist décrit les actions à réaliser pour supprimer la simulation de
 
 ## 1. Suppression de la simulation de ferme
 
-- [ ] Supprimer `run_farm.py`.
-- [ ] Supprimer les nœuds liés à la ferme dans `nodes/` :
+- [x] Supprimer `run_farm.py`.
+- [x] Supprimer les nœuds liés à la ferme dans `nodes/` :
   - `farm.py`, `animal.py`, `barn.py`, `silo.py`, `pasture.py`, `house.py`, `well.py`, `warehouse.py`, `inventory.py`, `resource_producer.py`, `character.py`, `need.py`, `ai_behavior.py`, `ai_utils.py`.
   - Supprimer aussi le sous-répertoire `nodes/routines/` et ses fichiers (`farmer.py`, etc.).
-- [ ] Supprimer les systèmes de ferme dans `systems/`, notamment `economy.py`.
+- [x] Supprimer les systèmes de ferme dans `systems/`, notamment `economy.py`.
 - [ ] Nettoyer `systems/pygame_viewer.py` :
   - Supprimer les importations de classes agricoles (FarmNode, BarnNode, SiloNode, PastureNode, HouseNode, WellNode, WarehouseNode).
   - Retirer les dictionnaires et constantes qui définissent tailles/couleurs pour les bâtiments agricoles.
