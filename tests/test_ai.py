@@ -57,3 +57,14 @@ def test_builder_constructs_city_when_idle_far_from_last():
                 positions.append(child.position)
     assert [3, 0] in positions
     assert builder.state == "moving"
+
+
+def test_ai_initializes_last_city_with_capital():
+    world = WorldNode(width=20, height=20)
+    nation = NationNode(parent=world, morale=100, capital_position=[5, 5])
+    ai = AISystem(parent=world, exploration_radius=2, capital_min_radius=2)
+    last = ai._last_city.get(id(nation))
+    assert isinstance(last, BuildingNode)
+    tr = next((c for c in last.children if isinstance(c, TransformNode)), None)
+    assert tr is not None
+    assert tr.position == [5, 5]
