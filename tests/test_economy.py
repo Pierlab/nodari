@@ -44,3 +44,17 @@ def test_transfer_raises_on_insufficient_stock():
 
     with pytest.raises(ValueError):
         econ.transfer(src, dst, "stone", 5)
+
+
+def test_transfer_raises_when_destination_full():
+    world = WorldNode()
+    econ = EconomySystem(parent=world)
+    src = ResourceNode(kind="iron", quantity=5, parent=world)
+    dst = ResourceNode(kind="iron", quantity=0, max_quantity=3, parent=world)
+
+    with pytest.raises(ValueError):
+        econ.transfer(src, dst, "iron", 4)
+
+    # quantities remain unchanged on failure
+    assert src.quantity == 5
+    assert dst.quantity == 0

@@ -47,7 +47,9 @@ class EconomySystem(SystemNode):
         if dst is not None:
             added = dst.add(amount)
             if added < amount:
-                # roll back removal to maintain conservation
+                # roll back both source and destination to maintain conservation
+                if added:
+                    dst.remove(added)
                 src.add(amount)
                 raise ValueError("destination lacks capacity")
             dst.emit("resource_produced", {"kind": kind, "amount": added})

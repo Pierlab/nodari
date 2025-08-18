@@ -12,6 +12,14 @@ Ce projet propose deux moteurs d'affichage interchangeables:
 - Rendu plus fluide lorsqu'il y a beaucoup d'unités ou de terrains complexes.
 - Démarrage légèrement plus long dû à l'initialisation d'OpenGL.
 
+### Utilisation
+Installez les dépendances optionnelles `moderngl` et `pygame` puis lancez la
+simulation avec l'argument `--viewer moderngl`:
+
+```bash
+python run_war.py --viewer moderngl
+```
+
 ## Performances
 - Pygame atteint environ 30–40 FPS sur des scènes denses.
 - ModernGL peut dépasser 120 FPS sur le même matériel grâce à l'accélération GPU.
