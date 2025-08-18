@@ -27,12 +27,12 @@
       {
         "type": "NationNode",
         "id": "north",
-        "config": { "capital_position": [500, 500], "morale": 100 },
+        "config": { "capital_position": [500, 500] },
         "children": [
           {
             "type": "GeneralNode",
             "id": "north_general",
-            "config": { "style": "balanced", "flank_success_chance": 0.25 },
+            "config": { "style": "balanced" },
             "children": [
               { "type": "TransformNode", "config": { "position": [500, 500] } }
             ]
