@@ -94,6 +94,8 @@ Les nœuds représentent toutes les entités du monde (unités, bâtiments, stoc
 
 Les transitions d'état sont déclenchées par des événements : `task_assigned`, `task_complete`, `unit_idle`.
 
+La méthode `find_task()` sélectionne la ressource disponible la plus proche grâce au `PathfindingSystem` et assigne la cible en émettant `unit_move`.
+
 Voir `docs/workers.md` pour une documentation d'utilisation détaillée.
 
 ---
@@ -117,7 +119,7 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
 - Réagit à `unit_idle` pour chercher une nouvelle tâche via `find_task()`.
 - Stratégies :
   - **Recherche de ressource** la plus proche en utilisant `systems.pathfinding`.
-  - **Exploration** de coordonnées inconnues en émettant `unit_move`.
+  - **Exploration** de coordonnées inconnues dans un rayon donné en émettant `unit_move`.
 
 ### `CombatSystem`
 - Permet d'attaquer des unités et des bâtiments (`attack_building`).
