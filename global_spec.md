@@ -58,7 +58,8 @@ nodari/
 │   ├── pygame_viewer.py
 │   └── scheduler.py
 ├── docs/
-│   └── global_spec.md ← ce document
+│   ├── global_spec.md ← ce document
+│   └── workers.md
 └── tests/
     ├── test_ai.py
     ├── test_combat_building.py
@@ -92,6 +93,8 @@ Les nœuds représentent toutes les entités du monde (unités, bâtiments, stoc
 | `building`  | Participe à la construction d'un bâtiment.                       |
 
 Les transitions d'état sont déclenchées par des événements : `task_assigned`, `task_complete`, `unit_idle`.
+
+Voir `docs/workers.md` pour une documentation d'utilisation détaillée.
 
 ---
 
