@@ -1,0 +1,268 @@
+{
+  "war_world": {
+    "type": "WorldNode",
+    "config": {
+      "width": 10000,
+      "height": 6000,
+      "seed": 1
+    },
+    "children": [
+      {
+        "type": "TimeSystem",
+        "id": "time",
+        "config": {
+          "time_scale": 10
+        }
+      },
+      {
+        "type": "MovementSystem",
+        "id": "movement",
+        "config": {
+          "terrain": "terrain"
+        }
+      },
+      {
+        "type": "CombatSystem",
+        "id": "combat",
+        "config": {
+          "terrain": "terrain"
+        }
+      },
+      {
+        "type": "MoralSystem",
+        "id": "moral"
+      },
+      {
+        "type": "VictorySystem",
+        "id": "victory",
+        "config": {
+          "capture_unit_threshold": 1
+        }
+      },
+      {
+        "type": "LoggingSystem",
+        "id": "logger",
+        "config": {
+          "events": ["unit_moved", "combat_occurred", "unit_engaged", "unit_routed"]
+        }
+      },
+      {
+        "type": "TerrainNode",
+        "id": "terrain",
+        "config": {
+          "grid_type": "square",
+          "tiles": [
+            [
+              "plain",
+              "plain",
+              "plain",
+              "plain",
+              "plain"
+            ],
+            [
+              "plain",
+              "plain",
+              "plain",
+              "plain",
+              "plain"
+            ],
+            [
+              "plain",
+              "plain",
+              "plain",
+              "plain",
+              "plain"
+            ]
+          ],
+          "obstacles": [],
+          "terrain_params": {
+            "rivers": [
+              {
+                "start": [0, 3000],
+                "end": [10000, 3000],
+                "width_min": 5,
+                "width_max": 8,
+                "meander": 0.2
+              }
+            ],
+            "lakes": [
+              {
+                "center": [5000, 2500],
+                "radius": 300,
+                "irregularity": 0.5
+              }
+            ],
+            "forests": {
+              "total_area_pct": 15,
+              "clusters": 6,
+              "cluster_spread": 0.6
+            },
+            "mountains": {
+              "total_area_pct": 8,
+              "perlin_scale": 0.01,
+              "peak_density": 0.2
+            },
+            "swamp_desert": {
+              "swamp_pct": 3,
+              "desert_pct": 5,
+              "clumpiness": 0.5
+            },
+            "obstacle_altitude_threshold": 0.75
+          }
+        }
+      },
+      {
+        "type": "NationNode",
+        "id": "north",
+        "config": {
+          "capital_position": [
+            1000,
+            3000
+          ],
+          "morale": 100
+        },
+        "children": [
+          {
+            "type": "GeneralNode",
+            "id": "north_general",
+            "config": {
+              "style": "balanced",
+              "flank_success_chance": 0.25
+            },
+            "children": [
+              {
+                "type": "TransformNode",
+                "config": {
+                  "position": [
+                    1000,
+                    3000
+                  ]
+                }
+              },
+              {
+                "type": "ArmyNode",
+                "id": "north_army",
+                "config": {
+                  "goal": "advance",
+                  "size": 1
+                },
+                "children": [
+                  {
+                    "type": "TransformNode",
+                    "config": {
+                      "position": [
+                        1000,
+                        3000
+                      ]
+                    }
+                  },
+                  {
+                    "type": "UnitNode",
+                    "id": "north_unit_1",
+                    "config": {
+                      "size": 100,
+                      "state": "idle",
+                      "speed": 1.0,
+                      "morale": 100,
+                      "target": [
+                        9000,
+                        3000
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "TransformNode",
+                        "config": {
+                          "position": [
+                            1000,
+                            3000
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "NationNode",
+        "id": "south",
+        "config": {
+          "capital_position": [
+            9000,
+            3000
+          ],
+          "morale": 100
+        },
+        "children": [
+          {
+            "type": "GeneralNode",
+            "id": "south_general",
+            "config": {
+              "style": "balanced",
+              "flank_success_chance": 0.25
+            },
+            "children": [
+              {
+                "type": "TransformNode",
+                "config": {
+                  "position": [
+                    9000,
+                    3000
+                  ]
+                }
+              },
+              {
+                "type": "ArmyNode",
+                "id": "south_army",
+                "config": {
+                  "goal": "advance",
+                  "size": 1
+                },
+                "children": [
+                  {
+                    "type": "TransformNode",
+                    "config": {
+                      "position": [
+                        9000,
+                        3000
+                      ]
+                    }
+                  },
+                  {
+                    "type": "UnitNode",
+                    "id": "south_unit_1",
+                    "config": {
+                      "size": 100,
+                      "state": "idle",
+                      "speed": 1.0,
+                      "morale": 100,
+                      "target": [
+                        1000,
+                        3000
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "TransformNode",
+                        "config": {
+                          "position": [
+                            9000,
+                            3000
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
