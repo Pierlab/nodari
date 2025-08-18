@@ -24,6 +24,8 @@ from simulation.war.nodes import (
     TransformNode,
     UnitNode,
 )
+from nodes.worker import WorkerNode
+from systems.ai import AISystem
 from simulation.war.presets import DEFAULT_SIM_PARAMS
 from simulation.war.systems import MovementSystem, PathfindingSystem
 from simulation.war.terrain_setup import terrain_regen
@@ -51,6 +53,7 @@ def load_plugins_for_war() -> None:
             "nodes.bodyguard",
             "nodes.building",
             "nodes.resource",
+            "nodes.worker",
             "systems.movement",
             "systems.combat",
             "systems.moral",
@@ -58,6 +61,7 @@ def load_plugins_for_war() -> None:
             "systems.victory",
             "systems.time",
             "systems.logger",
+            "systems.ai",
         ]
     )
 
@@ -82,6 +86,8 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
         sys.argv[1] if len(sys.argv) > 1 else "example/plain_map_config.json"
     )
     world = load_simulation_from_file(config_file)
+
+    AISystem(parent=world, capital_min_radius=100)
 
     terrain_node = next((c for c in world.children if isinstance(c, TerrainNode)), None)
     terrain_params = dict(getattr(terrain_node, "params", {})) if terrain_node else {}
@@ -124,6 +130,9 @@ def _spawn_armies(
     nations = [n for n in world.children if isinstance(n, NationNode)]
     width, height = world.width, world.height
     for nation in nations:
+        for child in list(nation.children):
+            if isinstance(child, WorkerNode):
+                nation.remove_child(child)
         general = next((c for c in nation.children if isinstance(c, GeneralNode)), None)
         if general is None:
             continue
@@ -140,6 +149,17 @@ def _spawn_armies(
 
         strategist = StrategistNode(name=f"{nation.name}_strategist")
         general.add_child(strategist)
+
+        for i in range(3):
+            worker = WorkerNode(
+                name=f"{nation.name}_worker_{i+1}",
+                state="exploring",
+                speed=1.0,
+                morale=100,
+            )
+            worker.add_child(TransformNode(position=list(center)))
+            nation.add_child(worker)
+            worker.emit("unit_idle", {})
 
         for i in range(5):
             size = _round_size(bodyguard_size, soldiers_per_dot)
