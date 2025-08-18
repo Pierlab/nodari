@@ -266,18 +266,23 @@ class PygameViewerSystem(SystemNode, Viewer):
     def _info_lines(self, node: SimNode) -> List[str]:
         """Return a list of human-readable attributes for ``node``."""
         lines: List[str] = [f"{node.name} ({node.__class__.__name__})"]
-        for attr, value in vars(node).items():
-            if attr.startswith("_") or attr in {"parent", "children"}:
-                continue
-            lines.append(f"{attr}:")
-            lines.append(f"  {value}")
+
+        if isinstance(node, UnitNode):
+            lines.append("state:")
+            lines.append(f"  {node.state}")
+            lines.append("morale:")
+            lines.append(f"  {node.morale}")
+            lines.append("speed:")
+            lines.append(f"  {node.speed}")
+            lines.append("target:")
+            lines.append(f"  {node.target}")
+
         for child in node.children:
-            lines.append(child.__class__.__name__ + ":")
-            for attr, value in vars(child).items():
-                if attr.startswith("_") or attr in {"parent", "children"}:
-                    continue
-                lines.append(f"  {attr}:")
-                lines.append(f"    {value}")
+            if isinstance(child, TransformNode):
+                lines.append("TransformNode:")
+                lines.append("  position:")
+                lines.append(f"    {child.position}")
+
         return lines
 
     # ------------------------------------------------------------------
