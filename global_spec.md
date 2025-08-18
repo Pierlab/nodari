@@ -157,6 +157,11 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
 
 ---
 
+## Exemples
+Un fichier de configuration minimal `example/farm_warehouse.json` illustre une ferme et un entrepôt utilisant `BuildingNode` et `ResourceNode` avec des stocks initiaux.
+
+---
+
 ## Notes de développement
 - Le système doit minimiser les calculs inutiles : les ouvriers ne font pas de vérification à chaque tick.
 - Tous les comportements IA restent simples mais extensibles.

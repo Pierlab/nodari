@@ -49,6 +49,8 @@ def load_plugins_for_war() -> None:
             "nodes.strategist",
             "nodes.officer",
             "nodes.bodyguard",
+            "nodes.building",
+            "nodes.resource",
             "systems.movement",
             "systems.combat",
             "systems.moral",
