@@ -7,6 +7,7 @@ import random
 
 from core.simnode import SystemNode, SimNode
 from core.plugins import register_node_type
+from core.terrain import METERS_PER_TILE
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
 from nodes.transform import TransformNode
@@ -17,8 +18,10 @@ from systems.pathfinding import PathfindingSystem
 class MovementSystem(SystemNode):
     """Move units each update toward their target position.
 
-    The movement speed of a unit is affected by the terrain tile modifier and
-    the unit's morale (scaled between ``0`` and ``1``).
+    All distances are measured in **meters** and the ``dt`` parameter represents
+    elapsed time in **seconds**. The movement speed of a unit is affected by the
+    terrain tile modifier and the unit's morale (scaled between ``0`` and
+    ``1``).
 
     Parameters
     ----------
@@ -127,7 +130,10 @@ class MovementSystem(SystemNode):
             if transform is None:
                 continue
             units.append((unit, transform))
-            pos = (int(round(transform.position[0])), int(round(transform.position[1])))
+            pos = (
+                int(round(transform.position[0] / METERS_PER_TILE)),
+                int(round(transform.position[1] / METERS_PER_TILE)),
+            )
             tile_units.setdefault(pos, []).append(unit)
             if self.blocking and getattr(unit, "state", "") == "fighting":
                 blocked_tiles.add(pos)
@@ -138,12 +144,13 @@ class MovementSystem(SystemNode):
             if not hasattr(unit, "target") or unit.target is None:
                 continue
             tx, ty = transform.position
-            sx, sy = int(round(tx)), int(round(ty))
+            sx, sy = int(round(tx / METERS_PER_TILE)), int(round(ty / METERS_PER_TILE))
             tile_units[(sx, sy)].remove(unit)
             if not tile_units.get((sx, sy)):
                 tile_units.pop((sx, sy), None)
             if hasattr(unit, "_path") and unit._path:
-                gx, gy = unit._path[0]
+                gx_tile, gy_tile = unit._path[0]
+                gx, gy = gx_tile * METERS_PER_TILE, gy_tile * METERS_PER_TILE
             else:
                 gx, gy = unit.target
             dx, dy = gx - tx, gy - ty
@@ -159,7 +166,7 @@ class MovementSystem(SystemNode):
             speed = unit.speed
             terrain = self.terrain
             if terrain is not None:
-                speed *= terrain.get_speed_modifier(int(tx), int(ty))
+                speed *= terrain.get_speed_modifier(sx, sy)
             speed *= max(unit.morale, 0) / 100.0
             step = speed * dt
             if step <= 0:
@@ -173,13 +180,13 @@ class MovementSystem(SystemNode):
                     angle += random.uniform(-self.direction_noise, self.direction_noise)
                 new_x = tx + cos(angle) * step
                 new_y = ty + sin(angle) * step
-            ix, iy = int(round(new_x)), int(round(new_y))
+            ix, iy = int(round(new_x / METERS_PER_TILE)), int(round(new_y / METERS_PER_TILE))
             occupants = tile_units.get((ix, iy), [])
             enemy = next((o for o in occupants if nations.get(o) != nations.get(unit)), None)
             if enemy is not None:
-                transform.position[0] = float(ix)
-                transform.position[1] = float(iy)
-                unit.target = [ix, iy]
+                transform.position[0] = float(ix * METERS_PER_TILE)
+                transform.position[1] = float(iy * METERS_PER_TILE)
+                unit.target = [ix * METERS_PER_TILE, iy * METERS_PER_TILE]
                 unit.engage(enemy)
                 enemy.engage(unit)
                 tile_units.setdefault((ix, iy), []).append(unit)
@@ -192,8 +199,11 @@ class MovementSystem(SystemNode):
                 tile_units.setdefault((sx, sy), []).append(unit)
                 if not self.avoid_obstacles or self.pathfinder is None:
                     continue
-                start = (int(round(tx)), int(round(ty)))
-                goal = (int(round(unit.target[0])), int(round(unit.target[1])))
+                start = (sx, sy)
+                goal = (
+                    int(round(unit.target[0] / METERS_PER_TILE)),
+                    int(round(unit.target[1] / METERS_PER_TILE)),
+                )
                 path = self.pathfinder.find_path(start, goal, blocked_tiles)
                 if len(path) > 1:
                     unit._path = path[1:]

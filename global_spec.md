@@ -17,7 +17,7 @@ Construire un simulateur de croissance de cité médiévale inspiré de *The Set
 
 ## Conventions d'échelle
 - **Temps** : secondes comme unité de base; minutes et heures utilisées pour l'affichage.
-- **Espace** : mètres comme unité de base. Les tuiles de terrain sont converties via `METERS_PER_TILE`.
+- **Espace** : mètres comme unité de base. Les tuiles de terrain sont converties via la constante `METERS_PER_TILE` définie dans `core/terrain.py`.
 
 ---
 
