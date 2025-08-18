@@ -9,6 +9,10 @@
     "children": [
       { "type": "TimeSystem", "id": "time", "config": { "time_scale": 48 } },
       { "type": "MovementSystem", "id": "movement", "config": { "terrain": "terrain" } },
+      { "type": "VisibilitySystem", "id": "visibility" },
+      { "type": "SchedulerSystem", "id": "scheduler" },
+      { "type": "PathfindingSystem", "id": "pathfinder", "config": { "terrain": "terrain" } },
+      { "type": "AISystem", "id": "ai", "config": { "exploration_radius": 10, "capital_min_radius": 50 } },
       {
         "type": "TerrainNode",
         "id": "terrain",
@@ -35,6 +39,30 @@
             "type": "GeneralNode",
             "id": "north_general",
             "config": { "style": "balanced" },
+            "children": [
+              { "type": "TransformNode", "config": { "position": [500, 500] } }
+            ]
+          },
+          {
+            "type": "BuilderNode",
+            "id": "builder1",
+            "config": { "speed": 10.0 },
+            "children": [
+              { "type": "TransformNode", "config": { "position": [500, 500] } }
+            ]
+          },
+          {
+            "type": "BuilderNode",
+            "id": "builder2",
+            "config": { "speed": 10.0 },
+            "children": [
+              { "type": "TransformNode", "config": { "position": [500, 500] } }
+            ]
+          },
+          {
+            "type": "BuilderNode",
+            "id": "builder3",
+            "config": { "speed": 10.0 },
             "children": [
               { "type": "TransformNode", "config": { "position": [500, 500] } }
             ]
