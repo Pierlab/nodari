@@ -46,15 +46,15 @@ Cette checklist décrit les actions à réaliser pour supprimer la simulation de
 - [x] Profiler et optimiser `systems/movement.py`, `systems/pathfinding.py`, `systems/visibility.py` :
   - Utiliser des structures de données plus efficaces si nécessaire (numpy, graphes optimisés).
   - Réduire la fréquence des calculs et logs.
-- [ ] Vérifier `pygame_viewer.py` :
+- [x] Vérifier `pygame_viewer.py` :
   - Paramétrer correctement `max_terrain_resolution` et les options de rendu pour accélérer le démarrage.
 
 ---
 
 ## 4. Tests et documentation
 
-- [ ] Supprimer les tests liés à la ferme (farm, barn, etc.).
-- [ ] Vérifier que les tests restants couvrent les nœuds et systèmes militaires.
+- [x] Supprimer les tests liés à la ferme (farm, barn, etc.).
+- [x] Vérifier que les tests restants couvrent les nœuds et systèmes militaires.
 - [ ] Ajouter de nouveaux tests unitaires pour :
   - ArmyNode, UnitNode, OfficerNode.
   - Systèmes combat, moral, pathfinding, victoire.
