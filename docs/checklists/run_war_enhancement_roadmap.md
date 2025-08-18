@@ -33,14 +33,14 @@ architecture as described in `docs/specs/project_spec.md`.
 ## 5. Terrain Generation (Checklist §2)
 
 ### 5.1 Code Organization
-- [ ] Create `tools/terrain_generators.py` containing pure functions:
-  - [ ] `generate_base(width, height, fill="plain")`
-  - [ ] `carve_river(tiles, *, start, end, width_min, width_max, meander, obstacles_set)`
-  - [ ] `place_lake(tiles, *, center, radius, irregularity)`
-  - [ ] `place_forest(tiles, *, total_area_pct, clusters, cluster_spread)`
-  - [ ] `place_mountains(tiles, *, total_area_pct, perlin_scale, peak_density, altitude_map_out=None)`
-  - [ ] `place_swamp_desert(tiles, *, swamp_pct, desert_pct, clumpiness)`
-  - [ ] Each function returns updated `tiles` and an `obstacles_set`.
+- [x] Create `tools/terrain_generators.py` containing pure functions:
+  - [x] `generate_base(width, height, fill="plain")`
+  - [x] `carve_river(tiles, *, start, end, width_min, width_max, meander, obstacles_set)`
+  - [x] `place_lake(tiles, *, center, radius, irregularity)`
+  - [x] `place_forest(tiles, *, total_area_pct, clusters, cluster_spread)`
+  - [x] `place_mountains(tiles, *, total_area_pct, perlin_scale, peak_density, altitude_map_out=None)`
+  - [x] `place_swamp_desert(tiles, *, swamp_pct, desert_pct, clumpiness)`
+  - [x] Each function returns updated `tiles` and an `obstacles_set`.
 
 ### 5.2 Integration
 - [ ] Extend `nodes/terrain.py` with optional `altitude_map` and `get_altitude` helper.
