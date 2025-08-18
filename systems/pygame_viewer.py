@@ -5,7 +5,7 @@ import os
 import time
 import logging
 from math import atan2, cos, sin, pi, ceil
-from typing import Iterator, List, Optional, Tuple, Type
+from typing import Callable, Iterator, List, Optional, Tuple, Type
 
 import pygame
 
@@ -134,6 +134,9 @@ class PygameViewerSystem(SystemNode):
         self.show_intel_overlay = False
         # Extra informational lines injected by external code (e.g. pause menu)
         self.extra_info: List[str] = []
+        # Interactive menu entries displayed in the side panel
+        self.menu_items: List[dict] = []
+        self._menu_button_rects: List[tuple[pygame.Rect, Callable[[], None]]] = []
         self._terrain_cache: pygame.Surface | None = None
         self._terrain_cache_scale = self.scale
         self._terrain_cache_size: tuple[int, int] | None = None
@@ -185,13 +188,29 @@ class PygameViewerSystem(SystemNode):
         if show_intel_overlay is not None:
             self.show_intel_overlay = show_intel_overlay
 
+    def set_menu_items(self, items: List[dict]) -> None:
+        """Replace interactive menu items.
+
+        Each *item* mapping should define ``label``, ``minus`` and ``plus``
+        callables which will be invoked when the corresponding button is
+        clicked.
+        """
+
+        self.menu_items = items
+
     def process_events(self, events: List[pygame.event.Event]) -> None:
         """Handle external Pygame events."""
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.pos[0] < self.view_width:
-                self.selected = self._node_at_pixel(event.pos)
-                if self.selected:
-                    self._center_on(self.selected)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if event.pos[0] < self.view_width:
+                    self.selected = self._node_at_pixel(event.pos)
+                    if self.selected:
+                        self._center_on(self.selected)
+                else:
+                    for rect, cb in self._menu_button_rects:
+                        if rect.collidepoint(event.pos):
+                            cb()
+                            break
             elif event.type == pygame.MOUSEWHEEL:
                 factor = 1.1 if event.y > 0 else 0.9
                 prev_scale = self.scale
@@ -536,18 +555,53 @@ class PygameViewerSystem(SystemNode):
         lines.insert(0, f"Characters: {character_count}")
         lines.insert(0, f"Units: {unit_count}")
 
-        lines.append("")
-        lines.append("Controls:")
-        lines.append(" Space: pause/resume")
-        lines.append(" +/- : change speed")
-        lines.append(" [: zoom out, ]: zoom in")
-        lines.append(" H/J/K/L: pan view")
-        lines.append(" V: toggle frame logging")
-        lines.extend(self.extra_info)
-
         line_height = self.font.get_linesize()
         text_y = 10
         for text in lines:
+            surf = self.font.render(text, True, (255, 255, 255))
+            self.screen.blit(surf, (panel_rect.x + 10, text_y))
+            text_y += line_height
+
+        # draw interactive menu items with +/- buttons
+        self._menu_button_rects = []
+        if self.menu_items:
+            text_y += line_height
+            for item in self.menu_items:
+                surf = self.font.render(item["label"], True, (255, 255, 255))
+                self.screen.blit(surf, (panel_rect.x + 10, text_y))
+                minus_rect = pygame.Rect(
+                    panel_rect.right - 60, text_y - 2, 20, line_height - 4
+                )
+                plus_rect = pygame.Rect(
+                    panel_rect.right - 30, text_y - 2, 20, line_height - 4
+                )
+                pygame.draw.rect(self.screen, (80, 80, 80), minus_rect)
+                pygame.draw.rect(self.screen, (80, 80, 80), plus_rect)
+                minus_surf = self.font.render("-", True, (255, 255, 255))
+                plus_surf = self.font.render("+", True, (255, 255, 255))
+                self.screen.blit(
+                    minus_surf,
+                    minus_surf.get_rect(center=minus_rect.center),
+                )
+                self.screen.blit(
+                    plus_surf,
+                    plus_surf.get_rect(center=plus_rect.center),
+                )
+                self._menu_button_rects.append((minus_rect, item["minus"]))
+                self._menu_button_rects.append((plus_rect, item["plus"]))
+                text_y += line_height
+
+        controls = [
+            "",
+            "Controls:",
+            " Space: pause/resume",
+            " +/- : change speed",
+            " [: zoom out, ]: zoom in",
+            " H/J/K/L: pan view",
+            " V: toggle frame logging",
+        ]
+        controls.extend(self.extra_info)
+        for text in controls:
             surf = self.font.render(text, True, (255, 255, 255))
             self.screen.blit(surf, (panel_rect.x + 10, text_y))
             text_y += line_height
