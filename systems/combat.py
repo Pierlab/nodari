@@ -10,6 +10,7 @@ from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
 from nodes.transform import TransformNode
 from nodes.nation import NationNode
+from nodes.building import BuildingNode
 
 
 class CombatSystem(SystemNode):
@@ -26,6 +27,7 @@ class CombatSystem(SystemNode):
         super().__init__(**kwargs)
         self._terrain_ref = terrain
         self.terrain: TerrainNode | None = terrain if isinstance(terrain, TerrainNode) else None
+        self.on_event("attack_building", self._on_attack_building)
 
     # ------------------------------------------------------------------
     def _resolve_terrain(self) -> None:
@@ -70,6 +72,33 @@ class CombatSystem(SystemNode):
                 return cur
             cur = cur.parent
         return None
+
+    # ------------------------------------------------------------------
+    def attack_building(
+        self, building: BuildingNode, damage: int, attacker: SimNode | None = None
+    ) -> None:
+        """Apply *damage* to *building* and emit ``building_destroyed`` if needed."""
+
+        if damage <= 0:
+            return
+        building.hit_points = max(0, building.hit_points - damage)
+        if building.hit_points == 0:
+            building.emit(
+                "building_destroyed",
+                {"attacker": attacker, "building": building.type},
+                direction="up",
+            )
+            if building.parent is not None:
+                building.parent.remove_child(building)
+
+    def _on_attack_building(
+        self, origin: SimNode, _event: str, payload: dict
+    ) -> None:
+        building = payload.get("target")
+        damage = payload.get("damage", 0)
+        attacker = origin if isinstance(origin, SimNode) else None
+        if isinstance(building, BuildingNode):
+            self.attack_building(building, damage, attacker)
 
     # ------------------------------------------------------------------
     def _resolve_combat(self, a: UnitNode, b: UnitNode, x: int, y: int) -> None:

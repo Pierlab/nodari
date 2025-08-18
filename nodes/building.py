@@ -16,13 +16,24 @@ class BuildingNode(SimNode):
         Maximum capacity of units or resources handled by the building.
     hit_points:
         Structural durability used in combat interactions.
+    strategic:
+        When ``True`` the loss of this building can trigger defeat
+        conditions.
     """
 
-    def __init__(self, type: str, capacity: int = 0, hit_points: int = 100, **kwargs) -> None:
+    def __init__(
+        self,
+        type: str,
+        capacity: int = 0,
+        hit_points: int = 100,
+        strategic: bool = False,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self.type = type
         self.capacity = capacity
         self.hit_points = hit_points
+        self.strategic = strategic
 
 
 register_node_type("BuildingNode", BuildingNode)
