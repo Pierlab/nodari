@@ -49,15 +49,15 @@ architecture as described in `docs/specs/project_spec.md`.
 - [x] Wire terrain parameters through `SimParams` and keyboard/menu controls.
 
 ### 5.3 Config Keys
-- [ ] Allow terrain features to be configured in world JSON (optional keys):
-  - [ ] `rivers: [{start, end, width_min, width_max, meander}]`
-  - [ ] `lakes: [{center, radius, irregularity}]`
-  - [ ] `forests: {total_area_pct, clusters, cluster_spread}`
-  - [ ] `mountains: {total_area_pct, perlin_scale, peak_density}`
-  - [ ] `swamp_desert: {swamp_pct, desert_pct, clumpiness}`
-  - [ ] `obstacle_altitude_threshold`
-- [ ] Update example configs to show new parameters.
-- [ ] Add tests for terrain generation ensuring rivers are contiguous and
+- [x] Allow terrain features to be configured in world JSON (optional keys):
+  - [x] `rivers: [{start, end, width_min, width_max, meander}]`
+  - [x] `lakes: [{center, radius, irregularity}]`
+  - [x] `forests: {total_area_pct, clusters, cluster_spread}`
+  - [x] `mountains: {total_area_pct, perlin_scale, peak_density}`
+  - [x] `swamp_desert: {swamp_pct, desert_pct, clumpiness}`
+  - [x] `obstacle_altitude_threshold`
+- [x] Update example configs to show new parameters.
+- [x] Add tests for terrain generation ensuring rivers are contiguous and
   obstacles match altitude thresholds.
 
 ---
