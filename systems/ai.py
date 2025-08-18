@@ -6,6 +6,8 @@ import random
 from core.simnode import SystemNode, SimNode
 from core.plugins import register_node_type
 from nodes.worker import WorkerNode
+from nodes.builder import BuilderNode
+from nodes.building import BuildingNode
 from nodes.transform import TransformNode
 from nodes.nation import NationNode
 from nodes.unit import UnitNode
@@ -26,6 +28,7 @@ class AISystem(SystemNode):
         self.exploration_radius = exploration_radius
         self.capital_min_radius = capital_min_radius
         self.on_event("unit_idle", self._on_unit_idle)
+        self._last_city: dict[int, SimNode] = {}
 
     # ------------------------------------------------------------------
     def _on_unit_idle(self, origin: SimNode, _event: str, _payload: dict) -> None:
@@ -36,6 +39,32 @@ class AISystem(SystemNode):
         transform = self._get_transform(origin)
         if transform is None:
             return
+        if isinstance(origin, BuilderNode) and self.capital_min_radius > 0:
+            nation = self._get_nation(origin)
+            if nation is not None:
+                key = id(nation)
+                last = self._last_city.get(key)
+                if last is None:
+                    root = self
+                    while root.parent is not None:
+                        root = root.parent
+                    last = BuildingNode(parent=root, type="city")
+                    TransformNode(parent=last, position=list(nation.capital_position))
+                    self._last_city[key] = last
+                last_tr = self._get_transform(last)
+                if last_tr is not None:
+                    x0 = int(round(transform.position[0]))
+                    y0 = int(round(transform.position[1]))
+                    lx = int(round(last_tr.position[0]))
+                    ly = int(round(last_tr.position[1]))
+                    dx = x0 - lx
+                    dy = y0 - ly
+                    if dx * dx + dy * dy >= self.capital_min_radius * self.capital_min_radius:
+                        city = origin.build_city([x0, y0], last)
+                        if city is not None:
+                            self._last_city[key] = city
+                            origin.emit("unit_idle", {}, direction="up")
+                        return
         x0 = int(round(transform.position[0]))
         y0 = int(round(transform.position[1]))
         radius = self.exploration_radius

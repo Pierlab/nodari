@@ -1,5 +1,7 @@
 from nodes.world import WorldNode
 from nodes.worker import WorkerNode
+from nodes.builder import BuilderNode
+from nodes.building import BuildingNode
 from nodes.transform import TransformNode
 from nodes.nation import NationNode
 from nodes.terrain import TerrainNode
@@ -38,3 +40,20 @@ def test_ai_respects_capital_radius_and_free_tiles():
     tx, ty = worker.target
     assert (tx - cx) * (tx - cx) + (ty - cy) * (ty - cy) >= 4
     assert worker.target not in ([7, 10], [8, 8])
+
+
+def test_builder_constructs_city_when_idle_far_from_last():
+    world = WorldNode(width=20, height=20)
+    nation = NationNode(parent=world, morale=100, capital_position=[0, 0])
+    builder = BuilderNode(parent=nation, state="idle")
+    TransformNode(parent=builder, position=[3, 0])
+    ai = AISystem(parent=world, exploration_radius=2, capital_min_radius=2)
+    builder.emit("unit_idle", {})
+    cities = [c for c in world.children if isinstance(c, BuildingNode) and c.type == "city"]
+    positions = []
+    for city in cities:
+        for child in city.children:
+            if isinstance(child, TransformNode):
+                positions.append(child.position)
+    assert [3, 0] in positions
+    assert builder.state == "moving"
