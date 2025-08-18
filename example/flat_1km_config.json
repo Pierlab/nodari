@@ -1,0 +1,41 @@
+{
+  "war_world": {
+    "type": "WorldNode",
+    "config": {
+      "width": 1000,
+      "height": 1000,
+      "seed": 1
+    },
+    "children": [
+      { "type": "TimeSystem", "id": "time", "config": { "time_scale": 48 } },
+      { "type": "MovementSystem", "id": "movement", "config": { "terrain": "terrain" } },
+      { "type": "CombatSystem", "id": "combat", "config": { "terrain": "terrain" } },
+      { "type": "MoralSystem", "id": "moral" },
+      { "type": "VictorySystem", "id": "victory", "config": { "capture_unit_threshold": 1 } },
+      { "type": "LoggingSystem", "id": "logger", "config": { "events": ["unit_moved"] } },
+      { "type": "TerrainNode", "id": "terrain", "config": {
+          "grid_type": "square",
+          "tiles": [["plain"]],
+          "obstacles": [],
+          "terrain_params": {
+            "rivers": [],
+            "lakes": [],
+            "forests": { "total_area_pct": 0, "clusters": 0, "cluster_spread": 0 },
+            "mountains": { "total_area_pct": 0 },
+            "swamp_desert": { "swamp_pct": 0, "desert_pct": 0, "clumpiness": 0 },
+            "obstacle_altitude_threshold": 1.0
+          }
+        }
+      },
+      { "type": "NationNode", "id": "north", "config": { "capital_position": [500, 500], "morale": 100 },
+        "children": [
+          { "type": "GeneralNode", "id": "north_general", "config": { "style": "balanced", "flank_success_chance": 0.25 },
+            "children": [
+              { "type": "TransformNode", "config": { "position": [500, 500] } }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

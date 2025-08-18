@@ -82,9 +82,7 @@ def load_sim_params(path: str) -> dict:
 def setup_world(config_file: str | None = None, settings_file: str | None = None):
     """Load the world and simulation parameters."""
 
-    config_file = config_file or (
-        sys.argv[1] if len(sys.argv) > 1 else "example/plain_map_config.json"
-    )
+    config_file = config_file or "example/flat_1km_config.json"
     world = load_simulation_from_file(config_file)
 
     AISystem(parent=world, capital_min_radius=100)
