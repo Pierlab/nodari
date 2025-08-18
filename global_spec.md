@@ -102,7 +102,7 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
 - Gère la **production**, la **consommation** et les **transferts** de ressources.
 - Méthodes principales :
   - `produce(node, kind, amount)`
-  - `transfer(src, dst, kind, amount)`
+  - `transfer(src, dst, kind, amount)` (`dst` peut être `None` pour une consommation directe)
 - Émet des événements `resource_produced` et `resource_consumed`.
 - Lève une erreur si le stock est insuffisant.
 
