@@ -75,7 +75,7 @@ class AISystem(SystemNode):
                     dx = x0 - lx
                     dy = y0 - ly
                     if dx * dx + dy * dy >= self.capital_min_radius * self.capital_min_radius:
-                        city = origin.build_city([x0, y0], last)
+                        city = origin.build_city([x0, y0], last, emit_idle=False)
                         if city is not None:
                             self._last_city[key] = city
                             origin.emit("unit_idle", {}, direction="up")
