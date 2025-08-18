@@ -51,3 +51,20 @@ def test_nation_defeated_on_moral_collapse():
     nation.change_morale(-1)
     world.update(1.0)
     assert defeated and defeated[0]["reason"] == "moral_collapse"
+
+
+def test_capital_capture_emitted_only_once():
+    world = WorldNode()
+    VictorySystem(parent=world, capture_unit_threshold=1)
+    attacker = NationNode(parent=world, morale=100, capital_position=[5, 0])
+    defender = NationNode(parent=world, morale=100, capital_position=[0, 0])
+    unit1 = UnitNode(parent=attacker)
+    TransformNode(parent=unit1, position=[0, 0])
+    events: list[dict] = []
+    defender.on_event("capital_captured", lambda _o, _e, p: events.append(p))
+    world.update(1.0)
+    assert len(events) == 1
+    unit2 = UnitNode(parent=attacker)
+    TransformNode(parent=unit2, position=[0, 0])
+    world.update(1.0)
+    assert len(events) == 1

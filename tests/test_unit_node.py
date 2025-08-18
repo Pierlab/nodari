@@ -34,3 +34,23 @@ def test_unit_retreats_when_morale_low():
 
     assert unit.state == "fleeing"
     assert unit.target == [0, 0]
+
+
+def test_order_acknowledgement_and_completion():
+    root = SimNode("root")
+    unit = UnitNode(parent=root)
+    acks: list[dict] = []
+    completed: list[dict] = []
+    root.on_event("order_ack", lambda _o, _e, p: acks.append(p))
+    root.on_event("order_complete", lambda _o, _e, p: completed.append(p))
+
+    order = {"action": "move", "priority": 1, "time_issued": 1}
+    root.emit("order_received", order, direction="down")
+
+    assert unit.current_order == order
+    assert acks and acks[0]["order"] == order
+
+    unit.complete_order()
+
+    assert unit.current_order is None
+    assert completed and completed[0]["order"] == order

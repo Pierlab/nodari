@@ -55,11 +55,11 @@ Cette checklist décrit les actions à réaliser pour supprimer la simulation de
 
 - [x] Supprimer les tests liés à la ferme (farm, barn, etc.).
 - [x] Vérifier que les tests restants couvrent les nœuds et systèmes militaires.
-- [ ] Ajouter de nouveaux tests unitaires pour :
+- [x] Ajouter de nouveaux tests unitaires pour :
   - ArmyNode, UnitNode, OfficerNode.
   - Systèmes combat, moral, pathfinding, victoire.
   - Chargement de presets et cohérence des paramètres.
-- [ ] Mettre à jour la documentation dans `docs/` pour :
+- [x] Mettre à jour la documentation dans `docs/` pour :
   - Fournir un guide clair sur la simulation de guerre.
   - Documenter la nouvelle architecture modulaire.
   - Lister les paramètres disponibles (remplacer `parameter_inventory.md`).
