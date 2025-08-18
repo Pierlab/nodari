@@ -98,7 +98,7 @@ Les transitions d'état sont déclenchées par des événements : `task_assigned
 
 La méthode `find_task()` sélectionne la ressource disponible la plus proche grâce au `PathfindingSystem` et assigne la cible en émettant `unit_move`.
 
-Voir `docs/workers.md` pour une documentation d'utilisation détaillée.
+Voir `workers.md` pour une documentation d'utilisation détaillée.
 
 ---
 
@@ -134,7 +134,7 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
   - `pygame_viewer.py` : backend existant.
   - `moderngl_viewer.py` : backend OpenGL pour de meilleures performances.
 - `run_war.py` accepte `--viewer` pour choisir l'implémentation.
-- Voir `docs/viewers.md` pour une comparaison de performances.
+- Voir `viewers.md` pour une comparaison de performances.
 
 ### `MovementSystem` et `TimeSystem`
 - Garantissent la cohérence des unités de temps et d'espace.
