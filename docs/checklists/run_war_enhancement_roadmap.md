@@ -6,10 +6,10 @@ configuration and UI improvements. Tasks are organized to fit Nodari's modular
 architecture as described in `docs/specs/project_spec.md`.
 
 ## 1. Combat Engagement Fix
-- [ ] Update movement/combat integration so opposing units stop and fight when
+- [x] Update movement/combat integration so opposing units stop and fight when
   entering the same tile.
-- [ ] Ensure combat blocks tiles for other units until resolution.
-- [ ] Add regression test verifying units no longer pass through each other.
+- [x] Ensure combat blocks tiles for other units until resolution.
+- [x] Add regression test verifying units no longer pass through each other.
 
 ## 2. Army AI and Movement
 - [ ] Implement cautious advance behaviour for generals and subordinate units:

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from math import atan2, cos, hypot, sin, pi
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Dict, Tuple
 import random
 
 from core.simnode import SystemNode, SimNode
@@ -10,6 +10,7 @@ from core.plugins import register_node_type
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
 from nodes.transform import TransformNode
+from nodes.nation import NationNode
 from systems.pathfinding import PathfindingSystem
 
 
@@ -106,16 +107,29 @@ class MovementSystem(SystemNode):
         return None
 
     # ------------------------------------------------------------------
+    def _get_nation(self, node: SimNode) -> NationNode | None:
+        cur = node.parent
+        while cur is not None:
+            if isinstance(cur, NationNode):
+                return cur
+            cur = cur.parent
+        return None
+
+    # ------------------------------------------------------------------
     def update(self, dt: float) -> None:
         self._resolve_terrain()
         self._resolve_pathfinder()
         blocked_tiles = set(self.obstacles)
-        if self.blocking:
-            for other in self._iter_units(self.parent or self):
-                if getattr(other, "state", "") == "fighting":
-                    tr = self._get_transform(other)
-                    if tr is not None:
-                        blocked_tiles.add((int(round(tr.position[0])), int(round(tr.position[1]))))
+        tile_units: Dict[Tuple[int, int], list[UnitNode]] = {}
+        for other in self._iter_units(self.parent or self):
+            tr = self._get_transform(other)
+            if tr is None:
+                continue
+            pos = (int(round(tr.position[0])), int(round(tr.position[1])))
+            tile_units.setdefault(pos, []).append(other)
+            if self.blocking and getattr(other, "state", "") == "fighting":
+                blocked_tiles.add(pos)
+
         for unit in self._iter_units(self.parent or self):
             if getattr(unit, "state", "") == "fighting":
                 continue
@@ -125,6 +139,10 @@ class MovementSystem(SystemNode):
             if transform is None:
                 continue
             tx, ty = transform.position
+            sx, sy = int(round(tx)), int(round(ty))
+            tile_units[sx, sy].remove(unit)
+            if not tile_units[sx, sy]:
+                del tile_units[sx, sy]
             if hasattr(unit, "_path") and unit._path:
                 gx, gy = unit._path[0]
             else:
@@ -154,10 +172,25 @@ class MovementSystem(SystemNode):
                 ny = ty + sin(angle) * step
                 new_x, new_y = nx, ny
             ix, iy = int(round(new_x)), int(round(new_y))
+            occupants = tile_units.get((ix, iy), [])
+            enemy = next(
+                (o for o in occupants if self._get_nation(o) != self._get_nation(unit)),
+                None,
+            )
+            if enemy is not None:
+                transform.position[0] = float(ix)
+                transform.position[1] = float(iy)
+                unit.target = [ix, iy]
+                unit.engage(enemy)
+                enemy.engage(unit)
+                tile_units.setdefault((ix, iy), []).append(unit)
+                blocked_tiles.add((ix, iy))
+                continue
             blocked = (ix, iy) in blocked_tiles or (
                 self.terrain is not None and self.terrain.is_obstacle(ix, iy)
             )
             if blocked:
+                tile_units.setdefault((sx, sy), []).append(unit)
                 if not self.avoid_obstacles or self.pathfinder is None:
                     continue
                 start = (int(round(tx)), int(round(ty)))
@@ -168,6 +201,7 @@ class MovementSystem(SystemNode):
                 continue
             transform.position[0] = new_x
             transform.position[1] = new_y
+            tile_units.setdefault((ix, iy), []).append(unit)
             unit.state = "moving"
             if hasattr(unit, "_path") and unit._path and (ix, iy) == unit._path[0]:
                 unit._path.pop(0)
