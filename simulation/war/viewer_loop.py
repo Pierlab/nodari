@@ -1,4 +1,5 @@
-"""Pygame viewer loop for the war simulation."""
+"""Viewer loop for the war simulation supporting multiple backends."""
+
 from __future__ import annotations
 
 import os
@@ -7,7 +8,7 @@ import pygame
 import config
 from simulation.war.presets import FOREST_LAYOUTS, MOUNTAIN_PRESETS, RIVER_WIDTH_PRESETS
 from simulation.war.terrain_setup import terrain_regen
-from simulation.war.ui import PygameViewerSystem
+from simulation.war.ui import ModernGLViewerSystem, PygameViewerSystem
 from simulation.war.war_loader import (
     load_plugins_for_war,
     reset_world,
@@ -16,8 +17,8 @@ from simulation.war.war_loader import (
 )
 
 
-def run() -> None:
-    """Run the interactive Pygame viewer for the war simulation."""
+def run(viewer: str = "pygame") -> None:
+    """Run the interactive viewer for the war simulation."""
 
     if "DISPLAY" not in os.environ and os.environ.get("SDL_VIDEODRIVER") is None:
         os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -26,7 +27,10 @@ def run() -> None:
     load_plugins_for_war()
     world, terrain_node, pathfinder = setup_world()
 
-    viewer = PygameViewerSystem(parent=world)
+    viewer_cls = PygameViewerSystem
+    if viewer == "moderngl":
+        viewer_cls = ModernGLViewerSystem
+    viewer = viewer_cls(parent=world)
     movement_system = None
 
     def _reset() -> None:
@@ -184,5 +188,6 @@ def run() -> None:
         viewer.process_events(events)
         dt = clock.tick(FPS) / 1000.0
         world.update(0 if paused else dt * TIME_SCALE)
+        viewer.render()
 
     pygame.quit()

@@ -5,7 +5,7 @@ import os
 import time
 import logging
 from math import atan2, cos, sin, pi, ceil
-from typing import Callable, Iterator, List, Optional, Tuple
+from typing import Any, Callable, Iterator, List, Optional, Tuple, Protocol
 
 import pygame
 
@@ -56,7 +56,20 @@ ROLE_RING_COLORS: dict[str, Tuple[int, int, int]] = {
 }
 
 
-class PygameViewerSystem(SystemNode):
+class Viewer(Protocol):
+    """Interface commune aux différents moteurs d'affichage."""
+
+    def process_events(self, events: List[Any]) -> None:
+        """Traiter les événements spécifiques au backend."""
+
+    def update(self, dt: float) -> None:
+        """Mettre à jour l'état interne sans effectuer de rendu."""
+
+    def render(self) -> None:
+        """Dessiner l'état courant à l'écran."""
+
+
+class PygameViewerSystem(SystemNode, Viewer):
     """Render simulation state using a simple Pygame window.
 
     Parameters
@@ -354,8 +367,12 @@ class PygameViewerSystem(SystemNode):
             (-int(self.offset_x * self.scale), -int(self.offset_y * self.scale)),
         )
 
-    def update(self, dt: float) -> None:  # noqa: D401 - inherit docstring
-        """Update the window and render state."""
+    def update(self, dt: float) -> None:  # noqa: D401 - part of Viewer
+        """Mettre à jour l'état interne sans rendu."""
+        pass
+
+    def render(self) -> None:
+        """Render the current simulation state."""
         start_time = time.perf_counter()
         self.screen.fill((30, 30, 30))
 
