@@ -33,3 +33,33 @@ def test_builder_creates_city_and_roads():
         if isinstance(child, BuildingNode) and child.type == "road"
     )
     assert road_positions == [[1, 0], [2, 0], [3, 0]]
+
+    # builder should resume exploration after construction
+    assert builder.state == "exploring"
+
+
+def test_builder_build_cities_respects_city_limit():
+    world = WorldNode(name="world")
+    terrain = TerrainNode(parent=world, tiles=[["plain"] * 10])
+    PathfindingSystem(parent=world, terrain=terrain)
+
+    last = BuildingNode(parent=world, type="capital")
+    TransformNode(parent=last, position=[0, 0])
+
+    builder = BuilderNode(parent=world)
+    cities = builder.build_cities([(4, 0), (8, 0)], last, max_cities=1)
+    assert len(cities) == 1
+    assert builder.state == "exploring"
+
+
+def test_builder_build_cities_respects_coverage_limit():
+    world = WorldNode(name="world")
+    terrain = TerrainNode(parent=world, tiles=[["plain"] * 10])
+    PathfindingSystem(parent=world, terrain=terrain)
+
+    last = BuildingNode(parent=world, type="capital")
+    TransformNode(parent=last, position=[0, 0])
+
+    builder = BuilderNode(parent=world)
+    cities = builder.build_cities([(4, 0), (8, 0)], last, max_coverage=5)
+    assert len(cities) == 1
