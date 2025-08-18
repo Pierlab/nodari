@@ -62,11 +62,15 @@ class PathfindingSystem(SystemNode):
         """
 
         self._resolve_terrain()
-        if self.terrain is None:
+        terrain = self.terrain
+        if terrain is None:
             return []
         blocked = blocked or set()
-        open_set: List[Tuple[float, Tuple[int, int]]] = []
-        heapq.heappush(open_set, (0.0, start))
+        get_neighbors = terrain.get_neighbors
+        is_obstacle = terrain.is_obstacle
+        get_speed = terrain.get_speed_modifier
+        heuristic = self._heuristic
+        open_set: List[Tuple[float, Tuple[int, int]]] = [(0.0, start)]
         came_from: Dict[Tuple[int, int], Tuple[int, int]] = {}
         g_score: Dict[Tuple[int, int], float] = {start: 0.0}
         while open_set:
@@ -78,17 +82,15 @@ class PathfindingSystem(SystemNode):
                     path.append(current)
                 path.reverse()
                 return path
-            for neighbor in self.terrain.get_neighbors(*current):
-                if neighbor in blocked or self.terrain.is_obstacle(*neighbor):
+            for neighbor in get_neighbors(*current):
+                if neighbor in blocked or is_obstacle(*neighbor):
                     continue
-                cost = 1.0 / self.terrain.get_speed_modifier(*neighbor)
-                tentative = g_score[current] + cost
+                tentative = g_score[current] + 1.0 / get_speed(*neighbor)
                 if tentative >= g_score.get(neighbor, float("inf")):
                     continue
                 came_from[neighbor] = current
                 g_score[neighbor] = tentative
-                f_score = tentative + self._heuristic(neighbor, goal)
-                heapq.heappush(open_set, (f_score, neighbor))
+                heapq.heappush(open_set, (tentative + heuristic(neighbor, goal), neighbor))
         return []
 
 

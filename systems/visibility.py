@@ -53,6 +53,7 @@ class VisibilitySystem(SystemNode):
         return None
 
     # ------------------------------------------------------------------
+
     def update(self, dt: float) -> None:
         """Recompute visibility and publish spotting events."""
 
@@ -61,7 +62,8 @@ class VisibilitySystem(SystemNode):
             return
 
         self._time += dt
-        self.visible_tiles.clear()
+        visible_tiles = self.visible_tiles
+        visible_tiles.clear()
 
         units: List[Tuple[UnitNode, TransformNode, NationNode]] = []
         for unit in self._iter_units(self.parent or self):
@@ -71,22 +73,22 @@ class VisibilitySystem(SystemNode):
                 continue
             units.append((unit, transform, nation))
 
-        # Compute visible tiles per nation
         for unit, transform, nation in units:
             radius = getattr(unit, "vision_radius_m", 0.0) / WORLD_SCALE_M
-            x0, y0 = int(round(transform.position[0])), int(round(transform.position[1]))
-            tiles = self.visible_tiles.setdefault(id(nation), set())
+            x0 = int(round(transform.position[0]))
+            y0 = int(round(transform.position[1]))
+            tiles = visible_tiles.setdefault(id(nation), set())
             r = int(round(radius))
+            r_sq = r * r
             for dx in range(-r, r + 1):
                 for dy in range(-r, r + 1):
-                    if dx * dx + dy * dy <= r * r:
+                    if dx * dx + dy * dy <= r_sq:
                         tiles.add((x0 + dx, y0 + dy))
 
-        # Spot enemies
         for unit, transform, nation in units:
             pos = (int(round(transform.position[0])), int(round(transform.position[1])))
-            for other_nation_id, tiles in self.visible_tiles.items():
-                if other_nation_id == id(nation):
+            for other_id, tiles in visible_tiles.items():
+                if other_id == id(nation):
                     continue
                 if pos in tiles:
                     payload = {
@@ -96,7 +98,6 @@ class VisibilitySystem(SystemNode):
                         "timestamp": self._time,
                         "confidence": 1.0,
                     }
-                    # Broadcast so strategists can hear it
                     self.emit("enemy_spotted", payload, direction="up")
 
 

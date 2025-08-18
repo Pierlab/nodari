@@ -6,6 +6,7 @@ import logging
 import math
 import os
 import random
+import pickle
 import sys
 
 import config
@@ -182,10 +183,24 @@ def _spawn_armies(
         general.add_child(army)
 
 
+
 def reset_world(world, pathfinder: PathfindingSystem | None = None) -> MovementSystem | None:
     """Reset terrain and spawn armies using current ``sim_params``."""
 
-    terrain_regen(world, sim_params["terrain"])
+    cache_path = os.environ.get("WAR_TERRAIN_CACHE")
+    if cache_path and os.path.exists(cache_path):
+        with open(cache_path, "rb") as fh:
+            data = pickle.load(fh)
+        terrain = next((c for c in world.children if isinstance(c, TerrainNode)), None)
+        if terrain is not None:
+            terrain.tiles = [bytearray(row) for row in data.get("tiles", [])]
+            terrain.obstacles = {tuple(o) for o in data.get("obstacles", [])}
+            terrain.altitude_map = data.get("altitude_map")
+            terrain.speed_modifiers.update(data.get("speed_modifiers", {}))
+            terrain.combat_bonuses.update(data.get("combat_bonuses", {}))
+            sim_params["terrain"] = data.get("params", {})
+    else:
+        terrain_regen(world, sim_params["terrain"])
     _spawn_armies(
         world,
         sim_params["dispersion"],
