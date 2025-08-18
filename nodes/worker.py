@@ -26,6 +26,7 @@ class WorkerNode(UnitNode):
         self._manual_update = True
         self.on_event("task_assigned", self._on_task_assigned)
         self.on_event("task_complete", self._on_task_complete)
+        self.emit("unit_idle", {}, direction="up")
 
     # ------------------------------------------------------------------
     def _find_scheduler(self) -> SchedulerSystem | None:
