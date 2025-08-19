@@ -8,7 +8,14 @@
     "visibility": true,
     "command_delay": 0.0,
     "movement_blocking": true,
-    "builder_spawn_interval": 0
+    "builder_spawn_interval": 0,
+    "city_influence_radius": 50,
+    "unit_speed": 1.0,
+    "initial_zoom": 1.0,
+    "map_width": 1000,
+    "map_height": 1000,
+    "build_duration": 7200.0,
+    "wander_drift": 0.1
   },
   "descriptions": {
     "dispersion": "Max distance from the nation's capital when spawning units (meters)",
@@ -19,6 +26,13 @@
     "visibility": "Enable fog of war via the VisibilitySystem",
     "command_delay": "Base seconds commands are delayed before reaching units",
     "movement_blocking": "Whether units block each other during movement",
-    "builder_spawn_interval": "Seconds between automatic builder spawns per nation"
+    "builder_spawn_interval": "Seconds between automatic builder spawns per nation",
+    "city_influence_radius": "Building influence radius affecting new city placement",
+    "unit_speed": "Base movement speed for all units",
+    "initial_zoom": "Initial zoom factor for the viewer",
+    "map_width": "Width of the world map in meters",
+    "map_height": "Height of the world map in meters",
+    "build_duration": "Construction time for a city in seconds",
+    "wander_drift": "Random directional drift applied during wandering"
   }
 }
