@@ -42,30 +42,6 @@
             "children": [
               { "type": "TransformNode", "config": { "position": [500, 500] } }
             ]
-          },
-          {
-            "type": "BuilderNode",
-            "id": "builder1",
-            "config": { "speed": 10.0 },
-            "children": [
-              { "type": "TransformNode", "config": { "position": [500, 500] } }
-            ]
-          },
-          {
-            "type": "BuilderNode",
-            "id": "builder2",
-            "config": { "speed": 10.0 },
-            "children": [
-              { "type": "TransformNode", "config": { "position": [500, 500] } }
-            ]
-          },
-          {
-            "type": "BuilderNode",
-            "id": "builder3",
-            "config": { "speed": 10.0 },
-            "children": [
-              { "type": "TransformNode", "config": { "position": [500, 500] } }
-            ]
           }
         ]
       }
