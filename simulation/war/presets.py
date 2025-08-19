@@ -10,6 +10,8 @@ DEFAULT_SIM_PARAMS = {
     "movement_blocking": True,
 
     "city_influence_radius": 50,
+    "capital_min_radius": 100,
+    "build_duration": 5.0,
 
     # Random wander parameters for idle units
     "wander_drift": 0.1,

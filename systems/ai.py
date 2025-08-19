@@ -31,6 +31,7 @@ class AISystem(SystemNode):
 
       
         builder_spawn_interval: float = 0.0,
+        build_duration: float = 0.0,
 
       
         **kwargs,
@@ -46,8 +47,11 @@ class AISystem(SystemNode):
         self.builder_spawn_interval = builder_spawn_interval
         self._spawn_acc = 0.0
 
-        
+        self.build_duration = build_duration
+
+
         self.on_event("unit_idle", self._on_unit_idle)
+        self.on_event("city_built", self._on_city_built)
         self._last_city: dict[int, SimNode] = {}
         self._init_last_cities()
 
@@ -67,6 +71,7 @@ class AISystem(SystemNode):
                         state="exploring",
                         speed=1.0,
                         morale=100,
+                        build_duration=self.build_duration,
                     )
                     builder.add_child(
                         TransformNode(position=list(nation.capital_position))
@@ -117,13 +122,7 @@ class AISystem(SystemNode):
                         break
                 if too_close:
                     continue
-                city = unit.build_city([x, y], last, emit_idle=False)
-                if city is not None:
-                    self._last_city[key] = city
-                    unit.emit("unit_idle", {}, direction="up")
-                    last_tr = self._get_transform(city)
-                    lx = int(round(last_tr.position[0])) if last_tr else lx
-                    ly = int(round(last_tr.position[1])) if last_tr else ly
+                unit.begin_construction((x, y), last)
         super().update(dt)
 
     # ------------------------------------------------------------------
@@ -178,13 +177,19 @@ class AISystem(SystemNode):
                                 too_close = True
                                 break
                         if not too_close:
-                            city = origin.build_city([x0, y0], last, emit_idle=False)
-                            if city is not None:
-                                self._last_city[key] = city
-                                origin.emit("unit_idle", {}, direction="up")
+                            origin.begin_construction((x0, y0), last)
                             return
         origin.state = "exploring"
         origin.target = None
+
+    # ------------------------------------------------------------------
+    def _on_city_built(self, origin: SimNode, _event: str, payload: dict) -> None:
+        if not isinstance(origin, BuilderNode):
+            return
+        nation = self._get_nation(origin)
+        city = payload.get("city")
+        if nation is not None and isinstance(city, BuildingNode):
+            self._last_city[id(nation)] = city
 
     # ------------------------------------------------------------------
     def _get_transform(self, node: SimNode) -> TransformNode | None:

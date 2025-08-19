@@ -8,6 +8,8 @@ from nodes.nation import NationNode
 from nodes.terrain import TerrainNode
 from systems.ai import AISystem
 from systems.movement import MovementSystem
+from systems.pathfinding import PathfindingSystem
+from systems.scheduler import SchedulerSystem
 
 
 def test_idle_worker_explores_unknown_tiles():
@@ -48,11 +50,25 @@ def test_ai_respects_capital_radius_and_free_tiles():
 
 def test_builder_constructs_city_when_idle_far_from_last():
     world = WorldNode(width=20, height=20)
-    nation = NationNode(parent=world, morale=100, capital_position=[0, 0])
-    builder = BuilderNode(parent=nation, state="idle")
+    terrain = TerrainNode(parent=world, tiles=[[0] * 20 for _ in range(20)])
+    PathfindingSystem(parent=world, terrain=terrain)
+    MovementSystem(parent=world, terrain=terrain)
+    SchedulerSystem(parent=world)
+    nation = NationNode(
+        parent=world, morale=100, capital_position=[0, 0], city_influence_radius=1
+    )
+    builder = BuilderNode(parent=nation, state="idle", build_duration=1.0)
     TransformNode(parent=builder, position=[3, 0])
-    ai = AISystem(parent=world, exploration_radius=2, capital_min_radius=2)
+    ai = AISystem(
+        parent=world,
+        exploration_radius=2,
+        capital_min_radius=2,
+        build_duration=1.0,
+        city_influence_radius=1,
+    )
     builder.emit("unit_idle", {})
+    for _ in range(4):
+        world.update(1.0)
     cities = [c for c in world.children if isinstance(c, BuildingNode) and c.type == "city"]
     positions = []
     for city in cities:
@@ -60,6 +76,14 @@ def test_builder_constructs_city_when_idle_far_from_last():
             if isinstance(child, TransformNode):
                 positions.append(child.position)
     assert [3, 0] in positions
+    tr = next(c for c in builder.children if isinstance(c, TransformNode))
+    assert tr.position == [0.0, 0.0]
+    road_positions = sorted(
+        child.children[0].position
+        for child in world.children
+        if isinstance(child, BuildingNode) and child.type == "road"
+    )
+    assert road_positions == [[1, 0], [2, 0]]
     assert builder.state == "exploring"
 
 
@@ -135,14 +159,29 @@ def test_builder_respects_city_influence_radius():
 
 def test_exploring_builder_auto_builds_new_city():
     world = WorldNode(width=20, height=20)
-    nation = NationNode(parent=world, morale=100, capital_position=[0, 0])
-    builder = BuilderNode(parent=nation, state="exploring")
+    terrain = TerrainNode(parent=world, tiles=[[0] * 20 for _ in range(20)])
+    PathfindingSystem(parent=world, terrain=terrain)
+    MovementSystem(parent=world, terrain=terrain)
+    SchedulerSystem(parent=world)
+    nation = NationNode(
+        parent=world, morale=100, capital_position=[0, 0], city_influence_radius=1
+    )
+    builder = BuilderNode(parent=nation, state="exploring", build_duration=1.0)
     TransformNode(parent=builder, position=[3, 0])
-    ai = AISystem(parent=world, exploration_radius=2, capital_min_radius=2)
+    ai = AISystem(
+        parent=world,
+        exploration_radius=2,
+        capital_min_radius=2,
+        build_duration=1.0,
+        city_influence_radius=1,
+    )
 
     # During update the builder has moved outside the influence of the capital
-    # and should establish a new city automatically.
+    # and should begin constructing a new city.
     ai.update(1.0)
+
+    for _ in range(5):
+        world.update(1.0)
 
     positions = [
         child.position
