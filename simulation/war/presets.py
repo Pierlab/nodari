@@ -8,7 +8,12 @@ DEFAULT_SIM_PARAMS = {
     "bodyguard_size": 5,
     "vision_radius_m": 100.0,
     "movement_blocking": True,
+
     "city_influence_radius": 50,
+
+    # Interval in seconds between automatic builder spawns per nation
+    "builder_spawn_interval": 0.0,
+
 }
 
 RIVER_WIDTH_PRESETS = [(2, 5), (4, 8), (8, 14)]
