@@ -104,14 +104,9 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
     sim_params["terrain"] = terrain_params
 
     ai.city_influence_radius = sim_params.get("city_influence_radius", 0)
+    ai.builder_spawn_interval = sim_params.get("builder_spawn_interval", 0.0)
     for nation in [n for n in world.children if isinstance(n, NationNode)]:
         nation.city_influence_radius = sim_params.get("city_influence_radius", 0)
-
-    AISystem(
-        parent=world,
-        capital_min_radius=100,
-        builder_spawn_interval=sim_params.get("builder_spawn_interval", 0.0),
-    )
 
 
     return world, terrain_node, pathfinder
