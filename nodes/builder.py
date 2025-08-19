@@ -84,12 +84,26 @@ class BuilderNode(WorkerNode):
         self.state = "building"
         self._build_position = (int(round(position[0])), int(round(position[1])))
         self._build_origin = origin
-        origin_tr = self._get_transform(origin)
-        self._home_tile = (
-            (int(round(origin_tr.position[0])), int(round(origin_tr.position[1])))
-            if origin_tr is not None
-            else None
-        )
+        # Builders always return to their nation's capital once construction
+        # completes.  Store the capital tile as the home location so the unit
+        # can head back there after raising a new city.
+        nation: NationNode | None = None
+        cur = self.parent
+        while cur is not None:
+            if isinstance(cur, NationNode):
+                nation = cur
+                break
+            cur = cur.parent
+        if nation is not None:
+            cx, cy = nation.capital_position
+            self._home_tile = (int(round(cx)), int(round(cy)))
+        else:  # pragma: no cover - fallback when nation is missing
+            origin_tr = self._get_transform(origin)
+            self._home_tile = (
+                (int(round(origin_tr.position[0])), int(round(origin_tr.position[1])))
+                if origin_tr is not None
+                else None
+            )
         self._build_elapsed = 0.0
         scheduler = self._find_scheduler()
         if scheduler is not None:
@@ -259,20 +273,16 @@ class BuilderNode(WorkerNode):
                     self.emit("city_built", {"city": city}, direction="up")
                     pathfinder = self._find_pathfinder()
                     start_tr = self._get_transform(city)
-                    origin_tr = self._get_transform(self._build_origin)
                     if (
                         pathfinder is not None
                         and start_tr is not None
-                        and origin_tr is not None
+                        and self._home_tile is not None
                     ):
                         start = (
                             int(round(start_tr.position[0])),
                             int(round(start_tr.position[1])),
                         )
-                        goal = (
-                            int(round(origin_tr.position[0])),
-                            int(round(origin_tr.position[1])),
-                        )
+                        goal = self._home_tile
                         path = pathfinder.find_path(start, goal)
                         if path:
                             self._path = path[1:]
