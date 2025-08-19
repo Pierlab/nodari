@@ -1,6 +1,7 @@
 """Simple AI system reacting to idle units."""
 from __future__ import annotations
 
+import logging
 import random
 
 from core.simnode import SystemNode, SimNode
@@ -13,6 +14,8 @@ from nodes.nation import NationNode
 from nodes.unit import UnitNode
 from nodes.terrain import TerrainNode
 from systems.visibility import VisibilitySystem
+
+logger = logging.getLogger(__name__)
 
 
 class AISystem(SystemNode):
@@ -69,7 +72,8 @@ class AISystem(SystemNode):
                         TransformNode(position=list(nation.capital_position))
                     )
                     nation.add_child(builder)
-                    builder.emit("unit_idle", {})
+                    logger.info("Spawned builder %s for %s", builder.name, nation.name)
+                    builder.emit("unit_idle", {}, direction="up")
         super().update(dt)
 
     # ------------------------------------------------------------------
@@ -147,6 +151,7 @@ class AISystem(SystemNode):
                 origin.target = [pos[0], pos[1]]
                 origin.state = "moving"
                 origin.emit("unit_move", {"to": origin.target}, direction="up")
+                logger.info("%s moving to %s", getattr(origin, "name", "unit"), origin.target)
                 return
         # fallback random move if everything explored
         for _ in range(10):
@@ -160,6 +165,7 @@ class AISystem(SystemNode):
             origin.target = [pos[0], pos[1]]
             origin.state = "moving"
             origin.emit("unit_move", {"to": origin.target}, direction="up")
+            logger.info("%s moving to %s", getattr(origin, "name", "unit"), origin.target)
             return
 
     # ------------------------------------------------------------------

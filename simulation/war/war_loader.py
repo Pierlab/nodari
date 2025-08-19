@@ -20,6 +20,7 @@ from simulation.war.nodes import (
 )
 from nodes.builder import BuilderNode
 from systems.ai import AISystem
+from systems.scheduler import SchedulerSystem
 from simulation.war.presets import DEFAULT_SIM_PARAMS
 from simulation.war.systems import MovementSystem, PathfindingSystem
 from simulation.war.terrain_setup import terrain_regen
@@ -56,6 +57,7 @@ def load_plugins_for_war() -> None:
             "systems.victory",
             "systems.time",
             "systems.logger",
+            "systems.scheduler",
             "systems.ai",
         ]
     )
@@ -85,6 +87,12 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
         capital_min_radius=100,
         city_influence_radius=sim_params.get("city_influence_radius", 0),
     )
+
+    # Ensure a SchedulerSystem is present so that newly spawned workers can be
+    # registered for periodic updates. If one is already defined in the config
+    # file it is reused, otherwise we create it here.
+    if not any(isinstance(c, SchedulerSystem) for c in world.children):
+        SchedulerSystem(parent=world)
 
 
     terrain_node = next((c for c in world.children if isinstance(c, TerrainNode)), None)
@@ -150,7 +158,7 @@ def _spawn_armies(
             )
             builder.add_child(TransformNode(position=list(center)))
             nation.add_child(builder)
-            builder.emit("unit_idle", {})
+            builder.emit("unit_idle", {}, direction="up")
 
 
 
