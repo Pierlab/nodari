@@ -82,7 +82,7 @@ class AISystem(SystemNode):
             key = id(nation)
             if key in self._last_city:
                 continue
-            city = BuildingNode(parent=root, type="city")
+            city = BuildingNode(type="city")
             TransformNode(parent=city, position=list(nation.capital_position))
             self._last_city[key] = city
 
@@ -101,10 +101,7 @@ class AISystem(SystemNode):
                 key = id(nation)
                 last = self._last_city.get(key)
                 if last is None:
-                    root = self
-                    while root.parent is not None:
-                        root = root.parent
-                    last = BuildingNode(parent=root, type="city")
+                    last = BuildingNode(type="city")
                     TransformNode(parent=last, position=list(nation.capital_position))
                     self._last_city[key] = last
                 last_tr = self._get_transform(last)
