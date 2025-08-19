@@ -100,6 +100,10 @@ La méthode `find_task()` sélectionne la ressource disponible la plus proche gr
 
 Voir `workers.md` pour une documentation d'utilisation détaillée.
 
+### `BuilderNode`
+Spécialisation de `WorkerNode` capable de fonder des villes et de relier les routes.
+L'`AISystem` peut en créer automatiquement à intervalles réguliers.
+
 ---
 
 ## Systèmes
@@ -116,9 +120,13 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
 ### `SchedulerSystem`
 - Exécute les mises à jour d'unités selon un intervalle (`n` secondes) au lieu de chaque tick.
 - Les ouvriers inactifs sont désinscrits du scheduler.
+- Les unités ajoutées dynamiquement sont inscrites dès qu'une tâche leur est assignée.
 
 ### `AISystem`
 - Réagit à `unit_idle` pour chercher une nouvelle tâche via `find_task()`.
+- Peut générer un `BuilderNode` à la capitale de chaque nation toutes les
+  `builder_spawn_interval` secondes et émet immédiatement `unit_idle` pour
+  qu'il soit pris en charge.
 - Stratégies :
   - **Recherche de ressource** la plus proche en utilisant `systems.pathfinding`.
   - **Exploration** de coordonnées inconnues dans un rayon donné en émettant `unit_move`.

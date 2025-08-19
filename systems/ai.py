@@ -22,14 +22,41 @@ class AISystem(SystemNode):
         self,
         exploration_radius: int = 5,
         capital_min_radius: int = 0,
+        builder_spawn_interval: float = 0.0,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.exploration_radius = exploration_radius
         self.capital_min_radius = capital_min_radius
+        self.builder_spawn_interval = builder_spawn_interval
+        self._spawn_acc = 0.0
         self.on_event("unit_idle", self._on_unit_idle)
         self._last_city: dict[int, SimNode] = {}
         self._init_last_cities()
+
+    # ------------------------------------------------------------------
+    def update(self, dt: float) -> None:
+        if self.builder_spawn_interval > 0:
+            self._spawn_acc += dt
+            if self._spawn_acc >= self.builder_spawn_interval:
+                self._spawn_acc -= self.builder_spawn_interval
+                root = self
+                while root.parent is not None:
+                    root = root.parent
+                for nation in self._iter_nations(root):
+                    count = sum(1 for c in nation.children if isinstance(c, BuilderNode))
+                    builder = BuilderNode(
+                        name=f"{nation.name}_builder_{count + 1}",
+                        state="exploring",
+                        speed=1.0,
+                        morale=100,
+                    )
+                    builder.add_child(
+                        TransformNode(position=list(nation.capital_position))
+                    )
+                    nation.add_child(builder)
+                    builder.emit("unit_idle", {})
+        super().update(dt)
 
     # ------------------------------------------------------------------
     def _init_last_cities(self) -> None:
