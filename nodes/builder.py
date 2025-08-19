@@ -14,7 +14,25 @@ from nodes.nation import NationNode
 class BuilderNode(WorkerNode):
     """Worker specialised in constructing cities and connecting roads."""
 
-    def __init__(self, build_duration: float = 5.0, **kwargs) -> None:
+    def __init__(self, build_duration: float | None = None, **kwargs) -> None:
+        """Initialize the builder.
+
+        Parameters
+        ----------
+        build_duration:
+            Construction time in seconds. When ``None`` the value is read from
+            the global ``sim_params`` if available, otherwise defaults to 7200
+            seconds (two simulated hours).
+        """
+
+        if build_duration is None:
+            try:  # pragma: no cover - best effort fallback
+                from simulation.war.war_loader import sim_params
+
+                build_duration = sim_params.get("build_duration", 7200.0)
+            except Exception:  # pragma: no cover - sim params not available
+                build_duration = 7200.0
+
         super().__init__(**kwargs)
         self.build_duration = build_duration
         self._build_elapsed = 0.0
@@ -239,12 +257,14 @@ class BuilderNode(WorkerNode):
                     TransformNode(parent=road, position=[tile[0], tile[1]])
                     self._last_tile = tile
                 if tile == self._home_tile:
-                    self._returning = False
                     scheduler = self._find_scheduler()
                     if scheduler is not None:
                         scheduler.unschedule(self)
-                    self.state = "exploring"
-                    self.emit("unit_idle", {}, direction="up")
+                    self._returning = False
+                    parent = self.parent
+                    if parent is not None:
+                        parent.remove_child(self)
+                    return
         elif self.state == "idle":
             scheduler = self._find_scheduler()
             if scheduler is not None:

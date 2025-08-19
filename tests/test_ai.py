@@ -76,15 +76,14 @@ def test_builder_constructs_city_when_idle_far_from_last():
             if isinstance(child, TransformNode):
                 positions.append(child.position)
     assert [3, 0] in positions
-    tr = next(c for c in builder.children if isinstance(c, TransformNode))
-    assert tr.position == [0.0, 0.0]
     road_positions = sorted(
         child.children[0].position
         for child in world.children
         if isinstance(child, BuildingNode) and child.type == "road"
     )
     assert road_positions == [[1, 0], [2, 0]]
-    assert builder.state == "exploring"
+    assert builder.parent is None
+    assert builder not in nation.children
 
 
 def test_build_city_resets_state_and_emits_idle():
