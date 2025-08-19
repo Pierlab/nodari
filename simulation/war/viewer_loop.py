@@ -53,7 +53,7 @@ def run(viewer: str = "pygame") -> None:
     TIME_SCALE = config.TIME_SCALE
     clock = pygame.time.Clock()
 
-    paused = False
+    paused = True
     running = True
     while running and pygame.get_init():
         events = pygame.event.get()

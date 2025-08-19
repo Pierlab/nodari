@@ -167,7 +167,7 @@ def _spawn_armies(
 
 
 def reset_world(world, pathfinder: PathfindingSystem | None = None) -> MovementSystem | None:
-    """Reset terrain and spawn armies using current ``sim_params``."""
+    """Reset terrain using current ``sim_params`` without spawning armies."""
 
     cache_path = os.environ.get("WAR_TERRAIN_CACHE")
     if cache_path and os.path.exists(cache_path):
@@ -183,13 +183,7 @@ def reset_world(world, pathfinder: PathfindingSystem | None = None) -> MovementS
             sim_params["terrain"] = data.get("params", {})
     else:
         terrain_regen(world, sim_params["terrain"])
-    _spawn_armies(
-        world,
-        sim_params["dispersion"],
-        sim_params["soldiers_per_dot"],
-        sim_params["bodyguard_size"],
-        pathfinder,
-    )
+    # Armies are no longer spawned automatically to start with an empty world
     movement_system = next((c for c in world.children if isinstance(c, MovementSystem)), None)
     if movement_system:
         movement_system.set_blocking(sim_params.get("movement_blocking", True))
