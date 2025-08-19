@@ -120,6 +120,27 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
     return world, terrain_node, pathfinder
 
 
+def spawn_builder(world) -> BuilderNode | None:
+    """Spawn a :class:`BuilderNode` at the capital of the main nation."""
+
+    nation = next((c for c in world.children if isinstance(c, NationNode)), None)
+    if nation is None:
+        return None
+
+    capital = getattr(nation, "capital_position", [world.width / 2, world.height / 2])
+    count = sum(1 for c in nation.children if isinstance(c, BuilderNode))
+    builder = BuilderNode(
+        name=f"{nation.name}_builder_{count + 1}",
+        state="exploring",
+        speed=1.0,
+        morale=100,
+    )
+    builder.add_child(TransformNode(position=list(capital)))
+    nation.add_child(builder)
+    builder.emit("unit_idle", {}, direction="up")
+    return builder
+
+
 def _spawn_armies(
     world,
     dispersion_radius: float,
