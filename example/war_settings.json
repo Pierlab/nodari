@@ -8,7 +8,7 @@
     "visibility": true,
     "command_delay": 0.0,
     "movement_blocking": true,
-    "builder_spawn_interval": 5.0
+    "builder_spawn_interval": 0
   },
   "descriptions": {
     "dispersion": "Max distance from the nation's capital when spawning units (meters)",
