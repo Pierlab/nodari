@@ -43,6 +43,43 @@ class BuilderNode(WorkerNode):
         self._returning = False
 
     # ------------------------------------------------------------------
+    def _direct_path(
+        self, start: tuple[int, int], goal: tuple[int, int]
+    ) -> list[tuple[int, int]]:
+        """Return a straight-line path between ``start`` and ``goal``.
+
+        Uses a simple Bresenham-like algorithm to generate intermediate
+        coordinates so roads can be laid without the pathfinding system.
+        """
+
+        x1, y1 = start
+        x2, y2 = goal
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+        sx = 1 if x2 >= x1 else -1
+        sy = 1 if y2 >= y1 else -1
+        path = [(x1, y1)]
+        if dx > dy:
+            err = dx / 2.0
+            while x1 != x2:
+                x1 += sx
+                err -= dy
+                if err < 0:
+                    y1 += sy
+                    err += dx
+                path.append((x1, y1))
+        else:
+            err = dy / 2.0
+            while y1 != y2:
+                y1 += sy
+                err -= dx
+                if err < 0:
+                    x1 += sx
+                    err += dy
+                path.append((x1, y1))
+        return path
+
+    # ------------------------------------------------------------------
     def begin_construction(self, position: tuple[int, int], origin: SimNode) -> None:
         self.state = "building"
         self._build_position = (int(round(position[0])), int(round(position[1])))
@@ -112,22 +149,27 @@ class BuilderNode(WorkerNode):
                         self.emit("unit_idle", {}, direction="up")
                     return None
 
+        start = (
+            int(round(start_tr.position[0])),
+            int(round(start_tr.position[1])),
+        )
+
         # Compute path using the existing pathfinding system if available
         pathfinder = self._find_pathfinder()
         path: list[tuple[int, int]] = []
         if pathfinder is not None:
-            start = (
-                int(round(start_tr.position[0])),
-                int(round(start_tr.position[1])),
-            )
             path = pathfinder.find_path(start, (goal_x, goal_y))
+
+        # Fallback to a straight line if no pathfinder or empty path
+        if not path or len(path) <= 2:
+            path = self._direct_path(start, (goal_x, goal_y))
 
         # Create the city at the goal position
         city = BuildingNode(parent=root, type="city")
         TransformNode(parent=city, position=[goal_x, goal_y])
 
         # Create road segments along the path (excluding endpoints)
-        if build_roads and len(path) > 2:
+        if build_roads:
             for x, y in path[1:-1]:
                 road = BuildingNode(parent=root, type="road")
                 TransformNode(parent=road, position=[x, y])
