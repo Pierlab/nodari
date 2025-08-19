@@ -26,14 +26,15 @@ class AISystem(SystemNode):
         exploration_radius: int = 5,
         capital_min_radius: int = 0,
 
-      
+
         city_influence_radius: int = 0,
 
-      
+
         builder_spawn_interval: float = 0.0,
         build_duration: float = 0.0,
+        unit_speed: float = 1.0,
 
-      
+
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -48,6 +49,7 @@ class AISystem(SystemNode):
         self._spawn_acc = 0.0
 
         self.build_duration = build_duration
+        self.unit_speed = unit_speed
 
 
         self.on_event("unit_idle", self._on_unit_idle)
@@ -69,7 +71,7 @@ class AISystem(SystemNode):
                     builder = BuilderNode(
                         name=f"{nation.name}_builder_{count + 1}",
                         state="exploring",
-                        speed=1.0,
+                        speed=self.unit_speed,
                         morale=100,
                         build_duration=self.build_duration,
                     )

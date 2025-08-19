@@ -8,10 +8,13 @@ DEFAULT_SIM_PARAMS = {
     "bodyguard_size": 5,
     "vision_radius_m": 100.0,
     "movement_blocking": True,
-
     "city_influence_radius": 50,
     "capital_min_radius": 100,
     "build_duration": 5.0,
+    "unit_speed": 1.0,
+    "initial_zoom": 1.0,
+    "map_width": 1000,
+    "map_height": 1000,
 
     # Random wander parameters for idle units
     "wander_drift": 0.1,

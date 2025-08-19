@@ -12,6 +12,7 @@ from simulation.war.war_loader import (
     spawn_builder,
     reset_world,
     setup_world,
+    sim_params,
 )
 
 
@@ -42,9 +43,13 @@ def run(viewer: str = "pygame") -> None:
     _reset()
 
     # Center the view on the world by default
-    scale_x = viewer.view_width / world.width
-    scale_y = viewer.view_height / world.height
-    viewer.scale = min(scale_x, scale_y)
+    init_zoom = sim_params.get("initial_zoom")
+    if init_zoom is None:
+        scale_x = viewer.view_width / world.width
+        scale_y = viewer.view_height / world.height
+        viewer.scale = min(scale_x, scale_y)
+    else:
+        viewer.scale = init_zoom
     viewer.unit_radius = 10
     viewer.draw_capital = True
     viewer.offset_x = world.width / 2 - viewer.view_width / (2 * viewer.scale)

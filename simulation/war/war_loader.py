@@ -87,6 +87,7 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
         capital_min_radius=sim_params.get("capital_min_radius", 0),
         city_influence_radius=sim_params.get("city_influence_radius", 0),
         build_duration=sim_params.get("build_duration", 0.0),
+        unit_speed=sim_params.get("unit_speed", 1.0),
     )
 
     # Ensure a SchedulerSystem is present so that newly spawned workers can be
@@ -102,6 +103,7 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
     terrain_params.setdefault("mountains", {"total_area_pct": 5, "perlin_scale": 0.01, "peak_density": 0.2})
     terrain_params.setdefault("swamp_desert", {"swamp_pct": 3, "desert_pct": 5, "clumpiness": 0.5})
 
+    movement_system = next((c for c in world.children if isinstance(c, MovementSystem)), None)
     pathfinder = next((c for c in world.children if isinstance(c, PathfindingSystem)), None)
     if pathfinder is None:
         pathfinder = PathfindingSystem(parent=world, terrain=terrain_node)
@@ -112,9 +114,24 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
     sim_params.update(load_sim_params(settings_file))
     sim_params["terrain"] = terrain_params
 
+    world.width = sim_params.get("map_width", world.width)
+    world.height = sim_params.get("map_height", world.height)
+    terrain_regen(world, terrain_params)
+
     ai.city_influence_radius = sim_params.get("city_influence_radius", 0)
     ai.builder_spawn_interval = sim_params.get("builder_spawn_interval", 0.0)
     ai.build_duration = sim_params.get("build_duration", 0.0)
+    ai.unit_speed = sim_params.get("unit_speed", ai.unit_speed)
+
+    if movement_system:
+        movement_system.set_blocking(sim_params.get("movement_blocking", True))
+        movement_system.wander_drift = sim_params.get(
+            "wander_drift", movement_system.wander_drift
+        )
+        movement_system.wander_speed = sim_params.get(
+            "unit_speed", movement_system.wander_speed
+        )
+
     for nation in [n for n in world.children if isinstance(n, NationNode)]:
         nation.city_influence_radius = sim_params.get("city_influence_radius", 0)
 
@@ -134,7 +151,7 @@ def spawn_builder(world) -> BuilderNode | None:
     builder = BuilderNode(
         name=f"{nation.name}_builder_{count + 1}",
         state="exploring",
-        speed=1.0,
+        speed=sim_params.get("unit_speed", 1.0),
         morale=100,
         build_duration=sim_params.get("build_duration", 0.0),
     )
@@ -181,7 +198,7 @@ def _spawn_armies(
             builder = BuilderNode(
                 name=f"{nation.name}_builder_{i+1}",
                 state="exploring",
-                speed=1.0,
+                speed=sim_params.get("unit_speed", 1.0),
                 morale=100,
                 build_duration=sim_params.get("build_duration", 0.0),
             )
@@ -213,5 +230,7 @@ def reset_world(world, pathfinder: PathfindingSystem | None = None) -> MovementS
     if movement_system:
         movement_system.set_blocking(sim_params.get("movement_blocking", True))
         movement_system.wander_drift = sim_params.get("wander_drift", movement_system.wander_drift)
-        movement_system.wander_speed = sim_params.get("wander_speed", movement_system.wander_speed)
+        movement_system.wander_speed = sim_params.get(
+            "unit_speed", sim_params.get("wander_speed", movement_system.wander_speed)
+        )
     return movement_system
