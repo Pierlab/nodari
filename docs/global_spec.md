@@ -152,6 +152,10 @@ Les systèmes encapsulent des règles de jeu spécifiques et écoutent les messa
 - Détecte la capture de la capitale et l'effondrement moral.
 - Écoute `building_destroyed` pour déclarer la défaite lorsqu'un bâtiment stratégique est perdu.
 
+### Croissance du royaume
+- Chaque nation maintient une liste `cities_positions` contenant les coordonnées de toutes ses cités, capitale incluse.
+- La construction d'une nouvelle cité est refusée si elle se trouve à moins de `city_influence_radius` d'une cité existante.
+
 ---
 
 ## Événements principaux

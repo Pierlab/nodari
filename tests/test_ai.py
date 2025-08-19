@@ -75,6 +75,26 @@ def test_build_city_resets_state_and_emits_idle():
     assert builder in events
 
 
+def test_build_city_refuses_within_influence_radius():
+    world = WorldNode(width=10, height=10)
+    nation = NationNode(
+        parent=world, morale=100, capital_position=[0, 0], city_influence_radius=5
+    )
+    builder = BuilderNode(parent=nation, state="building")
+    TransformNode(parent=builder, position=[1, 0])
+    last = BuildingNode(parent=world, type="city")
+    TransformNode(parent=last, position=[0, 0])
+
+    events: list[SimNode] = []
+    world.on_event("unit_idle", lambda origin, _e, _p: events.append(origin))
+
+    result = builder.build_city([3, 0], last)
+
+    assert result is None
+    assert builder.state == "exploring"
+    assert builder in events
+
+
 def test_ai_initializes_last_city_with_capital():
     world = WorldNode(width=20, height=20)
     nation = NationNode(parent=world, morale=100, capital_position=[5, 5])
@@ -84,3 +104,27 @@ def test_ai_initializes_last_city_with_capital():
     tr = next((c for c in last.children if isinstance(c, TransformNode)), None)
     assert tr is not None
     assert tr.position == [5, 5]
+
+
+def test_builder_respects_city_influence_radius():
+    world = WorldNode(width=20, height=20)
+    nation = NationNode(
+        parent=world, morale=100, capital_position=[0, 0], city_influence_radius=5
+    )
+    builder = BuilderNode(parent=nation, state="idle")
+    TransformNode(parent=builder, position=[3, 0])
+    ai = AISystem(
+        parent=world,
+        exploration_radius=2,
+        capital_min_radius=2,
+        city_influence_radius=5,
+    )
+    builder.emit("unit_idle", {})
+    cities = [c for c in world.children if isinstance(c, BuildingNode) and c.type == "city"]
+    positions = []
+    for city in cities:
+        for child in city.children:
+            if isinstance(child, TransformNode):
+                positions.append(child.position)
+    assert [3, 0] not in positions
+    assert builder.state == "moving"
