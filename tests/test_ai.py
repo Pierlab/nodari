@@ -131,3 +131,25 @@ def test_builder_respects_city_influence_radius():
                 positions.append(child.position)
     assert [3, 0] not in positions
     assert builder.state == "exploring"
+
+
+def test_exploring_builder_auto_builds_new_city():
+    world = WorldNode(width=20, height=20)
+    nation = NationNode(parent=world, morale=100, capital_position=[0, 0])
+    builder = BuilderNode(parent=nation, state="exploring")
+    TransformNode(parent=builder, position=[3, 0])
+    ai = AISystem(parent=world, exploration_radius=2, capital_min_radius=2)
+
+    # During update the builder has moved outside the influence of the capital
+    # and should establish a new city automatically.
+    ai.update(1.0)
+
+    positions = [
+        child.position
+        for city in world.children
+        if isinstance(city, BuildingNode) and city.type == "city"
+        for child in city.children
+        if isinstance(child, TransformNode)
+    ]
+    assert [3, 0] in positions
+    assert (3.0, 0.0) in nation.cities_positions

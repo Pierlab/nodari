@@ -74,6 +74,56 @@ class AISystem(SystemNode):
                     nation.add_child(builder)
                     logger.info("Spawned builder %s for %s", builder.name, nation.name)
                     builder.emit("unit_idle", {}, direction="up")
+        # After potentially spawning builders, check all existing builders that
+        # are currently exploring to see whether they should establish a new
+        # city.  A builder found outside the cumulative influence of all
+        # existing cities will immediately construct a new one and extend the
+        # nation's influence area.
+        root = self
+        while root.parent is not None:
+            root = root.parent
+        for nation in self._iter_nations(root):
+            key = id(nation)
+            last = self._last_city.get(key)
+            if last is None:
+                # Fallback to the capital if the last city tracking was lost
+                last = BuildingNode(type="city")
+                TransformNode(parent=last, position=list(nation.capital_position))
+                self._last_city[key] = last
+            last_tr = self._get_transform(last)
+            if last_tr is None:
+                continue
+            lx = int(round(last_tr.position[0]))
+            ly = int(round(last_tr.position[1]))
+            radius = getattr(nation, "city_influence_radius", self.city_influence_radius)
+            for unit in self._iter_units(nation):
+                if not isinstance(unit, BuilderNode) or unit.state != "exploring":
+                    continue
+                tr = self._get_transform(unit)
+                if tr is None:
+                    continue
+                x = int(round(tr.position[0]))
+                y = int(round(tr.position[1]))
+                dx = x - lx
+                dy = y - ly
+                if dx * dx + dy * dy < self.capital_min_radius * self.capital_min_radius:
+                    continue
+                too_close = False
+                for cx, cy in nation.cities_positions:
+                    ddx = x - int(round(cx))
+                    ddy = y - int(round(cy))
+                    if ddx * ddx + ddy * ddy < radius * radius:
+                        too_close = True
+                        break
+                if too_close:
+                    continue
+                city = unit.build_city([x, y], last, emit_idle=False)
+                if city is not None:
+                    self._last_city[key] = city
+                    unit.emit("unit_idle", {}, direction="up")
+                    last_tr = self._get_transform(city)
+                    lx = int(round(last_tr.position[0])) if last_tr else lx
+                    ly = int(round(last_tr.position[1])) if last_tr else ly
         super().update(dt)
 
     # ------------------------------------------------------------------
