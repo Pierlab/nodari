@@ -189,4 +189,6 @@ def reset_world(world, pathfinder: PathfindingSystem | None = None) -> MovementS
     movement_system = next((c for c in world.children if isinstance(c, MovementSystem)), None)
     if movement_system:
         movement_system.set_blocking(sim_params.get("movement_blocking", True))
+        movement_system.wander_drift = sim_params.get("wander_drift", movement_system.wander_drift)
+        movement_system.wander_speed = sim_params.get("wander_speed", movement_system.wander_speed)
     return movement_system

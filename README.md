@@ -29,7 +29,7 @@ After installing the dependencies, launch the Pygame-powered example farm:
 python run_farm.py
 ```
 
-The window renders terrain tiles, unit icons and yellow arrows pointing to their movement targets.
+The window renders terrain tiles and unit icons.
 
 The viewer opens centered on the battlefield with a compact sidebar so troop
 movement is immediately visible.

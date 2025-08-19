@@ -11,6 +11,10 @@ DEFAULT_SIM_PARAMS = {
 
     "city_influence_radius": 50,
 
+    # Random wander parameters for idle units
+    "wander_drift": 0.1,
+    "wander_speed": 1.0,
+
     # Interval in seconds between automatic builder spawns per nation
     "builder_spawn_interval": 0.0,
 

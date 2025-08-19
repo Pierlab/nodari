@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 import time
 import logging
-from math import atan2, cos, sin, pi, ceil
+from math import ceil
 from typing import Any, Callable, Iterator, List, Optional, Tuple, Protocol
 
 import pygame
@@ -36,9 +36,6 @@ TERRAIN_COLORS: dict[int, Tuple[int, int, int]] = {
     TILE_CODES["desert"]: (210, 180, 140),
     TILE_CODES["road"]: (120, 120, 120),
 }
-ARROW_COLOR = (255, 255, 0)
-# Shorter arrows for unit targets
-ARROW_MAX_LEN = 25
 CAPITAL_COLOR = (0, 200, 0)
 NATION_COLORS = [
     (200, 50, 50),
@@ -294,28 +291,6 @@ class PygameViewerSystem(SystemNode, Viewer):
             cur = cur.parent
         return None
 
-    def _draw_arrow(
-        self, start: Tuple[int, int], end: Tuple[int, int], color: Tuple[int, int, int]
-    ) -> None:
-        dx, dy = end[0] - start[0], end[1] - start[1]
-        dist = (dx ** 2 + dy ** 2) ** 0.5
-        if dist > ARROW_MAX_LEN:
-            scale = ARROW_MAX_LEN / dist
-            end = (start[0] + dx * scale, start[1] + dy * scale)
-            dx, dy = end[0] - start[0], end[1] - start[1]
-        pygame.draw.line(self.screen, color, start, end, 2)
-        angle = atan2(dy, dx)
-        size = 6
-        left = (
-            end[0] - size * cos(angle - pi / 6),
-            end[1] - size * sin(angle - pi / 6),
-        )
-        right = (
-            end[0] - size * cos(angle + pi / 6),
-            end[1] - size * sin(angle + pi / 6),
-        )
-        pygame.draw.polygon(self.screen, color, [end, left, right])
-
     def _draw_cross(self, center: Tuple[int, int], size: int) -> None:
         """Draw a cross centered on ``center`` with given ``size``."""
         x, y = center
@@ -424,12 +399,6 @@ class PygameViewerSystem(SystemNode, Viewer):
                 if isinstance(parent, UnitNode):
                     col = nation_colors.get(self._nation_of(parent), (200, 200, 200))
                     target = getattr(parent, "target", None)
-                    if target is not None and parent.state != "defeated":
-                        end = (
-                            int((target[0] - self.offset_x) * self.scale),
-                            int((target[1] - self.offset_y) * self.scale),
-                        )
-                        self._draw_arrow(pos, end, ARROW_COLOR)
                     radius = int(
                         self.unit_radius
                         * max(
