@@ -22,11 +22,13 @@ class AISystem(SystemNode):
         self,
         exploration_radius: int = 5,
         capital_min_radius: int = 0,
+        city_influence_radius: int = 0,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.exploration_radius = exploration_radius
         self.capital_min_radius = capital_min_radius
+        self.city_influence_radius = city_influence_radius
         self.on_event("unit_idle", self._on_unit_idle)
         self._last_city: dict[int, SimNode] = {}
         self._init_last_cities()
@@ -75,11 +77,22 @@ class AISystem(SystemNode):
                     dx = x0 - lx
                     dy = y0 - ly
                     if dx * dx + dy * dy >= self.capital_min_radius * self.capital_min_radius:
-                        city = origin.build_city([x0, y0], last, emit_idle=False)
-                        if city is not None:
-                            self._last_city[key] = city
-                            origin.emit("unit_idle", {}, direction="up")
-                        return
+                        radius = getattr(
+                            nation, "city_influence_radius", self.city_influence_radius
+                        )
+                        too_close = False
+                        for cx, cy in nation.cities_positions:
+                            ddx = x0 - int(round(cx))
+                            ddy = y0 - int(round(cy))
+                            if ddx * ddx + ddy * ddy < radius * radius:
+                                too_close = True
+                                break
+                        if not too_close:
+                            city = origin.build_city([x0, y0], last, emit_idle=False)
+                            if city is not None:
+                                self._last_city[key] = city
+                                origin.emit("unit_idle", {}, direction="up")
+                            return
         x0 = int(round(transform.position[0]))
         y0 = int(round(transform.position[1]))
         radius = self.exploration_radius

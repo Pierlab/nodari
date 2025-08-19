@@ -8,6 +8,7 @@ from core.simnode import SimNode
 from nodes.worker import WorkerNode
 from nodes.building import BuildingNode
 from nodes.transform import TransformNode
+from nodes.nation import NationNode
 
 
 class BuilderNode(WorkerNode):
@@ -43,6 +44,28 @@ class BuilderNode(WorkerNode):
 
         goal_x, goal_y = int(round(position[0])), int(round(position[1]))
 
+        # Prevent building too close to existing cities
+        nation: NationNode | None = None
+        cur = self.parent
+        while cur is not None:
+            if isinstance(cur, NationNode):
+                nation = cur
+                break
+            cur = cur.parent
+        if nation is not None:
+            radius = getattr(nation, "city_influence_radius", 0)
+            for cx, cy in nation.cities_positions:
+                dx = goal_x - cx
+                dy = goal_y - cy
+                if dx * dx + dy * dy < radius * radius:
+                    # Too close to an existing city; abort construction and
+                    # return the builder to exploration so it can seek another
+                    # location.
+                    self.state = "exploring"
+                    if emit_idle:
+                        self.emit("unit_idle", {}, direction="up")
+                    return None
+
         # Compute path using the existing pathfinding system if available
         pathfinder = self._find_pathfinder()
         path: list[tuple[int, int]] = []
@@ -62,6 +85,9 @@ class BuilderNode(WorkerNode):
             for x, y in path[1:-1]:
                 road = BuildingNode(parent=root, type="road")
                 TransformNode(parent=road, position=[x, y])
+
+        if nation is not None:
+            nation.cities_positions.append((goal_x, goal_y))
 
         # Return to exploration after construction so the builder may seek
         # the next expansion target.

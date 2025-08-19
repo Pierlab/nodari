@@ -1,7 +1,7 @@
 """Nation node representing a faction in the war simulation."""
 from __future__ import annotations
 
-from typing import List
+from typing import List, Tuple
 
 from core.simnode import SimNode
 from core.plugins import register_node_type
@@ -18,10 +18,17 @@ class NationNode(SimNode):
         ``[x, y]`` coordinates of the nation's capital.
     """
 
-    def __init__(self, morale: int, capital_position: List[int], **kwargs) -> None:
+    def __init__(
+        self, morale: int, capital_position: List[int], **kwargs
+    ) -> None:
+        city_radius = kwargs.pop("city_influence_radius", 0)
         super().__init__(**kwargs)
         self.morale = morale
         self.capital_position = capital_position
+        self.city_influence_radius = city_radius
+        self.cities_positions: List[Tuple[float, float]] = [
+            (float(capital_position[0]), float(capital_position[1]))
+        ]
 
     # ------------------------------------------------------------------
     def change_morale(self, delta: int) -> None:

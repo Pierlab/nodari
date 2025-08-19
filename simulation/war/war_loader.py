@@ -80,7 +80,11 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
     config_file = config_file or "example/flat_1km_config.json"
     world = load_simulation_from_file(config_file)
 
-    AISystem(parent=world, capital_min_radius=100)
+    ai = AISystem(
+        parent=world,
+        capital_min_radius=100,
+        city_influence_radius=sim_params.get("city_influence_radius", 0),
+    )
 
     terrain_node = next((c for c in world.children if isinstance(c, TerrainNode)), None)
     terrain_params = dict(getattr(terrain_node, "params", {})) if terrain_node else {}
@@ -92,9 +96,16 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
     if pathfinder is None:
         pathfinder = PathfindingSystem(parent=world, terrain=terrain_node)
 
-    settings_file = settings_file or (sys.argv[2] if len(sys.argv) > 2 else "example/war_settings.json")
+    settings_file = settings_file or (
+        sys.argv[2] if len(sys.argv) > 2 else "example/war_settings.json"
+    )
     sim_params.update(load_sim_params(settings_file))
     sim_params["terrain"] = terrain_params
+
+    ai.city_influence_radius = sim_params.get("city_influence_radius", 0)
+    for nation in [n for n in world.children if isinstance(n, NationNode)]:
+        nation.city_influence_radius = sim_params.get("city_influence_radius", 0)
+
     return world, terrain_node, pathfinder
 
 
