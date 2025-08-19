@@ -41,6 +41,9 @@ class MovementSystem(SystemNode):
         avoid_obstacles: bool = False,
         blocking: bool = True,
         pathfinder: PathfindingSystem | str | None = None,
+        wander_drift: float = 0.0,
+        wander_speed: float = 1.0,
+        avoid_capital_angle: float = pi / 4,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -54,6 +57,9 @@ class MovementSystem(SystemNode):
         self.pathfinder: PathfindingSystem | None = (
             pathfinder if isinstance(pathfinder, PathfindingSystem) else None
         )
+        self.wander_drift = wander_drift
+        self.wander_speed = wander_speed
+        self.avoid_capital_angle = avoid_capital_angle
 
     # ------------------------------------------------------------------
     def _resolve_terrain(self) -> None:
@@ -141,85 +147,133 @@ class MovementSystem(SystemNode):
         for unit, transform in units:
             if getattr(unit, "state", "") == "fighting":
                 continue
-            if not hasattr(unit, "target") or unit.target is None:
-                continue
             tx, ty = transform.position
             sx, sy = int(round(tx / METERS_PER_TILE)), int(round(ty / METERS_PER_TILE))
             tile_units[(sx, sy)].remove(unit)
             if not tile_units.get((sx, sy)):
                 tile_units.pop((sx, sy), None)
-            if hasattr(unit, "_path") and unit._path:
-                gx_tile, gy_tile = unit._path[0]
-                gx, gy = gx_tile * METERS_PER_TILE, gy_tile * METERS_PER_TILE
-            else:
-                gx, gy = unit.target
-            dx, dy = gx - tx, gy - ty
-            dist = hypot(dx, dy)
-            if dist == 0:
+            terrain = self.terrain
+            target = getattr(unit, "target", None)
+            if target is not None:
                 if hasattr(unit, "_path") and unit._path:
-                    unit._path.pop(0)
+                    gx_tile, gy_tile = unit._path[0]
+                    gx, gy = gx_tile * METERS_PER_TILE, gy_tile * METERS_PER_TILE
+                else:
+                    gx, gy = target
+                dx, dy = gx - tx, gy - ty
+                dist = hypot(dx, dy)
+                if dist == 0:
+                    if hasattr(unit, "_path") and unit._path:
+                        unit._path.pop(0)
+                        tile_units.setdefault((sx, sy), []).append(unit)
+                        continue
+                    unit.state = "idle"
+                    tile_units.setdefault((sx, sy), []).append(unit)
+                    unit.emit("unit_idle", {}, direction="up")
+                    continue
+                speed = unit.speed
+                terrain = self.terrain
+                if terrain is not None:
+                    speed *= terrain.get_speed_modifier(sx, sy)
+                speed *= max(unit.morale, 0) / 100.0
+                step = speed * dt
+                if step <= 0:
                     tile_units.setdefault((sx, sy), []).append(unit)
                     continue
-                unit.state = "idle"
-                tile_units.setdefault((sx, sy), []).append(unit)
-                unit.emit("unit_idle", {}, direction="up")
+                if step >= dist:
+                    new_x, new_y = gx, gy
+                else:
+                    angle = atan2(dy, dx)
+                    if self.direction_noise > 0:
+                        angle += random.uniform(-self.direction_noise, self.direction_noise)
+                    new_x = tx + cos(angle) * step
+                    new_y = ty + sin(angle) * step
+                ix, iy = int(round(new_x / METERS_PER_TILE)), int(round(new_y / METERS_PER_TILE))
+                occupants = tile_units.get((ix, iy), [])
+                enemy = next((o for o in occupants if nations.get(o) != nations.get(unit)), None)
+                if enemy is not None:
+                    transform.position[0] = float(ix * METERS_PER_TILE)
+                    transform.position[1] = float(iy * METERS_PER_TILE)
+                    unit.target = [ix * METERS_PER_TILE, iy * METERS_PER_TILE]
+                    unit.engage(enemy)
+                    enemy.engage(unit)
+                    tile_units.setdefault((ix, iy), []).append(unit)
+                    blocked_tiles.add((ix, iy))
+                    continue
+                blocked = (ix, iy) in blocked_tiles or (
+                    terrain is not None and terrain.is_obstacle(ix, iy)
+                )
+                if blocked:
+                    tile_units.setdefault((sx, sy), []).append(unit)
+                    if not self.avoid_obstacles or self.pathfinder is None:
+                        continue
+                    start = (sx, sy)
+                    goal = (
+                        int(round(target[0] / METERS_PER_TILE)),
+                        int(round(target[1] / METERS_PER_TILE)),
+                    )
+                    path = self.pathfinder.find_path(start, goal, blocked_tiles)
+                    if len(path) > 1:
+                        unit._path = path[1:]
+                    continue
+                transform.position[0] = new_x
+                transform.position[1] = new_y
+                tile_units.setdefault((ix, iy), []).append(unit)
+                unit.state = "moving"
+                if hasattr(unit, "_path") and unit._path and (ix, iy) == unit._path[0]:
+                    unit._path.pop(0)
+                unit.emit(
+                    "unit_moved",
+                    {"from": [tx, ty], "to": [new_x, new_y]},
+                    direction="up",
+                )
                 continue
-            speed = unit.speed
-            terrain = self.terrain
-            if terrain is not None:
-                speed *= terrain.get_speed_modifier(sx, sy)
-            speed *= max(unit.morale, 0) / 100.0
-            step = speed * dt
-            if step <= 0:
-                tile_units.setdefault((sx, sy), []).append(unit)
-                continue
-            if step >= dist:
-                new_x, new_y = gx, gy
-            else:
-                angle = atan2(dy, dx)
-                if self.direction_noise > 0:
-                    angle += random.uniform(-self.direction_noise, self.direction_noise)
+            if getattr(unit, "state", "") == "exploring":
+                angle = getattr(unit, "_wander_angle", random.uniform(-pi, pi))
+                angle += random.uniform(-self.wander_drift, self.wander_drift)
+                nation = nations.get(unit)
+                if nation is not None:
+                    cx, cy = nation.capital_position
+                    cap_angle = atan2(cy - ty, cx - tx)
+                    diff = (angle - cap_angle + pi) % (2 * pi) - pi
+                    if abs(diff) < self.avoid_capital_angle:
+                        angle += pi
+                angle = (angle + pi) % (2 * pi) - pi
+                step = unit.speed * self.wander_speed * dt
                 new_x = tx + cos(angle) * step
                 new_y = ty + sin(angle) * step
-            ix, iy = int(round(new_x / METERS_PER_TILE)), int(round(new_y / METERS_PER_TILE))
-            occupants = tile_units.get((ix, iy), [])
-            enemy = next((o for o in occupants if nations.get(o) != nations.get(unit)), None)
-            if enemy is not None:
-                transform.position[0] = float(ix * METERS_PER_TILE)
-                transform.position[1] = float(iy * METERS_PER_TILE)
-                unit.target = [ix * METERS_PER_TILE, iy * METERS_PER_TILE]
-                unit.engage(enemy)
-                enemy.engage(unit)
-                tile_units.setdefault((ix, iy), []).append(unit)
-                blocked_tiles.add((ix, iy))
-                continue
-            blocked = (ix, iy) in blocked_tiles or (
-                terrain is not None and terrain.is_obstacle(ix, iy)
-            )
-            if blocked:
-                tile_units.setdefault((sx, sy), []).append(unit)
-                if not self.avoid_obstacles or self.pathfinder is None:
+                ix, iy = int(round(new_x / METERS_PER_TILE)), int(round(new_y / METERS_PER_TILE))
+                occupants = tile_units.get((ix, iy), [])
+                enemy = next((o for o in occupants if nations.get(o) != nations.get(unit)), None)
+                if enemy is not None:
+                    transform.position[0] = float(ix * METERS_PER_TILE)
+                    transform.position[1] = float(iy * METERS_PER_TILE)
+                    unit.target = [ix * METERS_PER_TILE, iy * METERS_PER_TILE]
+                    unit.engage(enemy)
+                    enemy.engage(unit)
+                    tile_units.setdefault((ix, iy), []).append(unit)
+                    blocked_tiles.add((ix, iy))
+                    unit._wander_angle = angle
                     continue
-                start = (sx, sy)
-                goal = (
-                    int(round(unit.target[0] / METERS_PER_TILE)),
-                    int(round(unit.target[1] / METERS_PER_TILE)),
+                blocked = (ix, iy) in blocked_tiles or (
+                    terrain is not None and terrain.is_obstacle(ix, iy)
                 )
-                path = self.pathfinder.find_path(start, goal, blocked_tiles)
-                if len(path) > 1:
-                    unit._path = path[1:]
+                if blocked:
+                    angle += pi
+                    unit._wander_angle = angle
+                    tile_units.setdefault((sx, sy), []).append(unit)
+                    continue
+                transform.position[0] = new_x
+                transform.position[1] = new_y
+                unit._wander_angle = angle
+                tile_units.setdefault((ix, iy), []).append(unit)
+                unit.emit(
+                    "unit_moved",
+                    {"from": [tx, ty], "to": [new_x, new_y]},
+                    direction="up",
+                )
                 continue
-            transform.position[0] = new_x
-            transform.position[1] = new_y
-            tile_units.setdefault((ix, iy), []).append(unit)
-            unit.state = "moving"
-            if hasattr(unit, "_path") and unit._path and (ix, iy) == unit._path[0]:
-                unit._path.pop(0)
-            unit.emit(
-                "unit_moved",
-                {"from": [tx, ty], "to": [new_x, new_y]},
-                direction="up",
-            )
+            tile_units.setdefault((sx, sy), []).append(unit)
         super().update(dt)
 
     # ------------------------------------------------------------------

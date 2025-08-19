@@ -133,40 +133,8 @@ class AISystem(SystemNode):
                                 self._last_city[key] = city
                                 origin.emit("unit_idle", {}, direction="up")
                             return
-        x0 = int(round(transform.position[0]))
-        y0 = int(round(transform.position[1]))
-        radius = self.exploration_radius
-        explored = self._get_explored(origin)
-        for dx in range(-radius, radius + 1):
-            for dy in range(-radius, radius + 1):
-                if dx * dx + dy * dy > radius * radius:
-                    continue
-                pos = (x0 + dx, y0 + dy)
-                if pos in explored:
-                    continue
-                if not self._beyond_capital_radius(origin, pos):
-                    continue
-                if not self._is_free(pos):
-                    continue
-                origin.target = [pos[0], pos[1]]
-                origin.state = "moving"
-                origin.emit("unit_move", {"to": origin.target}, direction="up")
-                logger.info("%s moving to %s", getattr(origin, "name", "unit"), origin.target)
-                return
-        # fallback random move if everything explored
-        for _ in range(10):
-            dx = random.randint(-radius, radius)
-            dy = random.randint(-radius, radius)
-            pos = (x0 + dx, y0 + dy)
-            if not self._beyond_capital_radius(origin, pos):
-                continue
-            if not self._is_free(pos):
-                continue
-            origin.target = [pos[0], pos[1]]
-            origin.state = "moving"
-            origin.emit("unit_move", {"to": origin.target}, direction="up")
-            logger.info("%s moving to %s", getattr(origin, "name", "unit"), origin.target)
-            return
+        origin.state = "exploring"
+        origin.target = None
 
     # ------------------------------------------------------------------
     def _get_transform(self, node: SimNode) -> TransformNode | None:

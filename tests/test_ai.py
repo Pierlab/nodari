@@ -7,6 +7,7 @@ from nodes.transform import TransformNode
 from nodes.nation import NationNode
 from nodes.terrain import TerrainNode
 from systems.ai import AISystem
+from systems.movement import MovementSystem
 
 
 def test_idle_worker_explores_unknown_tiles():
@@ -17,18 +18,17 @@ def test_idle_worker_explores_unknown_tiles():
     # AI with deterministic exploration radius
     ai = AISystem(parent=world, exploration_radius=2)
 
-    # Worker becomes idle
     worker.emit("unit_idle", {})
 
-    # AI should send the worker exploring away from origin
-    assert worker.state == "moving"
-    assert worker.target == [-2, 0]
+    assert worker.state == "exploring"
+    assert worker.target is None
 
 
 def test_ai_respects_capital_radius_and_free_tiles():
     world = WorldNode(width=20, height=20)
     terrain = TerrainNode(tiles=[[0] * 20 for _ in range(20)], obstacles=[[7, 10]])
     world.add_child(terrain)
+    MovementSystem(parent=world, terrain=terrain)
     nation = NationNode(parent=world, morale=100, capital_position=[10, 10])
     worker = WorkerNode(parent=nation, state="exploring")
     TransformNode(parent=worker, position=[10, 10])
@@ -36,11 +36,14 @@ def test_ai_respects_capital_radius_and_free_tiles():
     TransformNode(parent=blocker, position=[8, 8])
     ai = AISystem(parent=world, exploration_radius=3, capital_min_radius=2)
     worker.emit("unit_idle", {})
-    assert worker.state == "moving"
+    assert worker.state == "exploring"
+    for _ in range(3):
+        world.update(1.0)
+    tr = next(c for c in worker.children if isinstance(c, TransformNode))
     cx, cy = nation.capital_position
-    tx, ty = worker.target
-    assert (tx - cx) * (tx - cx) + (ty - cy) * (ty - cy) >= 4
-    assert worker.target not in ([7, 10], [8, 8])
+    dx, dy = tr.position[0] - cx, tr.position[1] - cy
+    assert dx * dx + dy * dy >= 4
+    assert (int(round(tr.position[0])), int(round(tr.position[1]))) not in [(7, 10), (8, 8)]
 
 
 def test_builder_constructs_city_when_idle_far_from_last():
@@ -57,7 +60,7 @@ def test_builder_constructs_city_when_idle_far_from_last():
             if isinstance(child, TransformNode):
                 positions.append(child.position)
     assert [3, 0] in positions
-    assert builder.state == "moving"
+    assert builder.state == "exploring"
 
 
 def test_build_city_resets_state_and_emits_idle():
@@ -127,4 +130,4 @@ def test_builder_respects_city_influence_radius():
             if isinstance(child, TransformNode):
                 positions.append(child.position)
     assert [3, 0] not in positions
-    assert builder.state == "moving"
+    assert builder.state == "exploring"

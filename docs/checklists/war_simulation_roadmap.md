@@ -36,7 +36,7 @@ This roadmap breaks down the tasks required to build the simplified war simulati
 
 ## Visualization Enhancements (Later Iterations)
  - [x] **Zoom and inspect** – Ability to zoom into specific units or armies.
- - [x] **Clear map overlay** – Show terrain types, unit icons and movement arrows.
+- [x] **Clear map overlay** – Show terrain types and unit icons.
 - [ ] **Optional hex grid rendering** – If hex grid adopted, update visualization accordingly.
 
 ## Extensions & Analysis
