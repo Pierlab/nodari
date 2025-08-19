@@ -9,6 +9,7 @@ import config
 from simulation.war.ui import ModernGLViewerSystem, PygameViewerSystem
 from simulation.war.war_loader import (
     load_plugins_for_war,
+    spawn_builder,
     reset_world,
     setup_world,
 )
@@ -91,6 +92,8 @@ def run(viewer: str = "pygame") -> None:
                     viewer.offset_y += viewer.view_height * 0.1 / viewer.scale
                 elif event.key == pygame.K_z:
                     viewer.offset_y -= viewer.view_height * 0.1 / viewer.scale
+                elif event.key == pygame.K_u:
+                    spawn_builder(world)
                 # no additional controls when paused
 
         viewer.extra_info = []
