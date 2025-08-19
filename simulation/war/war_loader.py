@@ -149,6 +149,10 @@ def _spawn_armies(
         strategist = StrategistNode(name=f"{nation.name}_strategist")
         general.add_child(strategist)
 
+        for child in list(nation.children):
+            if isinstance(child, BuilderNode):
+                nation.remove_child(child)
+
         for i in range(3):
             builder = BuilderNode(
                 name=f"{nation.name}_builder_{i+1}",
