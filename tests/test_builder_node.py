@@ -38,6 +38,25 @@ def test_builder_creates_city_and_roads():
     assert builder.state == "exploring"
 
 
+def test_builder_creates_road_without_pathfinder():
+    world = WorldNode(name="world")
+    last = BuildingNode(parent=world, type="capital")
+    TransformNode(parent=last, position=[0, 0])
+
+    builder = BuilderNode(parent=world)
+    city = builder.build_city([3, 3], last)
+
+    assert isinstance(city, BuildingNode)
+
+    road_positions = sorted(
+        child.children[0].position
+        for child in world.children
+        if isinstance(child, BuildingNode) and child.type == "road"
+    )
+    assert road_positions == [[1, 1], [2, 2]]
+    assert builder.state == "exploring"
+
+
 def test_builder_build_cities_respects_city_limit():
     world = WorldNode(name="world")
     terrain = TerrainNode(parent=world, tiles=[["plain"] * 10])
