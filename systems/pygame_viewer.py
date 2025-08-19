@@ -373,15 +373,23 @@ class PygameViewerSystem(SystemNode, Viewer):
             self._draw_terrain(terrain)
         nations = [n for n in self._walk(root) if isinstance(n, NationNode)]
         nation_colors = {n: NATION_COLORS[i % len(NATION_COLORS)] for i, n in enumerate(nations)}
-        if nations and self.draw_capital:
-            for n in nations:
-                cap = getattr(n, "capital_position", None)
-                if cap is not None:
-                    cx = int((cap[0] - self.offset_x) * self.scale)
-                    cy = int((cap[1] - self.offset_y) * self.scale)
-                    size = int(self.unit_radius * 3)
-                    rect = pygame.Rect(cx - size, cy - size, size * 2, size * 2)
-                    pygame.draw.rect(self.screen, CAPITAL_COLOR, rect)
+        road_color = TERRAIN_COLORS[TILE_CODES["road"]]
+        for n in nations:
+            cap = getattr(n, "capital_position", None)
+            if cap is None:
+                continue
+            cx = int((cap[0] - self.offset_x) * self.scale)
+            cy = int((cap[1] - self.offset_y) * self.scale)
+            if self.draw_capital:
+                size = int(self.unit_radius * 3)
+                rect = pygame.Rect(cx - size, cy - size, size * 2, size * 2)
+                pygame.draw.rect(self.screen, CAPITAL_COLOR, rect)
+            for city in getattr(n, "cities_positions", []):
+                if city == tuple(cap):
+                    continue
+                x = int((city[0] - self.offset_x) * self.scale)
+                y = int((city[1] - self.offset_y) * self.scale)
+                pygame.draw.line(self.screen, road_color, (cx, cy), (x, y), 1)
 
         lines: List[str] = []
         time_sys: Optional[TimeSystem] = None
