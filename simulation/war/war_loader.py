@@ -84,8 +84,9 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
 
     ai = AISystem(
         parent=world,
-        capital_min_radius=100,
+        capital_min_radius=sim_params.get("capital_min_radius", 0),
         city_influence_radius=sim_params.get("city_influence_radius", 0),
+        build_duration=sim_params.get("build_duration", 0.0),
     )
 
     # Ensure a SchedulerSystem is present so that newly spawned workers can be
@@ -113,6 +114,7 @@ def setup_world(config_file: str | None = None, settings_file: str | None = None
 
     ai.city_influence_radius = sim_params.get("city_influence_radius", 0)
     ai.builder_spawn_interval = sim_params.get("builder_spawn_interval", 0.0)
+    ai.build_duration = sim_params.get("build_duration", 0.0)
     for nation in [n for n in world.children if isinstance(n, NationNode)]:
         nation.city_influence_radius = sim_params.get("city_influence_radius", 0)
 
@@ -134,6 +136,7 @@ def spawn_builder(world) -> BuilderNode | None:
         state="exploring",
         speed=1.0,
         morale=100,
+        build_duration=sim_params.get("build_duration", 0.0),
     )
     builder.add_child(TransformNode(position=list(capital)))
     nation.add_child(builder)
@@ -180,6 +183,7 @@ def _spawn_armies(
                 state="exploring",
                 speed=1.0,
                 morale=100,
+                build_duration=sim_params.get("build_duration", 0.0),
             )
             builder.add_child(TransformNode(position=list(center)))
             nation.add_child(builder)

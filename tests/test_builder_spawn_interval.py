@@ -10,7 +10,7 @@ def test_ai_spawns_builder_and_scheduler_handles_it():
     world = WorldNode(width=100, height=100)
     nation = NationNode(parent=world, morale=100, capital_position=[0, 0])
     scheduler = SchedulerSystem(parent=world)
-    AISystem(parent=world, builder_spawn_interval=1.0)
+    AISystem(parent=world, builder_spawn_interval=1.0, capital_min_radius=10)
 
     # No builders initially
     assert not [c for c in nation.children if isinstance(c, BuilderNode)]
