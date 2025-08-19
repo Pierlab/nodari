@@ -7,7 +7,8 @@
     "vision_radius_m": 100.0,
     "visibility": true,
     "command_delay": 0.0,
-    "movement_blocking": true
+    "movement_blocking": true,
+    "builder_spawn_interval": 5.0
   },
   "descriptions": {
     "dispersion": "Max distance from the nation's capital when spawning units (meters)",
@@ -17,6 +18,7 @@
     "vision_radius_m": "Unit vision radius in meters for fog of war calculations",
     "visibility": "Enable fog of war via the VisibilitySystem",
     "command_delay": "Base seconds commands are delayed before reaching units",
-    "movement_blocking": "Whether units block each other during movement"
+    "movement_blocking": "Whether units block each other during movement",
+    "builder_spawn_interval": "Seconds between automatic builder spawns per nation"
   }
 }
